@@ -1,8 +1,8 @@
 import 'package:flutter/widgets.dart';
 
-/// An item in the proportional grid with a size weight and child widget.
-class TProportionalItem {
-  const TProportionalItem({
+/// An item in the bento grid with a size weight and child widget.
+class TBentoItem {
+  const TBentoItem({
     required this.size,
     required this.child,
   });

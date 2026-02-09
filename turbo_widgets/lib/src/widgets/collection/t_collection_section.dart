@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:turbo_widgets/src/enums/t_collection_section_layout.dart';
-import 'package:turbo_widgets/src/enums/t_proportional_grid_animation.dart';
-import 'package:turbo_widgets/src/models/layout/t_proportional_item.dart';
-import 'package:turbo_widgets/src/widgets/layout/t_proportional_grid.dart';
+import 'package:turbo_widgets/src/enums/t_bento_grid_animation.dart';
+import 'package:turbo_widgets/src/models/layout/t_bento_item.dart';
+import 'package:turbo_widgets/src/widgets/layout/t_bento_grid.dart';
 
 class TCollectionSection extends StatelessWidget {
   const TCollectionSection({
@@ -18,7 +18,7 @@ class TCollectionSection extends StatelessWidget {
     this.itemSpacing = 12.0,
     this.itemSizeBuilder,
     this.bentoHeight = 320,
-    this.bentoAnimation = TProportionalGridAnimation.fade,
+    this.bentoAnimation = TBentoGridAnimation.fade,
     this.gridCrossAxisCount = 2,
     this.gridMainAxisSpacing = 12.0,
     this.gridCrossAxisSpacing = 12.0,
@@ -39,7 +39,7 @@ class TCollectionSection extends StatelessWidget {
   final double itemSpacing;
   final double Function(int index)? itemSizeBuilder;
   final double bentoHeight;
-  final TProportionalGridAnimation bentoAnimation;
+  final TBentoGridAnimation bentoAnimation;
   final int gridCrossAxisCount;
   final double gridMainAxisSpacing;
   final double gridCrossAxisSpacing;
@@ -152,7 +152,7 @@ class _TCollectionSectionBody extends StatelessWidget {
   final double itemSpacing;
   final double Function(int index)? itemSizeBuilder;
   final double bentoHeight;
-  final TProportionalGridAnimation bentoAnimation;
+  final TBentoGridAnimation bentoAnimation;
   final int gridCrossAxisCount;
   final double gridMainAxisSpacing;
   final double gridCrossAxisSpacing;
@@ -197,14 +197,14 @@ class _TCollectionBentoGrid extends StatelessWidget {
   final List<Widget> items;
   final double itemSpacing;
   final double height;
-  final TProportionalGridAnimation animation;
+  final TBentoGridAnimation animation;
   final double Function(int index)? itemSizeBuilder;
 
   @override
   Widget build(BuildContext context) {
-    final proportionalItems = <TProportionalItem>[
+    final bentoItems = <TBentoItem>[
       for (int i = 0; i < items.length; i++)
-        TProportionalItem(
+        TBentoItem(
           size: itemSizeBuilder?.call(i) ?? 1.0,
           child: items[i],
         ),
@@ -212,8 +212,8 @@ class _TCollectionBentoGrid extends StatelessWidget {
 
     return SizedBox(
       height: height,
-      child: TProportionalGrid(
-        items: proportionalItems,
+      child: TBentoGrid(
+        items: bentoItems,
         spacing: itemSpacing,
         animation: animation,
       ),

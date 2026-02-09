@@ -1,16 +1,16 @@
 import 'dart:ui';
 
-import 'package:turbo_widgets/src/models/layout/proportional_layout_result.dart';
+import 'package:turbo_widgets/src/models/layout/bento_layout_result.dart';
 
 /// Calculates proportional layouts using a squarified treemap algorithm.
 /// Guarantees 100% fill of available space with area proportional to size values.
-class ProportionalLayoutCalculator {
-  const ProportionalLayoutCalculator._();
+class BentoLayoutCalculator {
+  const BentoLayoutCalculator._();
 
   static const double _minDimension = 40.0;
 
   /// Calculate layout positions and sizes for all items.
-  static List<ProportionalLayoutResult> calculate({
+  static List<BentoLayoutResult> calculate({
     required List<double> sizes,
     required Size availableSize,
     required double spacing,
@@ -19,7 +19,7 @@ class ProportionalLayoutCalculator {
 
     if (sizes.length == 1) {
       return [
-        ProportionalLayoutResult(
+        BentoLayoutResult(
           index: 0,
           position: Offset.zero,
           size: availableSize,
@@ -44,7 +44,7 @@ class ProportionalLayoutCalculator {
     );
   }
 
-  static List<ProportionalLayoutResult> _squarify({
+  static List<BentoLayoutResult> _squarify({
     required List<int> indices,
     required List<double> areas,
     required Rect rect,
@@ -55,7 +55,7 @@ class ProportionalLayoutCalculator {
     // Base case: single item fills the entire rect
     if (indices.length == 1) {
       return [
-        ProportionalLayoutResult(
+        BentoLayoutResult(
           index: indices[0],
           position: Offset(rect.left, rect.top),
           size: Size(

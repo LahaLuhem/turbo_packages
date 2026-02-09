@@ -1,8 +1,8 @@
 import 'dart:ui';
 
-/// Computed layout result for a single item in the proportional grid.
-class ProportionalLayoutResult {
-  const ProportionalLayoutResult({
+/// Computed layout result for a single item in the bento grid.
+class BentoLayoutResult {
+  const BentoLayoutResult({
     required this.index,
     required this.position,
     required this.size,
@@ -15,7 +15,7 @@ class ProportionalLayoutResult {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is ProportionalLayoutResult &&
+      other is BentoLayoutResult &&
           index == other.index &&
           position == other.position &&
           size == other.size;

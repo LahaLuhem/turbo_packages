@@ -1,5 +1,5 @@
-/// Animation type for TProportionalGrid layout transitions.
-enum TProportionalGridAnimation {
+/// Animation type for TBentoGrid layout transitions.
+enum TBentoGridAnimation {
   /// Cards smoothly slide and resize to new positions.
   slide,
 

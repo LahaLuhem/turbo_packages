@@ -2,10 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:turbo_widgets/src/enums/t_proportional_grid_animation.dart';
-import 'package:turbo_widgets/src/models/layout/proportional_layout_result.dart';
-import 'package:turbo_widgets/src/models/layout/t_proportional_item.dart';
-import 'package:turbo_widgets/src/utils/proportional_layout_calculator.dart';
+import 'package:turbo_widgets/src/enums/t_bento_grid_animation.dart';
+import 'package:turbo_widgets/src/models/layout/bento_layout_result.dart';
+import 'package:turbo_widgets/src/models/layout/t_bento_item.dart';
+import 'package:turbo_widgets/src/utils/bento_layout_calculator.dart';
 
 /// High-performance delegate that positions items based on pre-computed layout.
 /// Used for fade, scale, and none animation types.
@@ -14,7 +14,7 @@ class _StaticFlowDelegate extends FlowDelegate {
     required this.layout,
   });
 
-  final List<ProportionalLayoutResult> layout;
+  final List<BentoLayoutResult> layout;
 
   @override
   void paintChildren(FlowPaintingContext context) {
@@ -40,7 +40,7 @@ class _StaticFlowDelegate extends FlowDelegate {
     return BoxConstraints.tight(result.size);
   }
 
-  ProportionalLayoutResult? _findResult(int index) {
+  BentoLayoutResult? _findResult(int index) {
     for (final r in layout) {
       if (r.index == index) return r;
     }
@@ -70,8 +70,8 @@ class _SlideFlowDelegate extends FlowDelegate {
     required this.animation,
   }) : super(repaint: animation);
 
-  final List<ProportionalLayoutResult> currentLayout;
-  final List<ProportionalLayoutResult>? previousLayout;
+  final List<BentoLayoutResult> currentLayout;
+  final List<BentoLayoutResult>? previousLayout;
   final Animation<double> animation;
 
   @override
@@ -115,8 +115,8 @@ class _SlideFlowDelegate extends FlowDelegate {
     return BoxConstraints.tight(interpolatedSize);
   }
 
-  ProportionalLayoutResult? _findResult(
-    List<ProportionalLayoutResult> results,
+  BentoLayoutResult? _findResult(
+    List<BentoLayoutResult> results,
     int index,
   ) {
     for (final r in results) {
@@ -138,9 +138,9 @@ class _SlideFlowDelegate extends FlowDelegate {
   }
 }
 
-/// A proportional grid that fills 100% of available space.
+/// A bento grid that fills 100% of available space.
 ///
-/// Items are sized based on their [TProportionalItem.size] values relative to
+/// Items are sized based on their [TBentoItem.size] values relative to
 /// each other. Larger sizes get proportionally more area.
 ///
 /// Example: If items have sizes [4, 2, 2, 2], total is 10.
@@ -149,12 +149,12 @@ class _SlideFlowDelegate extends FlowDelegate {
 ///
 /// The layout algorithm (squarified treemap) automatically arranges items
 /// to minimize aspect ratio distortion while guaranteeing 100% space fill.
-class TProportionalGrid extends StatefulWidget {
-  const TProportionalGrid({
+class TBentoGrid extends StatefulWidget {
+  const TBentoGrid({
     super.key,
     required this.items,
     this.spacing = 8.0,
-    this.animation = TProportionalGridAnimation.fade,
+    this.animation = TBentoGridAnimation.fade,
     this.animationDuration = const Duration(milliseconds: 300),
     this.animationCurve = Curves.easeInOut,
     this.debounceDuration = const Duration(milliseconds: 150),
@@ -163,13 +163,13 @@ class TProportionalGrid extends StatefulWidget {
   });
 
   /// The items to display in the grid.
-  final List<TProportionalItem> items;
+  final List<TBentoItem> items;
 
   /// Spacing between items.
   final double spacing;
 
   /// The animation type to use for layout transitions.
-  final TProportionalGridAnimation animation;
+  final TBentoGridAnimation animation;
 
   /// Duration of the animation.
   final Duration animationDuration;
@@ -178,24 +178,24 @@ class TProportionalGrid extends StatefulWidget {
   final Curve animationCurve;
 
   /// How long to wait after changes stop before recalculating layout.
-  /// Only used for [TProportionalGridAnimation.fade] and [TProportionalGridAnimation.scale].
+  /// Only used for [TBentoGridAnimation.fade] and [TBentoGridAnimation.scale].
   final Duration debounceDuration;
 
   final double? maxHeight;
   final double? maxWidth;
 
   @override
-  State<TProportionalGrid> createState() => _TProportionalGridState();
+  State<TBentoGrid> createState() => _TBentoGridState();
 }
 
-class _TProportionalGridState extends State<TProportionalGrid>
+class _TBentoGridState extends State<TBentoGrid>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
 
   Timer? _debounceTimer;
-  List<ProportionalLayoutResult>? _currentLayout;
-  List<ProportionalLayoutResult>? _previousLayout;
+  List<BentoLayoutResult>? _currentLayout;
+  List<BentoLayoutResult>? _previousLayout;
   Size? _lastSize;
   List<double>? _lastSizes;
   double? _lastSpacing;
@@ -214,7 +214,7 @@ class _TProportionalGridState extends State<TProportionalGrid>
       curve: widget.animationCurve,
     );
 
-    if (widget.animation == TProportionalGridAnimation.slide) {
+    if (widget.animation == TBentoGridAnimation.slide) {
       _controller.addListener(_onAnimationTick);
     }
   }
@@ -232,7 +232,7 @@ class _TProportionalGridState extends State<TProportionalGrid>
   }
 
   @override
-  void didUpdateWidget(TProportionalGrid oldWidget) {
+  void didUpdateWidget(TBentoGrid oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.animationDuration != oldWidget.animationDuration) {
       _controller.duration = widget.animationDuration;
@@ -245,7 +245,7 @@ class _TProportionalGridState extends State<TProportionalGrid>
     }
     if (widget.animation != oldWidget.animation) {
       _controller.removeListener(_onAnimationTick);
-      if (widget.animation == TProportionalGridAnimation.slide) {
+      if (widget.animation == TBentoGridAnimation.slide) {
         _controller.addListener(_onAnimationTick);
       }
     }
@@ -271,7 +271,7 @@ class _TProportionalGridState extends State<TProportionalGrid>
     List<double> sizes,
     double spacing,
   ) {
-    final newLayout = ProportionalLayoutCalculator.calculate(
+    final newLayout = BentoLayoutCalculator.calculate(
       sizes: sizes,
       availableSize: availableSize,
       spacing: spacing,
@@ -354,8 +354,8 @@ class _TProportionalGridState extends State<TProportionalGrid>
 
         if (_currentLayout == null) {
           _updateLayoutImmediate(availableSize, sizes, spacing);
-          if (widget.animation == TProportionalGridAnimation.fade ||
-              widget.animation == TProportionalGridAnimation.scale) {
+          if (widget.animation == TBentoGridAnimation.fade ||
+              widget.animation == TBentoGridAnimation.scale) {
             _controller.value = 1.0;
           }
         }
@@ -364,12 +364,12 @@ class _TProportionalGridState extends State<TProportionalGrid>
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (!mounted) return;
             switch (widget.animation) {
-              case TProportionalGridAnimation.slide:
+              case TBentoGridAnimation.slide:
                 _onLayoutChangedSlide(availableSize, sizes, spacing);
-              case TProportionalGridAnimation.fade:
-              case TProportionalGridAnimation.scale:
+              case TBentoGridAnimation.fade:
+              case TBentoGridAnimation.scale:
                 _onLayoutChangedDebounced(availableSize, sizes, spacing);
-              case TProportionalGridAnimation.none:
+              case TBentoGridAnimation.none:
                 _onLayoutChangedNone(availableSize, sizes, spacing);
             }
           });
@@ -378,7 +378,7 @@ class _TProportionalGridState extends State<TProportionalGrid>
         return SizedBox(
           width: availableSize.width,
           height: availableSize.height,
-          child: _ProportionalGridAnimatedContent(
+          child: _BentoGridAnimatedContent(
             animation: _animation,
             animationType: widget.animation,
             currentLayout: _currentLayout!,
@@ -391,8 +391,8 @@ class _TProportionalGridState extends State<TProportionalGrid>
   }
 }
 
-class _ProportionalGridAnimatedContent extends StatelessWidget {
-  const _ProportionalGridAnimatedContent({
+class _BentoGridAnimatedContent extends StatelessWidget {
+  const _BentoGridAnimatedContent({
     required this.animation,
     required this.animationType,
     required this.currentLayout,
@@ -401,15 +401,15 @@ class _ProportionalGridAnimatedContent extends StatelessWidget {
   });
 
   final Animation<double> animation;
-  final TProportionalGridAnimation animationType;
-  final List<ProportionalLayoutResult> currentLayout;
-  final List<ProportionalLayoutResult>? previousLayout;
-  final List<TProportionalItem> items;
+  final TBentoGridAnimation animationType;
+  final List<BentoLayoutResult> currentLayout;
+  final List<BentoLayoutResult>? previousLayout;
+  final List<TBentoItem> items;
 
   @override
   Widget build(BuildContext context) {
     final flow = Flow(
-      delegate: animationType == TProportionalGridAnimation.slide
+      delegate: animationType == TBentoGridAnimation.slide
           ? _SlideFlowDelegate(
               currentLayout: currentLayout,
               previousLayout: previousLayout,
@@ -422,16 +422,16 @@ class _ProportionalGridAnimatedContent extends StatelessWidget {
     );
 
     return switch (animationType) {
-      TProportionalGridAnimation.slide => flow,
-      TProportionalGridAnimation.fade => FadeTransition(
+      TBentoGridAnimation.slide => flow,
+      TBentoGridAnimation.fade => FadeTransition(
         opacity: animation,
         child: flow,
       ),
-      TProportionalGridAnimation.scale => ScaleTransition(
+      TBentoGridAnimation.scale => ScaleTransition(
         scale: animation,
         child: flow,
       ),
-      TProportionalGridAnimation.none => flow,
+      TBentoGridAnimation.none => flow,
     };
   }
 }
