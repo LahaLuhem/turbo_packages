@@ -18,10 +18,8 @@ class OopsViewModel extends TViewModel with Turbolytics, LogoutManagement {
   // 🧩 DEPENDENCIES -------------------------------------------------------------------------- \\
   // 🎬 INIT & DISPOSE ------------------------------------------------------------------------ \\
 
-  @override
   TRoute? get contextualButtonsRoute => TRoute.oops;
 
-  @override
   List<ContextualButtonEntry> get contextualButtons => const [];
 
   // 🎩 STATE --------------------------------------------------------------------------------- \\

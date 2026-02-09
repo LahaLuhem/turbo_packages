@@ -20,10 +20,8 @@ class SettingsViewModel extends TViewModel with Turbolytics {
   // 👂 LISTENERS ----------------------------------------------------------------------------- \\
   // ⚡️ OVERRIDES ----------------------------------------------------------------------------- \\
 
-  @override
   TRoute? get contextualButtonsRoute => TRoute.settings;
 
-  @override
   List<ContextualButtonEntry> get contextualButtons => [
     ContextualButtonEntry(
       id: 'settings-back',

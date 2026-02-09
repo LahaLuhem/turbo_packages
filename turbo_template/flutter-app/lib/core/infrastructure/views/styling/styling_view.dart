@@ -396,17 +396,6 @@ class _TEntityDetailWidgetsShowcase extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 16),
-        ValueListenableBuilder<String>(
-          valueListenable: model.markdownContent,
-          builder: (context, value, _) => TMarkdownSection(
-            title: 'Notes',
-            caption: 'Markdown editor with preview',
-            content: value,
-            onChanged: model.onMarkdownChanged,
-            onSave: model.onMarkdownSave,
-          ),
-        ),
       ],
     );
   }

@@ -44,7 +44,6 @@ export 'src/widgets/collection/t_collection_toolbar.dart';
 export 'src/widgets/detail/t_detail_header.dart';
 export 'src/widgets/detail/t_form_section.dart';
 export 'src/widgets/detail/t_key_value_field.dart';
-export 'src/widgets/detail/t_markdown_section.dart';
 export 'src/widgets/forms/interactive_form/controllers/t_interactive_form_controller.dart';
 export 'src/widgets/forms/interactive_form/enums/t_interactive_form_step_type.dart';
 export 'src/widgets/forms/interactive_form/models/t_card_option.dart';

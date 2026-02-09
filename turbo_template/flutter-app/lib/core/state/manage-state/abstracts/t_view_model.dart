@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:turbo_flutter_template/core/auth/services/auth_service.dart';
 import 'package:turbo_mvvm/data/models/t_base_view_model.dart';
-import 'package:turbo_widgets/turbo_widgets.dart';
 
 abstract class TViewModel<ARGUMENTS> extends TBaseViewModel<ARGUMENTS> {
   // 📍 LOCATOR ------------------------------------------------------------------------------- \\

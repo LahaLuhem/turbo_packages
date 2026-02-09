@@ -195,7 +195,6 @@ turbo_packages/
 | TDetailHeader | turbo_widgets/lib/src/widgets/detail/t_detail_header.dart | Detail page header with save action |
 | TFormSection | turbo_widgets/lib/src/widgets/detail/t_form_section.dart | Collapsible form section |
 | TKeyValueField | turbo_widgets/lib/src/widgets/detail/t_key_value_field.dart | Key-value display field |
-| TMarkdownSection | turbo_widgets/lib/src/widgets/detail/t_markdown_section.dart | Markdown editor with preview toggle |
 | TInteractiveForm | turbo_widgets/lib/src/widgets/forms/interactive_form/t_interactive_form.dart | Multi-step form with PageView |
 | TProportionalGrid | turbo_widgets/lib/src/widgets/layout/t_proportional_grid.dart | Squarified treemap layout |
 | TContextualAppBar | turbo_widgets/lib/src/widgets/navigation/t_contextual_app_bar.dart | App bar with contextual buttons |

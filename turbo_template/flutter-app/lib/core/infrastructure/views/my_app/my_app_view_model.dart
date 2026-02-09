@@ -118,10 +118,8 @@ class MyAppViewModel extends TViewModel with Turbolytics {
   // 👂 LISTENERS ----------------------------------------------------------------------------- \\
   // ⚡️ OVERRIDES ----------------------------------------------------------------------------- \\
 
-  @override
   TRoute? get contextualButtonsRoute => null;
 
-  @override
   List<ContextualButtonEntry> get contextualButtons => const [];
 
   // 🎩 STATE --------------------------------------------------------------------------------- \\

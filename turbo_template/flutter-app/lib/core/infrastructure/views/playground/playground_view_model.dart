@@ -19,10 +19,8 @@ class PlaygroundViewModel extends TViewModel with Turbolytics {
   // 👂 LISTENERS ----------------------------------------------------------------------------- \\
   // ⚡️ OVERRIDES ----------------------------------------------------------------------------- \\
 
-  @override
   TRoute? get contextualButtonsRoute => TRoute.playground;
 
-  @override
   List<ContextualButtonEntry> get contextualButtons => const [];
 
   // 🎩 STATE --------------------------------------------------------------------------------- \\

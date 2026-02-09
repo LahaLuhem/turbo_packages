@@ -81,10 +81,8 @@ class AuthViewModel extends TViewModel
     await super.dispose();
   }
 
-  @override
   TRoute? get contextualButtonsRoute => null;
 
-  @override
   List<ContextualButtonEntry> get contextualButtons => const [];
 
   // 🎩 STATE --------------------------------------------------------------------------------- \\

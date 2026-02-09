@@ -4,7 +4,6 @@ import 'package:turbo_flutter_template/core/infrastructure/forms/entity_detail_f
 import 'package:turbo_flutter_template/core/state/manage-state/abstracts/t_view_model.dart';
 import 'package:turbo_flutter_template/core/state/manage-state/models/contextual_button_entry.dart';
 import 'package:turbo_flutter_template/core/ux/services/toast_service.dart';
-import 'package:turbo_notifiers/t_notifier.dart';
 import 'package:turbolytics/turbolytics.dart';
 
 class StylingViewModel extends TViewModel with Turbolytics {
@@ -17,14 +16,9 @@ class StylingViewModel extends TViewModel with Turbolytics {
 
   ToastService get _toastService => ToastService.locate;
   final _entityDetailForm = EntityDetailForm.locate;
-  final _markdownContent = TNotifier<String>(
-    '## Overview\n\nThis is a markdown section for rich entity notes.',
-  );
 
-  @override
   TRoute? get contextualButtonsRoute => TRoute.styling;
 
-  @override
   List<ContextualButtonEntry> get contextualButtons => const [];
 
   // 🎬 INIT & DISPOSE ------------------------------------------------------------------------ \\
@@ -32,15 +26,12 @@ class StylingViewModel extends TViewModel with Turbolytics {
   @override
   Future<void> dispose() async {
     _entityDetailForm.dispose();
-    _markdownContent.dispose();
     await super.dispose();
   }
 
   // 🧲 FETCHERS ------------------------------------------------------------------------------ \\
 
   EntityDetailForm get entityDetailForm => _entityDetailForm;
-  TNotifier<String> get markdownContent => _markdownContent;
-
   // 🪄 MUTATORS ------------------------------------------------------------------------------ \\
 
   void onHeaderSave() => _toastService.showToast(
@@ -55,11 +46,4 @@ class StylingViewModel extends TViewModel with Turbolytics {
     subtitle: 'Entity section fields were saved.',
   );
 
-  void onMarkdownSave() => _toastService.showToast(
-    context: context,
-    title: 'Notes saved',
-    subtitle: 'Markdown content was saved.',
-  );
-
-  void onMarkdownChanged(String value) => _markdownContent.update(value);
 }
