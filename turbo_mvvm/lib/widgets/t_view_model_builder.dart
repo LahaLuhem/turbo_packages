@@ -15,7 +15,7 @@ class TViewModelBuilder<T extends TBaseViewModel> extends StatefulWidget {
     Object? Function()? argumentBuilder,
     this.isReactive = TurboMvvmDefaults.isReactive,
     this.shouldDispose = TurboMvvmDefaults.shouldDispose,
-    this.minBusyDuration = TurboMvvmDefaults.minBusyAnimation,
+    this.minBusyDuration,
     this.contentFadeDuration = TurboMvvmDefaults.animation,
     this.onDispose,
     Key? key,
