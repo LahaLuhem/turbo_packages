@@ -44,7 +44,9 @@ class TResponsiveBuilder extends StatelessWidget {
         currentWidth: constraints.maxWidth,
         currentHeight: constraints.maxHeight,
         orientation: constraints.orientation,
-        deviceType: constraints.deviceType(breakpointConfig: breakpointConfig),
+        deviceType: constraints.deviceType(
+          breakpointConfig: breakpointConfig,
+        ),
         media: media,
       );
       final builtWidget = builder(context, child, constraints, tools, data);
