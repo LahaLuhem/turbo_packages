@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:turbo_firestore_api_example/turbo_firestore_api/views/turbo_firestore_api/turbo_firestore_api_view.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:turbo_firestore_api/apis/t_firestore_api.dart';
