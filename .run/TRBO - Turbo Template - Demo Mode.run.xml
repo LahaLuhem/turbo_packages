@@ -1,10 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="TRBO - Turbo Template - Demo Mode" type="FlutterRunConfigurationType" factoryName="Flutter">
-    <option name="filePath" value="$PROJECT_DIR$/turbo_template/flutter-app/lib/main.dart" />
     <option name="additionalArgs" value="--dart-define=env=demo --flavor prod" />
-    <option name="workingDirectory" value="$PROJECT_DIR$/turbo_template/flutter-app" />
-    <method v="2">
-      <option name="RunConfigurationTask" enabled="true" run_configuration_name="TRBO:TT - Copy Prod Plist" run_configuration_type="ShConfigurationType" />
-    </method>
+    <option name="filePath" value="$PROJECT_DIR$/turbo_template/flutter-app/lib/main.dart" />
+    <method v="2" />
   </configuration>
 </component>

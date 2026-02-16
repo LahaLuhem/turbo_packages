@@ -9,7 +9,7 @@ import '../extensions/date_time_extensions.dart';
 
 part '../analytics/t_analytics_service.dart';
 part '../log/t_log.dart';
-part 't_event_bus.dart';
+part 't_analytics_event_bus.dart';
 
 /// Used to provide all logging, analytics and crashlytics functionality to a class of your choosing.
 ///
@@ -35,7 +35,7 @@ mixin Turbolytics<D extends TAnalytics> {
   );
 
   /// Used to handle events in the proper order that they are sent.
-  static final TEventBus _eventBus = TEventBus();
+  static final TAnalyticsEventBus _eventBus = TAnalyticsEventBus();
 
   /// Provides the configured [TAnalytics] functionality through the [Turbolytics] mixin per type of [D].
   late final D analytics = _getIt.get<D>()

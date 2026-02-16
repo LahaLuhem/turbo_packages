@@ -26,7 +26,7 @@ class TLog {
   final int? _maxLinesStackTrace;
 
   /// Used to properly handle chronological processing of events.
-  late final TEventBus _eventBus = TEventBus();
+  late final TAnalyticsEventBus _eventBus = TAnalyticsEventBus();
 
   /// Used to toggle broadcasting logs on or off.
   static bool broadcastLogs = false;

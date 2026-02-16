@@ -1,0 +1,34 @@
+watch:
+  throttle_ms: 1000
+  extensions:
+    - .md
+  ignore_folders:
+    - .git
+    - node_modules
+    - build
+    - .dart_tool
+    - .plx
+feedback:
+  marker: '#FEEDBACK'
+  extensions:
+    - .dart
+    - .ts
+    - .tsx
+    - .js
+    - .jsx
+    - .kt
+    - .swift
+    - .java
+    - .go
+  ignore_folders:
+    - .git
+    - node_modules
+    - build
+    - .dart_tool
+    - .plx
+paste:
+  default_file_extension: .md
+  default_file_casing: upper
+append:
+  default_file_extension: .md
+  default_file_casing: upper

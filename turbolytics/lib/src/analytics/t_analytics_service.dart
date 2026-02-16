@@ -13,7 +13,7 @@ class TAnalyticsService {
   final TLog? _log;
 
   /// Used to handle analytics in proper order that they are sent.
-  late final TEventBus _eventBus = TEventBus();
+  late final TAnalyticsEventBus _eventBus = TAnalyticsEventBus();
 
   /// Used to identify the first input when sending a stream of similar analytics.
   TAnalytic? _firstInput;

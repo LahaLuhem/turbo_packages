@@ -1,4 +1,4 @@
-part of '../data/models/t_base_view_model.dart';
+part of '../data/abstracts/t_base_view_model.dart';
 
 /// Used to build and provide a [TBaseViewModel] to the widget tree.
 class TViewModelBuilder<T extends TBaseViewModel> extends StatefulWidget {

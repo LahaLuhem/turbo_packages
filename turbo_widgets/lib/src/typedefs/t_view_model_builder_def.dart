@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:turbo_mvvm/data/models/t_base_view_model.dart';
+import 'package:turbo_mvvm/data/abstracts/t_base_view_model.dart';
 
 typedef TViewModelBuilderDef<T extends TBaseViewModel> =
     Widget Function(
