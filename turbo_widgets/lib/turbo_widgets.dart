@@ -53,6 +53,7 @@ export 'src/widgets/forms/interactive_form/renderers/t_card_selection_renderer.d
 export 'src/widgets/forms/interactive_form/renderers/t_text_input_renderer.dart';
 export 'src/widgets/forms/interactive_form/t_interactive_form.dart';
 export 'src/widgets/layout/t_bento_grid.dart';
+export 'src/widgets/layout/t_calculated_height.dart';
 export 'src/widgets/navigation/t_contextual_app_bar.dart';
 export 'src/widgets/navigation/t_contextual_bottom_navigation.dart';
 export 'src/widgets/navigation/t_contextual_nav_button.dart';
