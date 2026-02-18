@@ -6,6 +6,7 @@ import 'package:turbo_widgets/src/enums/t_bento_grid_animation.dart';
 import 'package:turbo_widgets/src/models/layout/bento_layout_result.dart';
 import 'package:turbo_widgets/src/models/layout/t_bento_item.dart';
 import 'package:turbo_widgets/src/utils/bento_layout_calculator.dart';
+import 'package:turbo_widgets/src/widgets/layout/t_calculated_height.dart';
 
 /// High-performance delegate that positions items based on pre-computed layout.
 /// Used for fade, scale, and none animation types.
@@ -155,11 +156,15 @@ class TBentoGrid extends StatefulWidget {
     required this.items,
     this.spacing = 8.0,
     this.animation = TBentoGridAnimation.fade,
-    this.animationDuration = const Duration(milliseconds: 300),
+    this.animationDuration = const Duration(milliseconds: 225),
     this.animationCurve = Curves.easeInOut,
-    this.debounceDuration = const Duration(milliseconds: 150),
+    this.debounceDuration = const Duration(milliseconds: 225),
     this.maxHeight,
     this.maxWidth,
+    this.baseHeight = 480,
+    this.multiplierThreshold = 3,
+    this.calculatedMinHeight = 280,
+    this.calculatedMaxHeight,
   });
 
   /// The items to display in the grid.
@@ -183,6 +188,11 @@ class TBentoGrid extends StatefulWidget {
 
   final double? maxHeight;
   final double? maxWidth;
+
+  final double baseHeight;
+  final int multiplierThreshold;
+  final double calculatedMinHeight;
+  final double? calculatedMaxHeight;
 
   @override
   State<TBentoGrid> createState() => _TBentoGridState();
@@ -342,51 +352,58 @@ class _TBentoGridState extends State<TBentoGrid>
       return const SizedBox.shrink();
     }
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final availableSize = Size(
-          widget.maxWidth ?? constraints.maxWidth,
-          widget.maxHeight ?? (constraints.hasBoundedHeight ? constraints.maxHeight : 400),
-        );
+    return TCalculatedHeight(
+      count: widget.items.length,
+      baseHeight: widget.baseHeight,
+      multiplierThreshold: widget.multiplierThreshold,
+      minHeight: widget.calculatedMinHeight,
+      maxHeight: widget.calculatedMaxHeight,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final availableSize = Size(
+            widget.maxWidth ?? constraints.maxWidth,
+            widget.maxHeight ?? (constraints.hasBoundedHeight ? constraints.maxHeight : 400),
+          );
 
-        final sizes = widget.items.map((item) => item.size).toList();
-        final spacing = widget.spacing;
+          final sizes = widget.items.map((item) => item.size).toList();
+          final spacing = widget.spacing;
 
-        if (_currentLayout == null) {
-          _updateLayoutImmediate(availableSize, sizes, spacing);
-          if (widget.animation == TBentoGridAnimation.fade ||
-              widget.animation == TBentoGridAnimation.scale) {
-            _controller.value = 1.0;
-          }
-        }
-
-        if (_hasLayoutChanged(availableSize, sizes, spacing)) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (!mounted) return;
-            switch (widget.animation) {
-              case TBentoGridAnimation.slide:
-                _onLayoutChangedSlide(availableSize, sizes, spacing);
-              case TBentoGridAnimation.fade:
-              case TBentoGridAnimation.scale:
-                _onLayoutChangedDebounced(availableSize, sizes, spacing);
-              case TBentoGridAnimation.none:
-                _onLayoutChangedNone(availableSize, sizes, spacing);
+          if (_currentLayout == null) {
+            _updateLayoutImmediate(availableSize, sizes, spacing);
+            if (widget.animation == TBentoGridAnimation.fade ||
+                widget.animation == TBentoGridAnimation.scale) {
+              _controller.value = 1.0;
             }
-          });
-        }
+          }
 
-        return SizedBox(
-          width: availableSize.width,
-          height: availableSize.height,
-          child: _BentoGridAnimatedContent(
-            animation: _animation,
-            animationType: widget.animation,
-            currentLayout: _currentLayout!,
-            previousLayout: _previousLayout,
-            items: widget.items,
-          ),
-        );
-      },
+          if (_hasLayoutChanged(availableSize, sizes, spacing)) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!mounted) return;
+              switch (widget.animation) {
+                case TBentoGridAnimation.slide:
+                  _onLayoutChangedSlide(availableSize, sizes, spacing);
+                case TBentoGridAnimation.fade:
+                case TBentoGridAnimation.scale:
+                  _onLayoutChangedDebounced(availableSize, sizes, spacing);
+                case TBentoGridAnimation.none:
+                  _onLayoutChangedNone(availableSize, sizes, spacing);
+              }
+            });
+          }
+
+          return SizedBox(
+            width: availableSize.width,
+            height: availableSize.height,
+            child: _BentoGridAnimatedContent(
+              animation: _animation,
+              animationType: widget.animation,
+              currentLayout: _currentLayout!,
+              previousLayout: _previousLayout,
+              items: widget.items,
+            ),
+          );
+        },
+      ),
     );
   }
 }

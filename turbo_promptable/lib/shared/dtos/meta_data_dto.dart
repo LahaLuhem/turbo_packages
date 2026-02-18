@@ -2,7 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'meta_data_dto.g.dart';
 
-@JsonSerializable(includeIfNull: false, explicitToJson: true)
+@JsonSerializable(includeIfNull: true, explicitToJson: true)
 class MetaDataDto {
   MetaDataDto({required this.name, required this.description});
 
