@@ -198,8 +198,7 @@ class TBentoGrid extends StatefulWidget {
   State<TBentoGrid> createState() => _TBentoGridState();
 }
 
-class _TBentoGridState extends State<TBentoGrid>
-    with SingleTickerProviderStateMixin {
+class _TBentoGridState extends State<TBentoGrid> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
 
@@ -211,6 +210,8 @@ class _TBentoGridState extends State<TBentoGrid>
   double? _lastSpacing;
 
   bool _isWaitingForStability = false;
+  List<TBentoItem>? _displayedItems;
+  List<TBentoItem>? _previousItems;
 
   @override
   void initState() {
@@ -227,6 +228,15 @@ class _TBentoGridState extends State<TBentoGrid>
     if (widget.animation == TBentoGridAnimation.slide) {
       _controller.addListener(_onAnimationTick);
     }
+    _controller.addStatusListener(_onAnimationStatusChanged);
+  }
+
+  void _onAnimationStatusChanged(AnimationStatus status) {
+    if (status == AnimationStatus.completed && mounted) {
+      setState(() {
+        _previousItems = null;
+      });
+    }
   }
 
   void _onAnimationTick() {
@@ -237,6 +247,7 @@ class _TBentoGridState extends State<TBentoGrid>
   void dispose() {
     _debounceTimer?.cancel();
     _controller.removeListener(_onAnimationTick);
+    _controller.removeStatusListener(_onAnimationStatusChanged);
     _controller.dispose();
     super.dispose();
   }
@@ -302,6 +313,7 @@ class _TBentoGridState extends State<TBentoGrid>
     if (!_hasLayoutChanged(availableSize, sizes, spacing)) return;
 
     setState(() {
+      _previousItems = List<TBentoItem>.from(_displayedItems ?? widget.items);
       _updateLayoutImmediate(availableSize, sizes, spacing);
     });
 
@@ -319,6 +331,7 @@ class _TBentoGridState extends State<TBentoGrid>
 
     if (!_isWaitingForStability) {
       _isWaitingForStability = true;
+      _previousItems ??= List<TBentoItem>.from(_displayedItems ?? widget.items);
       _controller.reverse();
     }
 
@@ -328,6 +341,7 @@ class _TBentoGridState extends State<TBentoGrid>
       setState(() {
         _updateLayoutImmediate(availableSize, sizes, spacing);
         _isWaitingForStability = false;
+        _previousItems = null;
       });
 
       _controller.forward();
@@ -348,12 +362,16 @@ class _TBentoGridState extends State<TBentoGrid>
 
   @override
   Widget build(BuildContext context) {
-    if (widget.items.isEmpty) {
+    if (widget.items.isEmpty && _displayedItems == null) {
       return const SizedBox.shrink();
     }
 
+    final heightCount = (_displayedItems != null && _isWaitingForStability)
+        ? _displayedItems!.length
+        : widget.items.length;
+
     return TCalculatedHeight(
-      count: widget.items.length,
+      count: heightCount,
       baseHeight: widget.baseHeight,
       multiplierThreshold: widget.multiplierThreshold,
       minHeight: widget.calculatedMinHeight,
@@ -376,7 +394,25 @@ class _TBentoGridState extends State<TBentoGrid>
             }
           }
 
-          if (_hasLayoutChanged(availableSize, sizes, spacing)) {
+          final layoutChanged = _hasLayoutChanged(availableSize, sizes, spacing);
+
+          final List<TBentoItem> itemsToPass;
+          if (_previousItems != null && _controller.value < 1.0 && _currentLayout != null) {
+            final n = _currentLayout!.length;
+            itemsToPass = List.generate(
+              n,
+              (i) => i < _previousItems!.length ? _previousItems![i] : widget.items[i],
+            );
+          } else if (layoutChanged &&
+              _displayedItems != null &&
+              (widget.animation == TBentoGridAnimation.fade ||
+                  widget.animation == TBentoGridAnimation.scale)) {
+            itemsToPass = _displayedItems!;
+          } else {
+            itemsToPass = widget.items;
+          }
+
+          if (layoutChanged) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (!mounted) return;
               switch (widget.animation) {
@@ -388,6 +424,11 @@ class _TBentoGridState extends State<TBentoGrid>
                 case TBentoGridAnimation.none:
                   _onLayoutChangedNone(availableSize, sizes, spacing);
               }
+              _displayedItems = itemsToPass;
+            });
+          } else {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) _displayedItems = itemsToPass;
             });
           }
 
@@ -399,7 +440,7 @@ class _TBentoGridState extends State<TBentoGrid>
               animationType: widget.animation,
               currentLayout: _currentLayout!,
               previousLayout: _previousLayout,
-              items: widget.items,
+              items: itemsToPass,
             ),
           );
         },
@@ -433,9 +474,7 @@ class _BentoGridAnimatedContent extends StatelessWidget {
               animation: animation,
             )
           : _StaticFlowDelegate(layout: currentLayout),
-      children: items
-          .map((item) => RepaintBoundary(child: item.child))
-          .toList(),
+      children: items.map((item) => RepaintBoundary(child: item.child)).toList(),
     );
 
     return switch (animationType) {
