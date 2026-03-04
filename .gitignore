@@ -39,3 +39,9 @@ coverage/
 
 # Generated Flutter plugin dependencies
 .flutter-plugins-dependencies
+
+# Compiled test artifacts
+*.dill
+
+# Symlinks
+turbo_packages
