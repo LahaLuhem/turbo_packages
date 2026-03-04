@@ -198,7 +198,8 @@ class TBentoGrid extends StatefulWidget {
   State<TBentoGrid> createState() => _TBentoGridState();
 }
 
-class _TBentoGridState extends State<TBentoGrid> with SingleTickerProviderStateMixin {
+class _TBentoGridState extends State<TBentoGrid>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
 
@@ -224,6 +225,11 @@ class _TBentoGridState extends State<TBentoGrid> with SingleTickerProviderStateM
       parent: _controller,
       curve: widget.animationCurve,
     );
+
+    if (widget.animation == TBentoGridAnimation.fade ||
+        widget.animation == TBentoGridAnimation.scale) {
+      _controller.value = 1.0;
+    }
 
     if (widget.animation == TBentoGridAnimation.slide) {
       _controller.addListener(_onAnimationTick);
@@ -380,7 +386,8 @@ class _TBentoGridState extends State<TBentoGrid> with SingleTickerProviderStateM
         builder: (context, constraints) {
           final availableSize = Size(
             widget.maxWidth ?? constraints.maxWidth,
-            widget.maxHeight ?? (constraints.hasBoundedHeight ? constraints.maxHeight : 400),
+            widget.maxHeight ??
+                (constraints.hasBoundedHeight ? constraints.maxHeight : 400),
           );
 
           final sizes = widget.items.map((item) => item.size).toList();
@@ -388,20 +395,24 @@ class _TBentoGridState extends State<TBentoGrid> with SingleTickerProviderStateM
 
           if (_currentLayout == null) {
             _updateLayoutImmediate(availableSize, sizes, spacing);
-            if (widget.animation == TBentoGridAnimation.fade ||
-                widget.animation == TBentoGridAnimation.scale) {
-              _controller.value = 1.0;
-            }
           }
 
-          final layoutChanged = _hasLayoutChanged(availableSize, sizes, spacing);
+          final layoutChanged = _hasLayoutChanged(
+            availableSize,
+            sizes,
+            spacing,
+          );
 
           final List<TBentoItem> itemsToPass;
-          if (_previousItems != null && _controller.value < 1.0 && _currentLayout != null) {
+          if (_previousItems != null &&
+              _controller.value < 1.0 &&
+              _currentLayout != null) {
             final n = _currentLayout!.length;
             itemsToPass = List.generate(
               n,
-              (i) => i < _previousItems!.length ? _previousItems![i] : widget.items[i],
+              (i) => i < _previousItems!.length
+                  ? _previousItems![i]
+                  : widget.items[i],
             );
           } else if (layoutChanged &&
               _displayedItems != null &&
@@ -474,7 +485,9 @@ class _BentoGridAnimatedContent extends StatelessWidget {
               animation: animation,
             )
           : _StaticFlowDelegate(layout: currentLayout),
-      children: items.map((item) => RepaintBoundary(child: item.child)).toList(),
+      children: items
+          .map((item) => RepaintBoundary(child: item.child))
+          .toList(),
     );
 
     return switch (animationType) {
