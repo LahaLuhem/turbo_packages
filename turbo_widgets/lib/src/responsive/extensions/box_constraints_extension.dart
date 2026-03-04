@@ -15,7 +15,9 @@ extension BoxConstraintsExtension on BoxConstraints {
       return TOrientation.square;
     }
 
-    return maxHeight > maxWidth ? TOrientation.portrait : TOrientation.landscape;
+    return maxHeight > maxWidth
+        ? TOrientation.portrait
+        : TOrientation.landscape;
   }
 
   TDeviceType deviceType({
@@ -23,7 +25,8 @@ extension BoxConstraintsExtension on BoxConstraints {
     bool doConsiderHeight = false,
   }) {
     if (maxWidth >= breakpointConfig.desktopBreakpointWidth ||
-        (doConsiderHeight &&  maxHeight >= breakpointConfig.desktopBreakpointHeight)) {
+        (doConsiderHeight &&
+            maxHeight >= breakpointConfig.desktopBreakpointHeight)) {
       return TDeviceType.desktop;
     }
     if (maxWidth >= breakpointConfig.tabletBreakpointWidth) {

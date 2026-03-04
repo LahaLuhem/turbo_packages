@@ -17,12 +17,13 @@ enum TSideNavBarButtonAlignment {
   spaceAround,
 }
 
-typedef TSideNavBarItemBuilder = Widget Function(
-  BuildContext context,
-  TButtonConfig config,
-  bool isActive,
-  VoidCallback onTap,
-);
+typedef TSideNavBarItemBuilder =
+    Widget Function(
+      BuildContext context,
+      TButtonConfig config,
+      bool isActive,
+      VoidCallback onTap,
+    );
 
 class TSideNavBar extends StatelessWidget {
   const TSideNavBar({
@@ -237,7 +238,8 @@ class _TSideNavBarVertical extends StatelessWidget {
       if (itemBuilder != null) {
         children.add(
           Builder(
-            builder: (context) => itemBuilder!(context, entry.value, isActive, onTap),
+            builder: (context) =>
+                itemBuilder!(context, entry.value, isActive, onTap),
           ),
         );
       } else if (isExpanded) {
@@ -348,7 +350,8 @@ class _TSideNavBarHorizontal extends StatelessWidget {
       final Widget item;
       if (itemBuilder != null) {
         item = Builder(
-          builder: (context) => itemBuilder!(context, entry.value, isActive, onTap),
+          builder: (context) =>
+              itemBuilder!(context, entry.value, isActive, onTap),
         );
       } else {
         item = _TSideNavBarCollapsedItem(

@@ -45,5 +45,4 @@ class StylingViewModel extends TViewModel with Turbolytics {
     title: 'Section saved',
     subtitle: 'Entity section fields were saved.',
   );
-
 }
