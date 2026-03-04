@@ -16,7 +16,7 @@ A Dart/Flutter monorepo providing core infrastructure packages for building prod
 | GetIt | ^9.2.0 | Service locator (turbolytics) |
 | ShadCN UI | latest | UI framework (turbo_forms, turbo_widgets) |
 | Equatable | latest | Equality (turbo_forms) |
-| json_annotation | ^4.9.0 | JSON serialization (turbo_promptable, turbo_plx_cli) |
+| json_annotation | ^4.9.0 | JSON serialization (turbo_promptable, pew_pew_cli) |
 | xml | ^6.3.0 | XML serialization (turbo_serializable) |
 | yaml | ^3.1.0 | YAML serialization (turbo_serializable) |
 | change_case | ^2.2.0 | Case conversion (turbo_serializable) |
@@ -37,7 +37,7 @@ turbo_packages/
 ├── turbo_forms/                    # Form field configuration + validation (ShadCN)
 ├── turbo_widgets/                  # Reusable UI widgets, responsive, navigation, playground
 ├── turbo_promptable/               # OOP prompting framework for AI agents
-├── turbo_plx_cli/                  # File operations via plx CLI subprocess
+├── pew_pew_cli/                  # File operations via plx CLI subprocess
 └── turbo_template/                 # Production Flutter app template/scaffold (310+ Dart files)
 ```
 
@@ -72,7 +72,7 @@ turbo_packages/
 | turbo_forms | 1.0.1 | Type-safe form field configuration and validation with ShadCN UI | flutter, equatable, shadcn_ui, turbo_notifiers, turbolytics |
 | turbo_widgets | 1.1.0 | Reusable UI widgets, responsive utilities, navigation, playground | flutter, shadcn_ui, cached_network_image, flutter_hooks, soft_edge_blur |
 | turbo_promptable | 0.0.1 | OOP prompting framework for AI agent roles, workflows, tools | turbo_serializable, turbo_response, json_annotation |
-| turbo_plx_cli | 0.0.1 | Firestore-like API for local file operations via plx CLI subprocess | turbo_response, json_annotation |
+| pew_pew_cli | 0.0.1 | Firestore-like API for local file operations via plx CLI subprocess | turbo_response, json_annotation |
 | turbo_template | N/A | Production Flutter app template/scaffold with Firebase integration | All turbo packages |
 
 ### Abstract Classes / Interfaces / Mixins
@@ -99,7 +99,7 @@ turbo_packages/
 | TContextualButtonsServiceInterface | turbo_widgets/lib/src/abstracts/t_contextual_buttons_service_interface.dart | Interface for contextual buttons state |
 | TNavigationTabServiceInterface\<T\> | turbo_widgets/lib/src/abstracts/t_navigation_tab_service_interface.dart | Interface for active navigation tab tracking |
 | TContextualButtonsManagement | turbo_widgets/lib/src/mixins/t_contextual_buttons_management.dart | Mixin for managing contextual buttons |
-| PlxClientInterface | turbo_plx_cli/lib/src/abstracts/plx_client_interface.dart | Interface for plx CLI client |
+| PlxClientInterface | pew_pew_cli/lib/src/abstracts/plx_client_interface.dart | Interface for plx CLI client |
 | CrashReportsInterface | turbolytics/lib/src/crash_reports/crash_reports_interface.dart | Contract for crash reporting providers |
 | TAnalyticsInterface | turbolytics/lib/src/analytics/t_analytics_interface.dart | Contract for analytics providers |
 | Turbolytics\<D\> | turbolytics/lib/src/turbolytics/turbolytics.dart | Main mixin providing logging, analytics, crashlytics |
@@ -129,9 +129,9 @@ turbo_packages/
 | TData | turbo_widgets/lib/src/responsive/models/t_data.dart | Responsive data (dimensions, orientation, device type) |
 | TCardOption | turbo_widgets/lib/src/widgets/forms/interactive_form/models/t_card_option.dart | Card option for interactive form |
 | TInteractiveFormStepConfig | turbo_widgets/lib/src/widgets/forms/interactive_form/models/t_interactive_form_step_config.dart | Sealed base for form step configs |
-| FileEntryDto | turbo_plx_cli/lib/src/dtos/file_entry_dto.dart | File path, content, lastModified |
-| WatchEventDto | turbo_plx_cli/lib/src/dtos/watch_event_dto.dart | File system event (type, path, content, files) |
-| WatchConfigDto | turbo_plx_cli/lib/src/dtos/watch_config_dto.dart | Watch configuration (throttle, extensions, ignore) |
+| FileEntryDto | pew_pew_cli/lib/src/dtos/file_entry_dto.dart | File path, content, lastModified |
+| WatchEventDto | pew_pew_cli/lib/src/dtos/watch_event_dto.dart | File system event (type, path, content, files) |
+| WatchConfigDto | pew_pew_cli/lib/src/dtos/watch_config_dto.dart | Watch configuration (throttle, extensions, ignore) |
 | TAnalytic | turbolytics/lib/src/analytics/t_analytic.dart | Analytics event data (subject, type, parameters) |
 | CustomAnalytic | turbolytics/lib/src/analytics/t_analytic.dart | Flexible analytics with custom name |
 | ActivityDto\<I, O\> | turbo_promptable/lib/activities/dtos/activity_dto.dart | Generic AI activity with typed I/O |
@@ -164,14 +164,14 @@ turbo_packages/
 | TInteractiveFormController | turbo_widgets/lib/src/widgets/forms/interactive_form/controllers/t_interactive_form_controller.dart | Multi-step form pagination and validation | Factory | TInteractiveFormStepConfig |
 | TAnalyticsService | turbolytics/lib/src/analytics/t_analytics_service.dart | 97+ predefined analytics event methods | Factory | TLog, TEventBus |
 | TAnalyticsFactory | turbolytics/lib/src/analytics/t_analytics_factory.dart | Registers analytics implementations via GetIt | Factory | GetIt |
-| PlxClient | turbo_plx_cli/lib/src/services/plx_client.dart | Connects to plx CLI subprocess for file ops | Factory | PlxClientInterface |
+| PlxClient | pew_pew_cli/lib/src/services/plx_client.dart | Connects to plx CLI subprocess for file ops | Factory | PlxClientInterface |
 
 ### APIs
 
 | Name | Path | Purpose |
 |---|---|---|
 | TFirestoreApi\<T\> | turbo_firestore_api/lib/apis/t_firestore_api.dart | Type-safe Firestore CRUD, streaming, search, transactions, batches |
-| PlxApi | turbo_plx_cli/lib/src/apis/plx_api.dart | Firestore-like API for local file operations (get, list, create, update, delete, stream) |
+| PlxApi | pew_pew_cli/lib/src/apis/plx_api.dart | Firestore-like API for local file operations (get, list, create, update, delete, stream) |
 
 ### Widgets / Components
 
@@ -228,8 +228,8 @@ turbo_packages/
 | TCollectionSectionLayout | turbo_widgets/lib/src/enums/t_collection_section_layout.dart | bento, list, grid |
 | TContextualPosition | turbo_widgets/lib/src/enums/t_contextual_position.dart | top, bottom, left, right |
 | TDeviceType | turbo_widgets/lib/src/responsive/enums/t_device_type.dart | mobile, tablet, desktop |
-| WatchEventType | turbo_plx_cli/lib/src/enums/watch_event_type.dart | create, modify, delete, error, get, list |
-| TurboPlxCliDefaults | turbo_plx_cli/lib/src/constants/turbo_plx_cli_defaults.dart | Throttle, extensions, ignore folders, timeout |
+| WatchEventType | pew_pew_cli/lib/src/enums/watch_event_type.dart | create, modify, delete, error, get, list |
+| PewPewCliDefaults | pew_pew_cli/lib/src/constants/pew_pew_cli_defaults.dart | Throttle, extensions, ignore folders, timeout |
 | WorkflowStepType | turbo_promptable/lib/activities/enums/workflow_step_type.dart | assess, research, enrich, align, refine, plan, act, review, test, deliver |
 | MetaDataKeys | turbo_promptable/lib/shared/constants/meta_data_keys.dart | Metadata key constants |
 
@@ -240,7 +240,7 @@ turbo_packages/
 | TurboException | turbo_response/lib/src/turbo_exception.dart | Exception with error, title, message, stackTrace |
 | TFirestoreException (sealed) | turbo_firestore_api/lib/exceptions/t_firestore_exception.dart | Firestore exception hierarchy (PermissionDenied, Unavailable, NotFound, AlreadyExists, Cancelled, DeadlineExceeded, Generic) |
 | InvalidJsonException | turbo_firestore_api/lib/exceptions/invalid_json_exception.dart | Invalid JSON data exception |
-| PlxException | turbo_plx_cli/lib/src/exceptions/plx_exception.dart | CLI communication exception |
+| PlxException | pew_pew_cli/lib/src/exceptions/plx_exception.dart | CLI communication exception |
 
 ### Extensions
 
@@ -329,7 +329,7 @@ turbo_widgets ──► flutter, shadcn_ui, cached_network_image, flutter_hooks
     │
 turbo_promptable ──► turbo_serializable, turbo_response, json_annotation
     │
-turbo_plx_cli ──► turbo_response, json_annotation
+pew_pew_cli ──► turbo_response, json_annotation
     │
 turbo_template ──► all turbo packages + Firebase + third-party
 ```
@@ -350,7 +350,7 @@ turbo_template ──► all turbo packages + Firebase + third-party
 | turbo_notifiers | turbo_notifiers/test/ | flutter_test, mockito | 47 tests covering TNotifier behavior |
 | turbo_mvvm | turbo_mvvm/test/ | gherkin_unit_test, gherkin_integration_test | Unit + integration (BDD Gherkin style) |
 | turbo_firestore_api | turbo_firestore_api/test/ | flutter_test | Service and API tests |
-| turbo_plx_cli | turbo_plx_cli/test/ | test | Unit + integration tests with mock CLI |
+| pew_pew_cli | pew_pew_cli/test/ | test | Unit + integration tests with mock CLI |
 | turbolytics | turbolytics/test/ | flutter_test | Placeholder test |
 | turbo_serializable | turbo_serializable/test/ | (empty) | No tests |
 | turbo_forms | (none) | (none) | No tests |

@@ -1,6 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:turbo_plx_cli/src/dtos/file_entry_dto.dart';
-import 'package:turbo_plx_cli/src/enums/watch_event_type.dart';
+import 'package:pew_pew_cli/src/dtos/file_entry_dto.dart';
+import 'package:pew_pew_cli/src/enums/watch_event_type.dart';
 
 part 'watch_event_dto.g.dart';
 

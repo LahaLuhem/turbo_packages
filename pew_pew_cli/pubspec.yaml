@@ -1,9 +1,9 @@
-name: turbo_plx_cli
+name: pew_pew_cli
 description: A Firestore-like API for local file operations via the plx CLI subprocess.
-version: 0.0.1
+version: 0.0.2
 publish_to: none
 resolution: workspace
-repository: https://github.com/appboypov/turbo_packages/tree/main/turbo_plx_cli
+repository: https://github.com/appboypov/turbo_packages/tree/main/pew_pew_cli
 homepage: https://github.com/appboypov/turbo_packages
 issue_tracker: https://github.com/appboypov/turbo_packages/issues
 

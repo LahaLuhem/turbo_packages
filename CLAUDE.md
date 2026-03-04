@@ -56,7 +56,7 @@ turbo_firestore_api     (turbo_response + turbo_serializable + turbo_notifiers +
 turbo_forms             (turbo_notifiers + turbolytics + shadcn_ui)
 turbo_widgets           (turbo_mvvm + turbo_forms + shadcn_ui)
 turbo_promptable        (turbo_serializable + turbo_response)
-turbo_plx_cli           (turbo_response)
+pew_pew_cli             (turbo_response)
 turbo_template          (all turbo packages + Firebase)
 ```
 

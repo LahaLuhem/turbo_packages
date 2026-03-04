@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:turbo_plx_cli/src/abstracts/plx_client_interface.dart';
-import 'package:turbo_plx_cli/src/dtos/file_entry_dto.dart';
-import 'package:turbo_plx_cli/src/dtos/watch_event_dto.dart';
-import 'package:turbo_plx_cli/src/enums/watch_event_type.dart';
-import 'package:turbo_plx_cli/src/exceptions/plx_exception.dart';
+import 'package:pew_pew_cli/src/abstracts/plx_client_interface.dart';
+import 'package:pew_pew_cli/src/dtos/file_entry_dto.dart';
+import 'package:pew_pew_cli/src/dtos/watch_event_dto.dart';
+import 'package:pew_pew_cli/src/enums/watch_event_type.dart';
+import 'package:pew_pew_cli/src/exceptions/plx_exception.dart';
 import 'package:turbo_response/turbo_response.dart';
 
 class PlxApi {

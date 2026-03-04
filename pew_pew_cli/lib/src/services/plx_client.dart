@@ -2,15 +2,15 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:turbo_plx_cli/src/abstracts/plx_client_interface.dart';
-import 'package:turbo_plx_cli/src/constants/turbo_plx_cli_defaults.dart';
-import 'package:turbo_plx_cli/src/dtos/watch_event_dto.dart';
-import 'package:turbo_plx_cli/src/enums/watch_event_type.dart';
+import 'package:pew_pew_cli/src/abstracts/plx_client_interface.dart';
+import 'package:pew_pew_cli/src/constants/pew_pew_cli_defaults.dart';
+import 'package:pew_pew_cli/src/dtos/watch_event_dto.dart';
+import 'package:pew_pew_cli/src/enums/watch_event_type.dart';
 
 class PlxClient implements PlxClientInterface {
   PlxClient({
-    this.plxExecutable = TurboPlxCliDefaults.plxExecutable,
-    this.requestTimeout = TurboPlxCliDefaults.requestTimeout,
+    this.plxExecutable = PewPewCliDefaults.plxExecutable,
+    this.requestTimeout = PewPewCliDefaults.requestTimeout,
   });
 
   final String plxExecutable;

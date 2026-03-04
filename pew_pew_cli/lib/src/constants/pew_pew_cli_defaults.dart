@@ -1,5 +1,5 @@
-abstract final class TurboPlxCliDefaults {
-  TurboPlxCliDefaults._();
+abstract final class PewPewCliDefaults {
+  PewPewCliDefaults._();
 
   static const int throttleMs = 1000;
   static const List<String> extensions = ['.md'];

@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:turbo_plx_cli/src/dtos/watch_event_dto.dart';
+import 'package:pew_pew_cli/src/dtos/watch_event_dto.dart';
 
 abstract interface class PlxClientInterface {
   bool get isConnected;

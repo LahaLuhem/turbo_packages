@@ -1,5 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:turbo_plx_cli/src/constants/turbo_plx_cli_defaults.dart';
+import 'package:pew_pew_cli/src/constants/pew_pew_cli_defaults.dart';
 
 part 'watch_config_dto.g.dart';
 
@@ -10,9 +10,9 @@ part 'watch_config_dto.g.dart';
 )
 class WatchConfigDto {
   const WatchConfigDto({
-    this.throttleMs = TurboPlxCliDefaults.throttleMs,
-    this.extensions = TurboPlxCliDefaults.extensions,
-    this.ignoreFolders = TurboPlxCliDefaults.ignoreFolders,
+    this.throttleMs = PewPewCliDefaults.throttleMs,
+    this.extensions = PewPewCliDefaults.extensions,
+    this.ignoreFolders = PewPewCliDefaults.ignoreFolders,
   });
 
   final int throttleMs;

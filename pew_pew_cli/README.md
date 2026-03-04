@@ -1,4 +1,4 @@
-# turbo_plx_cli
+# pew_pew_cli
 
 A Firestore-like API for local file operations via the plx CLI subprocess.
 
@@ -11,7 +11,7 @@ A Firestore-like API for local file operations via the plx CLI subprocess.
 ## Usage
 
 ```dart
-import 'package:turbo_plx_cli/turbo_plx_cli.dart';
+import 'package:pew_pew_cli/pew_pew_cli.dart';
 
 // Create and connect service
 final plxService = PlxService();

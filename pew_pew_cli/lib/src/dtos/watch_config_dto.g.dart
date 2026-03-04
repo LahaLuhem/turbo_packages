@@ -10,17 +10,17 @@ WatchConfigDto _$WatchConfigDtoFromJson(Map<String, dynamic> json) =>
     WatchConfigDto(
       throttleMs:
           (json['throttle_ms'] as num?)?.toInt() ??
-          TurboPlxCliDefaults.throttleMs,
+          PewPewCliDefaults.throttleMs,
       extensions:
           (json['extensions'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
-          TurboPlxCliDefaults.extensions,
+          PewPewCliDefaults.extensions,
       ignoreFolders:
           (json['ignore_folders'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
-          TurboPlxCliDefaults.ignoreFolders,
+          PewPewCliDefaults.ignoreFolders,
     );
 
 Map<String, dynamic> _$WatchConfigDtoToJson(WatchConfigDto instance) =>
