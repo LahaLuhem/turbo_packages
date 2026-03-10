@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:pew_pew_cli/pew_pew_cli.dart';
 import 'package:test/test.dart';
+import 'package:turbo_plx_cli/turbo_plx_cli.dart';
 import 'package:turbo_response/turbo_response.dart';
 
 class MockPlxClient implements PlxClientInterface {
@@ -10,6 +10,8 @@ class MockPlxClient implements PlxClientInterface {
   Exception? exceptionToThrow;
   final StreamController<WatchEventDto> _eventController =
       StreamController<WatchEventDto>.broadcast();
+  final StreamController<AgentEventDto> _agentEventController =
+      StreamController<AgentEventDto>.broadcast();
 
   @override
   bool get isConnected => true;
@@ -19,6 +21,9 @@ class MockPlxClient implements PlxClientInterface {
 
   @override
   Stream<WatchEventDto> get events => _eventController.stream;
+
+  @override
+  Stream<AgentEventDto> get agentEvents => _agentEventController.stream;
 
   @override
   Future<void> connect(String workingDirectory) async {}
@@ -36,8 +41,25 @@ class MockPlxClient implements PlxClientInterface {
   }
 
   @override
+  Future<List<SessionSummaryDto>> sendAgentSessionsList({String? dataDir}) async =>
+      throw UnimplementedError();
+
+  @override
+  Future<ConversationDto> sendAgentSessionGet({
+    required String sessionId,
+    String? projectPath,
+    String? dataDir,
+  }) async =>
+      throw UnimplementedError();
+
+  @override
+  void sendAgentRun(AgentRunRequestDto request) =>
+      throw UnimplementedError();
+
+  @override
   Future<void> dispose() async {
     await _eventController.close();
+    await _agentEventController.close();
   }
 
   void emitEvent(WatchEventDto event) {

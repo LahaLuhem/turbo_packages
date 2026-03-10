@@ -12,7 +12,7 @@ workspace:
   - turbo_mvvm/example
   - turbo_notifiers
   - turbo_notifiers/example
-  - pew_pew_cli
+  - turbo_plx_cli
   - turbo_promptable
   - turbo_response
   - turbo_response/example
