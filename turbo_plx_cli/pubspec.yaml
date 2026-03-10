@@ -1,7 +1,6 @@
 name: turbo_plx_cli
 description: A Firestore-like API for local file operations via the plx CLI subprocess.
 version: 0.0.3
-publish_to: none
 resolution: workspace
 repository: https://github.com/appboypov/turbo_packages/tree/main/turbo_plx_cli
 homepage: https://github.com/appboypov/turbo_packages
