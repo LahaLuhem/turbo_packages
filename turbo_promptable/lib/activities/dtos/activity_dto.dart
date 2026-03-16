@@ -1,16 +1,13 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:turbo_promptable/abstracts/has_to_json.dart';
-import 'package:turbo_promptable/activities/dtos/instruction_dto.dart';
-import 'package:turbo_promptable/activities/dtos/sub_agent_dto.dart';
-import 'package:turbo_promptable/workflows/dtos/workflow_dto.dart';
+import 'package:turbo_promptable/actors/dtos/agent_dto.dart';
+import 'package:turbo_promptable/shared/abstracts/has_to_json.dart';
+import 'package:turbo_promptable/skills/dtos/instruction_dto.dart';
+import 'package:turbo_promptable/skills/workflows/dtos/workflow_dto.dart';
 
 import '../../shared/abstracts/turbo_promptable.dart';
 
 part 'activity_dto.g.dart';
 
-/// Represents an activity (AI command) in the Pew Pew Plaza hierarchy.
-///
-/// Activities are AI commands that agents can execute.
 @JsonSerializable(
   includeIfNull: true,
   explicitToJson: true,
@@ -18,18 +15,17 @@ part 'activity_dto.g.dart';
 )
 class ActivityDto<INPUT extends HasToJson, OUTPUT extends HasToJson>
     extends TurboPromptable {
-  /// Creates an [ActivityDto] with the given properties.
   ActivityDto({
     required this.output,
     required this.workflow,
     this.input,
     this.instructions,
-    this.subAgents,
+    this.agents,
   });
 
   final INPUT? input;
   final List<InstructionDto>? instructions;
-  final List<SubAgentDto>? subAgents;
+  final List<AgentDto>? agents;
   final OUTPUT? output;
   final WorkflowDto workflow;
 
@@ -53,5 +49,5 @@ class ActivityDto<INPUT extends HasToJson, OUTPUT extends HasToJson>
 
   @override
   String toString() =>
-      'ActivityDto{input: $input, instructions: $instructions, subAgents: $subAgents, output: $output, workflow: $workflow}';
+      'ActivityDto{input: $input, instructions: $instructions, agents: $agents, output: $output, workflow: $workflow}';
 }

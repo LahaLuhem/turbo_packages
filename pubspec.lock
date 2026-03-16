@@ -113,30 +113,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.0"
-  build_resolvers:
-    dependency: transitive
-    description:
-      name: build_resolvers
-      sha256: "065445f16bde0abf5dab8ff20dcc6773125fe387a128cb175f77df756910b452"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.4"
   build_runner:
     dependency: transitive
     description:
       name: build_runner
-      sha256: b1c7d812e9dd647d8dec0dc1041ec549f7bc2270d60cd1f8ec13f206c10227f8
+      sha256: "39ad4ca8a2876779737c60e4228b4bcd35d4352ef7e14e47514093edc012c734"
       url: "https://pub.dev"
     source: hosted
-    version: "2.7.2"
-  build_runner_core:
-    dependency: transitive
-    description:
-      name: build_runner_core
-      sha256: "59dc22b9724207519e6c8790fa706d7517dd8cff2d0d55da439c5ce7285200c9"
-      url: "https://pub.dev"
-    source: hosted
-    version: "9.3.2"
+    version: "2.11.1"
   built_collection:
     dependency: transitive
     description:
@@ -1601,14 +1585,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.0"
-  timing:
-    dependency: transitive
-    description:
-      name: timing
-      sha256: c386d07d7f5efc613479a7c4d9d64b03710b03cfaa7e8ad5f2bfb295a1f0dfad
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.0"
   top_snackbar_flutter:
     dependency: transitive
     description:
