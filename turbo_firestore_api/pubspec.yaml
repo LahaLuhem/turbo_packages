@@ -17,7 +17,11 @@ dependencies:
   rxdart: ^0.28.0
   turbolytics: ^1.1.0
   turbo_response: ^1.1.0
-  turbo_serializable: ^0.3.0
+  turbo_serializable:
+    git:
+      url: https://github.com/LahaLuhem/turbo_packages.git
+      path: turbo_serializable
+      ref: "main"
   turbo_notifiers: ^1.1.0
 
 dev_dependencies:
