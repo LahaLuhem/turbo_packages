@@ -35,6 +35,8 @@ import 'package:turbo_response/turbo_response.dart';
 /// }
 /// ```
 abstract class TWriteable {
+  const TWriteable();
+
   /// Validates the object's data before writing to Firestore.
   ///
   /// Returns a [TurboResponse] with error details if the validation fails,

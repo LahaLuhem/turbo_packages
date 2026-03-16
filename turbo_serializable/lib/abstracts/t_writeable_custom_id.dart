@@ -55,6 +55,8 @@ import 'package:turbo_serializable/abstracts/t_writeable.dart';
 /// }
 /// ```
 abstract class TWriteableCustomId<T> extends TWriteable {
+  const TWriteableCustomId();
+
   /// The unique identifier for this document.
   ///
   /// This getter must be implemented by subclasses to provide the document's

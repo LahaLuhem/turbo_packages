@@ -23,6 +23,8 @@ import 'package:turbo_serializable/abstracts/t_writeable.dart';
 /// }
 /// ```
 abstract class TWriteableId extends TWriteable {
+  const TWriteableId();
+
   /// The unique string identifier for this object.
   ///
   /// This getter must be implemented by subclasses to provide the object's
