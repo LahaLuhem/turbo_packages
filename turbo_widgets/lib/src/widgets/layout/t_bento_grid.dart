@@ -190,7 +190,7 @@ class TBentoGrid extends StatefulWidget {
   final double? maxWidth;
 
   final double baseHeight;
-  final int multiplierThreshold;
+  final double multiplierThreshold;
   final double calculatedMinHeight;
   final double? calculatedMaxHeight;
 

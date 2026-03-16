@@ -17,7 +17,7 @@ class TCalculatedHeight extends StatelessWidget {
 
   final int count;
   final double baseHeight;
-  final int multiplierThreshold;
+  final double multiplierThreshold;
   final double? minHeight;
   final double? maxHeight;
   final Widget child;

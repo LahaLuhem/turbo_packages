@@ -1,7 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="TRBO:TT - Run Emulators" type="FlutterRunConfigurationType" factoryName="Flutter">
-    <option name="additionalArgs" value="--dart-define=env=emulators --dart-define=ip=192.168.178.111 --dart-define=AUTH_PORT=9210 --dart-define=FIRESTORE_PORT=9211 --dart-define=FUNCTIONS_PORT=9212 --dart-define=STORAGE_PORT=9213 --flavor prod" />
-    <option name="filePath" value="$PROJECT_DIR$/flutter-app/lib/main.dart" />
-    <method v="2" />
-  </configuration>
-</component>

@@ -1,9 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="TRBO - Melos Test" type="ShConfigurationType" factoryName="Shell Script">
-    <option name="scriptPath" value="$PROJECT_DIR$/.run/scripts/melos_test.sh" />
-    <option name="interpreterPath" value="/bin/bash" />
-    <option name="interpreterOptions" value="" />
-    <option name="workingDirectory" value="$PROJECT_DIR$" />
-    <method v="2" />
-  </configuration>
-</component>
