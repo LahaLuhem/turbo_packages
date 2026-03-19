@@ -12,9 +12,6 @@ pubspec.lock
 # Coverage
 coverage/
 
-# Generated
-*.g.dart
-*.freezed.dart
 
 # OS
 .DS_Store

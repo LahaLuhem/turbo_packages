@@ -1,6 +1,6 @@
 name: turbo_promptable
 description: Object-Oriented Prompting framework for defining AI agent prompts, roles, workflows, and tools as type-safe Dart objects.
-version: 0.0.1
+version: 0.0.2
 resolution: workspace
 repository: https://github.com/appboypov/turbo_packages/tree/main/turbo_promptable
 homepage: https://github.com/appboypov/turbo_packages
