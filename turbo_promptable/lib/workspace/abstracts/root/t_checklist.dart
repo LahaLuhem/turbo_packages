@@ -1,6 +1,8 @@
-
-import 'package:turbo_promptable/shared/abstracts/turbo_promptable.dart';
+import 'package:turbo_promptable/workspace/abstracts/meta/t_promptable.dart';
 
 abstract class TChecklist extends TPromptable {
-  TChecklist({super.metaData,});
+  TChecklist({
+    required super.name,
+    super.metaData,
+  });
 }

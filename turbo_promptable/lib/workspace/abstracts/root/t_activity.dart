@@ -1,4 +1,3 @@
-import 'package:turbo_promptable/shared/abstracts/turbo_promptable.dart';
 import 'package:turbo_promptable/workspace/abstracts/meta/t_promptable.dart';
 import 'package:turbo_promptable/workspace/abstracts/root/t_input.dart';
 import 'package:turbo_promptable/workspace/abstracts/root/t_output.dart';
@@ -15,12 +14,13 @@ abstract class TActivity<
 >
     extends TPromptable {
   TActivity({
-    super.metaData,
-    this.role,
-    this.persona,
+    required super.name,
     required this.input,
-    required this.workflow,
     required this.output,
+    required this.workflow,
+    super.metaData,
+    this.persona,
+    this.role,
   });
 
   final ROLE? role;

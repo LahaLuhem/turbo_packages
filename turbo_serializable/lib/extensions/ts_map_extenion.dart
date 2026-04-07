@@ -41,6 +41,66 @@ extension TSMapExtenionExtension on Map {
     return buffer.toString();
   }
 
+  String toMd({KeyBuilderDef? keyBuilder, int headingLevel = 1}) {
+    keyBuilder ??= (key) => key;
+    final buffer = StringBuffer();
+    final headingPrefix = '#' * headingLevel;
+    for (final entry in entries) {
+      final key = keyBuilder(entry.key.toString());
+      final value = entry.value;
+      if (value is Map) {
+        final title = _mdTitle(key, value);
+        buffer.writeln('$headingPrefix $title');
+        buffer.writeln();
+        final remaining = Map.of(value)
+          ..remove('name')
+          ..remove('emoji');
+        if (remaining.isNotEmpty) {
+          buffer.write(
+            remaining.toMd(
+              keyBuilder: keyBuilder,
+              headingLevel: headingLevel + 1,
+            ),
+          );
+        }
+      } else if (value is List) {
+        buffer.writeln('$headingPrefix ${key.toTitleCase()}');
+        buffer.writeln();
+        for (final item in value) {
+          if (item is Map) {
+            buffer.write(
+              item.toMd(
+                keyBuilder: keyBuilder,
+                headingLevel: headingLevel + 1,
+              ),
+            );
+          } else {
+            buffer.writeln('- $item');
+          }
+        }
+        buffer.writeln();
+      } else if (value == null) {
+        buffer.writeln('$headingPrefix ${key.toTitleCase()}');
+        buffer.writeln();
+      } else {
+        buffer.writeln('$headingPrefix ${key.toTitleCase()}');
+        buffer.writeln();
+        buffer.writeln(value);
+        buffer.writeln();
+      }
+    }
+    return buffer.toString();
+  }
+
+  String _mdTitle(String fallback, Map map) {
+    final name = map['name'];
+    final emoji = map['emoji'];
+    final title =
+        name != null ? name.toString().toTitleCase() : fallback.toTitleCase();
+    if (emoji != null) return '$emoji $title';
+    return title;
+  }
+
   String toXml({KeyBuilderDef? keyBuilder, int indent = 0}) {
     keyBuilder ??= (key) => key.toPascalCase();
     final buffer = StringBuffer();
