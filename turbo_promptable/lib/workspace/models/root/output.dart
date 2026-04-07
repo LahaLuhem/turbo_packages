@@ -1,8 +1,12 @@
-import 'package:turbo_promptable/workspace/abstracts/checklists/acceptance_criteria.dart';
-import 'package:turbo_promptable/workspace/abstracts/meta/t_promptable.dart';
-import 'package:turbo_promptable/workspace/abstracts/root/template.dart';
+import 'package:json_annotation/json_annotation.dart';
+import 'package:turbo_promptable/workspace/models/meta/t_promptable.dart';
+import 'package:turbo_promptable/workspace/models/root/checklist.dart';
+import 'package:turbo_promptable/workspace/models/root/template.dart';
 
- class Output extends TPromptable {
+part 'output.g.dart';
+
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
+class Output extends TPromptable {
   Output({
     required super.name,
     super.metaData,
@@ -11,5 +15,9 @@ import 'package:turbo_promptable/workspace/abstracts/root/template.dart';
   });
 
   final Template? template;
-  final AcceptanceCriteria? acceptanceCriteria;
+  final Checklist? acceptanceCriteria;
+
+  factory Output.fromJson(Map<String, dynamic> json) => _$OutputFromJson(json);
+  @override
+  Map<String, dynamic> toJson() => _$OutputToJson(this);
 }

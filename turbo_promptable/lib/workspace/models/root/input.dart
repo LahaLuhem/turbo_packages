@@ -1,9 +1,14 @@
-import 'package:turbo_promptable/workspace/abstracts/root/context.dart';
-import 'package:turbo_promptable/workspace/abstracts/root/goal.dart';
-import 'package:turbo_promptable/workspace/abstracts/root/issue.dart';
-import 'package:turbo_promptable/workspace/abstracts/root/spec.dart';
+import 'package:json_annotation/json_annotation.dart';
+import 'package:turbo_promptable/workspace/models/meta/t_promptable.dart';
+import 'package:turbo_promptable/workspace/models/root/context.dart';
+import 'package:turbo_promptable/workspace/models/root/goal.dart';
+import 'package:turbo_promptable/workspace/models/root/issue.dart';
+import 'package:turbo_promptable/workspace/models/root/spec.dart';
 
- class Input extends TPromptable {
+part 'input.g.dart';
+
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
+class Input extends TPromptable {
   Input({
     required super.name,
     super.metaData,
@@ -20,4 +25,8 @@ import 'package:turbo_promptable/workspace/abstracts/root/spec.dart';
   final List<Issue>? issues;
   final List<Spec>? specs;
   final String request;
+
+  factory Input.fromJson(Map<String, dynamic> json) => _$InputFromJson(json);
+  @override
+  Map<String, dynamic> toJson() => _$InputToJson(this);
 }

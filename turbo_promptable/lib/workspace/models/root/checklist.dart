@@ -1,8 +1,12 @@
-import 'package:turbo_promptable/workspace/abstracts/meta/t_promptable.dart';
+import 'package:json_annotation/json_annotation.dart';
+import 'package:turbo_promptable/workspace/models/meta/t_promptable.dart';
 
-export 'package:turbo_promptable/workspace/abstracts/meta/t_promptable.dart';
+export 'package:turbo_promptable/workspace/models/meta/t_promptable.dart';
 
- class Checklist extends TPromptable {
+part 'checklist.g.dart';
+
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
+class Checklist extends TPromptable {
   Checklist({
     required super.name,
     super.config,
@@ -11,4 +15,9 @@ export 'package:turbo_promptable/workspace/abstracts/meta/t_promptable.dart';
   });
 
   final List<String> items;
+
+  factory Checklist.fromJson(Map<String, dynamic> json) =>
+      _$ChecklistFromJson(json);
+  @override
+  Map<String, dynamic> toJson() => _$ChecklistToJson(this);
 }

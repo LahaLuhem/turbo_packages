@@ -1,5 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:turbo_promptable/workspace/abstracts/root/role.dart';
+import 'package:turbo_promptable/workspace/models/root/role.dart';
 
 part 'persona.g.dart';
 
@@ -24,9 +24,11 @@ class Persona extends Role {
 
   final String identity;
 
-  static const fromJsonFactory = _$PersonaFromJson;
+  static final Persona Function(Map<String, dynamic> json) fromJsonFactory =
+      _$PersonaFromJson;
   factory Persona.fromJson(Map<String, dynamic> json) => _$PersonaFromJson(json);
-  static const toJsonFactory = _$PersonaToJson;
+  static final Map<String, dynamic> Function(Persona value) toJsonFactory =
+      _$PersonaToJson;
   @override
   Map<String, dynamic> toJson() => _$PersonaToJson(this);
 }

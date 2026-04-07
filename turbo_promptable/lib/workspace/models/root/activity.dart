@@ -1,9 +1,13 @@
-import 'package:turbo_promptable/workspace/abstracts/meta/t_promptable.dart';
-import 'package:turbo_promptable/workspace/abstracts/root/input.dart';
-import 'package:turbo_promptable/workspace/abstracts/root/output.dart';
-import 'package:turbo_promptable/workspace/abstracts/root/workflow.dart';
+import 'package:json_annotation/json_annotation.dart';
+import 'package:turbo_promptable/workspace/models/meta/t_promptable.dart';
+import 'package:turbo_promptable/workspace/models/root/input.dart';
+import 'package:turbo_promptable/workspace/models/root/output.dart';
+import 'package:turbo_promptable/workspace/models/root/workflow.dart';
 
- class Activity extends TPromptable {
+part 'activity.g.dart';
+
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
+class Activity extends TPromptable {
   Activity({
     required super.name,
     required this.input,
@@ -16,4 +20,9 @@ import 'package:turbo_promptable/workspace/abstracts/root/workflow.dart';
   final Input input;
   final Workflow workflow;
   final Output output;
+
+  factory Activity.fromJson(Map<String, dynamic> json) =>
+      _$ActivityFromJson(json);
+  @override
+  Map<String, dynamic> toJson() => _$ActivityToJson(this);
 }

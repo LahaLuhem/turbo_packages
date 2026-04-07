@@ -1,5 +1,13 @@
-import 'package:turbo_promptable/workspace/abstracts/root/context.dart';
+import 'package:json_annotation/json_annotation.dart';
+import 'package:turbo_promptable/workspace/models/root/context.dart';
 
+part 'collection.g.dart';
+
+@JsonSerializable(
+  includeIfNull: false,
+  explicitToJson: true,
+  genericArgumentFactories: true,
+)
 abstract class Collection<T extends Object> extends Context {
   Collection({
     required super.name,

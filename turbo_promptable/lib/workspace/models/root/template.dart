@@ -1,9 +1,18 @@
-import 'package:turbo_promptable/workspace/abstracts/meta/t_promptable.dart';
+import 'package:json_annotation/json_annotation.dart';
+import 'package:turbo_promptable/workspace/models/meta/t_promptable.dart';
 
- class Template extends TPromptable {
+part 'template.g.dart';
+
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
+class Template extends TPromptable {
   Template({
     required super.name,
     super.metaData,
     super.config,
   });
+
+  factory Template.fromJson(Map<String, dynamic> json) =>
+      _$TemplateFromJson(json);
+  @override
+  Map<String, dynamic> toJson() => _$TemplateToJson(this);
 }

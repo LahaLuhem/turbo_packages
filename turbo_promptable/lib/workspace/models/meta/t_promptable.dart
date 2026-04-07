@@ -1,14 +1,14 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:turbo_promptable/core/constants/tp_keys.dart';
-import 'package:turbo_promptable/workspace/abstracts/meta/t_meta_data.dart';
-import 'package:turbo_promptable/workspace/models/t_config.dart';
+import 'package:turbo_promptable/core/models/t_config.dart';
+import 'package:turbo_promptable/workspace/models/meta/t_meta_data.dart';
 import 'package:turbo_serializable/extensions/ts_map_extenion.dart';
 import 'package:turbo_serializable/extensions/ts_string_extension.dart';
 import 'package:turbo_serializable/markdown/factories/t_md_factory.dart';
 import 'package:turbo_serializable/turbo_serializable.dart';
 
+export 'package:turbo_promptable/core/models/t_render_type.dart';
 export 'package:turbo_promptable/workspace/enums/t_body_type.dart';
-export 'package:turbo_promptable/workspace/models/t_render_type.dart';
 
 @JsonSerializable(
   explicitToJson: true,

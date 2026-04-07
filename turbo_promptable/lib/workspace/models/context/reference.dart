@@ -1,4 +1,4 @@
-import 'package:turbo_promptable/workspace/abstracts/root/context.dart';
+import 'package:turbo_promptable/workspace/models/meta/t_promptable.dart';
 
 abstract class Reference extends TPromptable {
   Reference({

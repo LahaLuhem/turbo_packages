@@ -1,5 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:turbo_promptable/workspace/abstracts/root/persona.dart';
+import 'package:turbo_promptable/workspace/models/root/persona.dart';
 
 part 'agent.g.dart';
 
@@ -19,9 +19,11 @@ class Agent extends Persona {
     super.workflows,
   });
 
-  static const fromJsonFactory = _$AgentFromJson;
+  static final Agent Function(Map<String, dynamic> json) fromJsonFactory =
+      _$AgentFromJson;
   factory Agent.fromJson(Map<String, dynamic> json) => _$AgentFromJson(json);
-  static const toJsonFactory = _$AgentToJson;
+  static final Map<String, dynamic> Function(Agent value) toJsonFactory =
+      _$AgentToJson;
   @override
   Map<String, dynamic> toJson() => _$AgentToJson(this);
 }

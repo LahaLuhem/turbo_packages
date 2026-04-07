@@ -1,16 +1,16 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:turbo_promptable/workspace/abstracts/root/activity.dart';
-import 'package:turbo_promptable/workspace/abstracts/root/checklist.dart';
-import 'package:turbo_promptable/workspace/abstracts/root/instruction.dart';
-import 'package:turbo_promptable/workspace/abstracts/root/template.dart';
-import 'package:turbo_promptable/workspace/abstracts/root/tool.dart';
-import 'package:turbo_promptable/workspace/abstracts/root/workflow.dart';
+import 'package:turbo_promptable/workspace/models/meta/t_promptable.dart';
+import 'package:turbo_promptable/workspace/models/root/activity.dart';
+import 'package:turbo_promptable/workspace/models/root/checklist.dart';
+import 'package:turbo_promptable/workspace/models/root/instruction.dart';
+import 'package:turbo_promptable/workspace/models/root/template.dart';
+import 'package:turbo_promptable/workspace/models/root/tool.dart';
+import 'package:turbo_promptable/workspace/models/root/workflow.dart';
 
-part 't_role.g.dart';
+part 'role.g.dart';
 
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
-class Role
-    extends TPromptable {
+class Role extends TPromptable {
   Role({
     required super.name,
     super.metaData,
@@ -32,9 +32,11 @@ class Role
   final List<Workflow>? workflows;
   final String expertise;
 
-  static const fromJsonFactory = _$RoleFromJson;
+  static final Role Function(Map<String, dynamic> json) fromJsonFactory =
+      _$RoleFromJson;
   factory Role.fromJson(Map<String, dynamic> json) => _$RoleFromJson(json);
-  static const toJsonFactory = _$RoleToJson;
+  static final Map<String, dynamic> Function(Role value) toJsonFactory =
+      _$RoleToJson;
   @override
   Map<String, dynamic> toJson() => _$RoleToJson(this);
 }

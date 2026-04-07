@@ -1,6 +1,15 @@
-import 'package:turbo_promptable/workspace/abstracts/root/memory.dart';
+import 'package:json_annotation/json_annotation.dart';
+import 'package:turbo_promptable/workspace/models/root/memory.dart';
 
-abstract class Progress extends TMemory {
+part 'progress.g.dart';
+
+@JsonSerializable(
+  includeIfNull: false,
+  explicitToJson: true,
+  createFactory: false,
+  createToJson: false,
+)
+abstract class Progress extends Memory {
   Progress({
     required super.name,
     super.metaData,

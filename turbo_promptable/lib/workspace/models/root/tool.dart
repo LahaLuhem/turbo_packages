@@ -1,11 +1,19 @@
-import 'package:turbo_promptable/workspace/abstracts/meta/t_promptable.dart';
+import 'package:json_annotation/json_annotation.dart';
+import 'package:turbo_promptable/workspace/models/meta/t_promptable.dart';
 
-export 'package:turbo_promptable/workspace/abstracts/meta/t_promptable.dart';
+export 'package:turbo_promptable/workspace/models/meta/t_promptable.dart';
 
- class Tool extends TPromptable {
+part 'tool.g.dart';
+
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
+class Tool extends TPromptable {
   Tool({
     required super.name,
     super.metaData,
     super.config,
   });
+
+  factory Tool.fromJson(Map<String, dynamic> json) => _$ToolFromJson(json);
+  @override
+  Map<String, dynamic> toJson() => _$ToolToJson(this);
 }
