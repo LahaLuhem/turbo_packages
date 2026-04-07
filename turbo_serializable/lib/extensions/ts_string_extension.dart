@@ -35,6 +35,14 @@ extension TSStringExtension on String {
   /// ```
   String toSnakeCase() => _words.map((w) => w.toLowerCase()).join('_');
 
+  /// Converts to `kebab-case`.
+  ///
+  /// ```dart
+  /// 'HelloWorld'.toKebabCase(); // 'hello-world'
+  /// 'someHTTPResponse'.toKebabCase(); // 'some-http-response'
+  /// ```
+  String toKebabCase() => _words.map((w) => w.toLowerCase()).join('-');
+
   /// Converts to `camelCase`.
   ///
   /// ```dart

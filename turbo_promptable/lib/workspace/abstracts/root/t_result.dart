@@ -1,7 +1,7 @@
-import 'package:turbo_promptable/workspace/abstracts/root/t_context.dart';
+import 'package:turbo_promptable/workspace/abstracts/meta/t_promptable.dart';
 
-abstract class TStakeholder extends TContext {
-  TStakeholder({
+abstract class TResult extends TPromptable {
+  TResult({
     required super.name,
     super.renderType = TRenderType.embed,
     super.bodyType = TBodyType.md,

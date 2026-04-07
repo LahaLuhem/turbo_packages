@@ -1,9 +1,15 @@
-import 'package:turbo_serializable/extensions/ts_string_extenion.dart';
+import 'package:turbo_serializable/extensions/ts_string_extension.dart';
 import 'package:turbo_serializable/typedefs/key_builder_def.dart';
 
 extension TSMapExtenionExtension on Map {
-
-  String toYaml({KeyBuilderDef? keyBuilder, int indent = 0}) {
+  String toYaml({
+    KeyBuilderDef? keyBuilder,
+    int indent = 0,
+    bool includeMetaData = true,
+  }) {
+    if (!includeMetaData) {
+      remove('metaData');
+    }
     keyBuilder ??= (key) => key.toSnakeCase();
     final buffer = StringBuffer();
     final prefix = '  ' * indent;
@@ -41,14 +47,31 @@ extension TSMapExtenionExtension on Map {
     return buffer.toString();
   }
 
-  String toMd({KeyBuilderDef? keyBuilder, int headingLevel = 1}) {
+  String toMd({
+    KeyBuilderDef? keyBuilder,
+    int headingLevel = 1,
+    bool includeMetaData = true,
+  }) {
     keyBuilder ??= (key) => key;
     final buffer = StringBuffer();
+    if (includeMetaData && headingLevel == 1) {
+      final metaData = this['metaData'];
+      if (metaData is Map && metaData.isNotEmpty) {
+        buffer.writeln('---');
+        buffer.write(metaData.toYaml());
+        buffer.writeln('---');
+        buffer.writeln();
+      }
+    } else {
+      remove('metaData');
+    }
     final headingPrefix = '#' * headingLevel;
     for (final entry in entries) {
       final key = keyBuilder(entry.key.toString());
       final value = entry.value;
-      if (value is Map) {
+      if (entry.key == 'metaData' && headingLevel == 1) {
+        continue;
+      } else if (value is Map) {
         final title = _mdTitle(key, value);
         buffer.writeln('$headingPrefix $title');
         buffer.writeln();
@@ -95,13 +118,19 @@ extension TSMapExtenionExtension on Map {
   String _mdTitle(String fallback, Map map) {
     final name = map['name'];
     final emoji = map['emoji'];
-    final title =
-        name != null ? name.toString().toTitleCase() : fallback.toTitleCase();
+    final title = name != null ? name.toString().toTitleCase() : fallback.toTitleCase();
     if (emoji != null) return '$emoji $title';
     return title;
   }
 
-  String toXml({KeyBuilderDef? keyBuilder, int indent = 0}) {
+  String toXml({
+    KeyBuilderDef? keyBuilder,
+    int indent = 0,
+    bool includeMetaData = true,
+  }) {
+    if (!includeMetaData) {
+      remove('metaData');
+    }
     keyBuilder ??= (key) => key.toPascalCase();
     final buffer = StringBuffer();
     final prefix = '  ' * indent;

@@ -1,0 +1,4 @@
+enum TRenderType {
+  file,
+  embed,
+}

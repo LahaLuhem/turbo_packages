@@ -45,7 +45,7 @@ class TMdFactory<T extends TWriteable> {
   TMdFile build({
     TMdFileBuilder? mdBuilder,
   }) =>
-      (mdBuilder ?? this.mdFileBuilder)?.call(
+      (mdBuilder ?? mdFileBuilder)?.call(
         writeable,
         buildFrontmatter(),
         buildSections(),

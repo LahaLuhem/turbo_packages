@@ -1,0 +1,4 @@
+enum TEmbedType {
+  body,
+  reference,
+}

@@ -19,45 +19,58 @@ abstract class TSerializable extends TWriteable {
   /// Converts this object to a YAML string.
   ///
   /// Uses [yamlBuilder] to serialize the result of [toJson()].
-  /// Throws an [UnimplementedError] if [yamlBuilder] is not provided.
-  String toYaml() => yamlBuilder?.call(this) ?? ((writeable) => toJson().toYaml())(this);
+  String toYaml({
+    bool includeMetaData = true,
+  }) =>
+      yamlBuilder?.call(this, true) ??
+      ((writeable) => toJson().toYaml(
+        includeMetaData: includeMetaData,
+      ))(this);
 
   /// Returns a function that builds a YAML string from a JSON map.
   ///
   /// Subclasses should override this getter to supply their YAML builder, or
   /// set it externally, if applicable. If not provided, [toYaml()] will throw.
   @JsonKey(includeFromJson: false, includeToJson: false)
-  final String Function(TWriteable writeable)? yamlBuilder;
+  final String Function(TWriteable writeable, bool includeMetaData)? yamlBuilder;
 
   /// Converts this object to a Markdown string.
   ///
   /// Uses [mdFactory] to serialize the result of [toJson()].
-  /// Throws an [UnimplementedError] if [mdFactory] is not provided.
-  String toMarkdown({
+  String toMd({
     TMdFactory? mdFactory,
+    bool includeMetaData = true,
   }) {
     final pMdFactory = mdFactory ?? this.mdFactory;
-    if (pMdFactory == null) return '';
-    return pMdFactory.build();
+    if (pMdFactory == null)
+      return toJson().toMd(
+        includeMetaData: includeMetaData,
+      );
+    return includeMetaData ? pMdFactory.build() : pMdFactory.buildBody();
   }
 
   /// Returns a function that builds a Markdown string from a JSON map.
   ///
   /// Subclasses should override this getter to supply their Markdown builder, or
-  /// set it externally, if applicable. If not provided, [toMarkdown()] will throw.
+  /// set it externally, if applicable.
   @JsonKey(includeFromJson: false, includeToJson: false)
   final TMdFactory? mdFactory;
 
   /// Converts this object to an XML string.
   ///
   /// Uses [xmlBuilder] to serialize the result of [toJson()].
-  /// Throws an [UnimplementedError] if [xmlBuilder] is not provided.
-  String toXml() => xmlBuilder?.call(this) ?? ((writeable) => toJson().toXml())(this);
+  String toXml({
+    bool includeMetaData = true,
+  }) =>
+      xmlBuilder?.call(this, includeMetaData) ??
+      ((writeable) => toJson().toXml(
+        includeMetaData: includeMetaData,
+      ))(this);
 
   /// Returns a function that builds an XML string from a JSON map.
   ///
   /// Subclasses should override this getter to supply their XML builder, or
   /// set it externally, if applicable. If not provided, [toXml()] will throw.
   @JsonKey(includeFromJson: false, includeToJson: false)
-  final String Function(TWriteable writeable)? xmlBuilder;
+  final String Function(TWriteable writeable, bool includeMeta)? xmlBuilder;
 }
