@@ -1,4 +1,4 @@
-import 'package:turbo_promptable/core/extensions/t_collection_extension.dart';
+import 'package:turbo_promptable/core/extensions/t_collection_extensions.dart';
 import 'package:turbo_promptable/workspace/abstracts/meta/t_tag.dart';
 
 typedef TFrontMatter = TMetaData;

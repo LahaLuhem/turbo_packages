@@ -1,14 +1,14 @@
-extension TStringExtension on String {
+extension TSStringExtension on String {
   List<String> get _words {
     if (isEmpty) return [];
     return replaceAllMapped(
       RegExp(r'([a-z\d])([A-Z])'),
-      (match) => '${match[1]} ${match[2]}',
+          (match) => '${match[1]} ${match[2]}',
     )
         .replaceAllMapped(
-          RegExp(r'([A-Z]+)([A-Z][a-z])'),
+      RegExp(r'([A-Z]+)([A-Z][a-z])'),
           (match) => '${match[1]} ${match[2]}',
-        )
+    )
         .replaceAll(RegExp(r'[_\-]+'), ' ')
         .trim()
         .split(RegExp(r'\s+'))

@@ -1,10 +1,9 @@
 import 'dart:convert';
 
-import 'package:turbo_promptable/core/extensions/t_collection_extensions.dart';
-import 'package:turbo_promptable/core/extensions/t_string_extensions.dart';
 import 'package:turbo_promptable/core/typedefs/body_builder.dart';
 import 'package:turbo_promptable/workspace/abstracts/meta/t_meta_data.dart';
 import 'package:turbo_promptable/workspace/enums/t_body_type.dart';
+import 'package:turbo_serializable/extensions/ts_string_extenion.dart';
 import 'package:turbo_serializable/markdown/factories/t_md_factory.dart';
 import 'package:turbo_serializable/turbo_serializable.dart';
 
@@ -67,13 +66,4 @@ abstract class TPromptable extends TSerializable {
         '$frontmatter\n\n'
         '$body',
   );
-
-  @override
-  String Function(TWriteable writeable) get yamlBuilder =>
-      (writeable) => toJson().toYaml();
-
-  @override
-  // TODO: implement xmlBuilder
-  String Function(TWriteable writeable)? get xmlBuilder =>
-      (writeable) => toJson().toXml();
 }

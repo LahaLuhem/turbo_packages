@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:turbo_serializable/abstracts/t_writeable.dart';
+import 'package:turbo_serializable/extensions/ts_map_extenion.dart';
 import 'package:turbo_serializable/markdown/factories/t_md_factory.dart';
 
 /// Abstract base class providing serialization to multiple data formats.
@@ -19,10 +20,7 @@ abstract class TSerializable extends TWriteable {
   ///
   /// Uses [yamlBuilder] to serialize the result of [toJson()].
   /// Throws an [UnimplementedError] if [yamlBuilder] is not provided.
-  String toYaml() {
-    if (yamlBuilder == null) throw UnimplementedError();
-    return yamlBuilder!(this);
-  }
+  String toYaml() => yamlBuilder?.call(this) ?? ((writeable) => toJson().toYaml())(this);
 
   /// Returns a function that builds a YAML string from a JSON map.
   ///
@@ -54,10 +52,7 @@ abstract class TSerializable extends TWriteable {
   ///
   /// Uses [xmlBuilder] to serialize the result of [toJson()].
   /// Throws an [UnimplementedError] if [xmlBuilder] is not provided.
-  String toXml() {
-    if (xmlBuilder == null) throw UnimplementedError();
-    return xmlBuilder!(this);
-  }
+  String toXml() => xmlBuilder?.call(this) ?? ((writeable) => toJson().toXml())(this);
 
   /// Returns a function that builds an XML string from a JSON map.
   ///
