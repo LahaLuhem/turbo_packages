@@ -11,7 +11,11 @@ class Cli extends Tool {
     super.config,
   });
 
-  factory Cli.fromJson(Map<String, dynamic> json) => _$TCliFromJson(json);
+  static final Cli Function(Map<String, dynamic> json) fromJsonFactory =
+      _$CliFromJson;
+  factory Cli.fromJson(Map<String, dynamic> json) => _$CliFromJson(json);
+  static final Map<String, dynamic> Function(Cli value) toJsonFactory =
+      _$CliToJson;
   @override
-  Map<String, dynamic> toJson() => _$TCliToJson(this);
+  Map<String, dynamic> toJson() => _$CliToJson(this);
 }

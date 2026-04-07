@@ -11,7 +11,11 @@ class Script extends Tool {
     super.config,
   });
 
-  factory Script.fromJson(Map<String, dynamic> json) => _$TScriptFromJson(json);
+  static final Script Function(Map<String, dynamic> json) fromJsonFactory =
+      _$ScriptFromJson;
+  factory Script.fromJson(Map<String, dynamic> json) => _$ScriptFromJson(json);
+  static final Map<String, dynamic> Function(Script value) toJsonFactory =
+      _$ScriptToJson;
   @override
-  Map<String, dynamic> toJson() => _$TScriptToJson(this);
+  Map<String, dynamic> toJson() => _$ScriptToJson(this);
 }

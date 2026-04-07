@@ -1,13 +1,7 @@
-import 'package:json_annotation/json_annotation.dart';
 import 'package:turbo_promptable/workspace/models/root/context.dart';
+import 'package:turbo_serializable/turbo_serializable.dart';
 
-part 'collection.g.dart';
-
-@JsonSerializable(
-  includeIfNull: false,
-  explicitToJson: true,
-  genericArgumentFactories: true,
-)
+/// [T] is typically a [TWriteable]; items are encoded with [TWriteable.toJson].
 abstract class Collection<T extends Object> extends Context {
   Collection({
     required super.name,
@@ -17,4 +11,18 @@ abstract class Collection<T extends Object> extends Context {
   });
 
   final List<T> items;
+
+  @override
+  Map<String, dynamic> toJson() {
+    final map = super.toJson();
+    map['items'] = items.map(_encodeItem).toList();
+    return map;
+  }
+
+  Object? _encodeItem(T item) {
+    if (item is TWriteable) {
+      return item.toJson();
+    }
+    return item;
+  }
 }
