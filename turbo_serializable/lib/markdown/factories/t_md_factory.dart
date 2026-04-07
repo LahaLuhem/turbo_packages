@@ -4,17 +4,17 @@ import 'package:turbo_serializable/markdown/typedefs/t_markdown_typedefs.dart';
 class TMdFactory<T extends TWriteable> {
   final T writeable;
 
-  final TMdFrontmatterBuilder? mdFrontmatterBuilder;
-  final TMdSectionsBuilder? mdSectionsBuilder;
-  final TMdBodyBuilder? mdBodyBuilder;
-  final TMdFileBuilder? mdBuilder;
+  final TMdFrontmatterBuilder<T>? mdFrontmatterBuilder;
+  final TMdSectionsBuilder<T>? mdSectionsBuilder;
+  final TMdBodyBuilder<T>? mdBodyBuilder;
+  final TMdFileBuilder<T>? mdFileBuilder;
 
   TMdFactory({
     required this.writeable,
     this.mdFrontmatterBuilder,
     this.mdSectionsBuilder,
     this.mdBodyBuilder,
-    this.mdBuilder,
+    this.mdFileBuilder,
   });
 
   TMdFrontmatter buildFrontmatter({
@@ -45,7 +45,7 @@ class TMdFactory<T extends TWriteable> {
   TMdFile build({
     TMdFileBuilder? mdBuilder,
   }) =>
-      (mdBuilder ?? this.mdBuilder)?.call(
+      (mdBuilder ?? this.mdFileBuilder)?.call(
         writeable,
         buildFrontmatter(),
         buildSections(),

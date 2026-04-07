@@ -1,5 +1,7 @@
 import 'package:turbo_promptable/shared/abstracts/turbo_promptable.dart';
 
-abstract class TInstruction extends TurboPromptable {
-  TInstruction({super.metaData,});
+abstract class TInstruction extends TPromptable {
+  TInstruction({
+    super.metaData,
+  });
 }
