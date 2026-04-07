@@ -10,6 +10,7 @@ class RoleDto extends TurboPromptable {
   RoleDto({
     required this.expertise,
     this.persona,
+    super.metaData,
   });
 
   final PersonaDto? persona;

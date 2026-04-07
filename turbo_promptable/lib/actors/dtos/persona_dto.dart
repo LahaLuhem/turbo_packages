@@ -13,6 +13,7 @@ class PersonaDto extends TurboPromptable {
     this.preferences,
     this.resume,
     this.values,
+    super.metaData,
   });
 
   final List<String>? achievements;

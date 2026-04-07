@@ -7,14 +7,17 @@ part 'person_dto.g.dart';
 
 @JsonSerializable(includeIfNull: true, explicitToJson: true)
 class PersonDto extends TurboPromptable {
-  PersonDto({this.role, this.persona});
+  PersonDto({
+    this.role,
+    this.persona,
+    super.metaData,
+  });
 
   final RoleDto? role;
   final PersonaDto? persona;
 
   static const fromJsonFactory = _$PersonDtoFromJson;
-  factory PersonDto.fromJson(Map<String, dynamic> json) =>
-      _$PersonDtoFromJson(json);
+  factory PersonDto.fromJson(Map<String, dynamic> json) => _$PersonDtoFromJson(json);
   static const toJsonFactory = _$PersonDtoToJson;
   @override
   Map<String, dynamic> toJson() => _$PersonDtoToJson(this);

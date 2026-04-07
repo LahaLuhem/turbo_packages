@@ -10,6 +10,7 @@ class TeamDto extends TurboPromptable {
   TeamDto({
     this.areas,
     this.roles,
+    super.metaData,
   });
 
   final List<AreaDto>? areas;

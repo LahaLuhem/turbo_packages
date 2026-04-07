@@ -15,6 +15,7 @@ FolderDto _$FolderDtoFromJson(Map<String, dynamic> json) => FolderDto(
   isActive: json['isActive'] as bool,
   createdAt: const TimestampOrDateTimeConverter().fromJson(json['createdAt']),
   updatedAt: const TimestampOrDateTimeConverter().fromJson(json['updatedAt']),
+  lastSyncedFileCount: (json['lastSyncedFileCount'] as num?)?.toInt(),
 );
 
 Map<String, dynamic> _$FolderDtoToJson(FolderDto instance) => <String, dynamic>{
@@ -25,6 +26,7 @@ Map<String, dynamic> _$FolderDtoToJson(FolderDto instance) => <String, dynamic>{
   'isActive': instance.isActive,
   'createdAt': const TimestampOrDateTimeConverter().toJson(instance.createdAt),
   'updatedAt': const TimestampOrDateTimeConverter().toJson(instance.updatedAt),
+  'lastSyncedFileCount': instance.lastSyncedFileCount,
 };
 
 UpdateFolderDtoRequest _$UpdateFolderDtoRequestFromJson(
@@ -34,6 +36,7 @@ UpdateFolderDtoRequest _$UpdateFolderDtoRequestFromJson(
   emoji: json['emoji'] as String?,
   path: json['path'] as String?,
   isActive: json['isActive'] as bool?,
+  lastSyncedFileCount: (json['lastSyncedFileCount'] as num?)?.toInt(),
 );
 
 Map<String, dynamic> _$UpdateFolderDtoRequestToJson(
@@ -43,5 +46,6 @@ Map<String, dynamic> _$UpdateFolderDtoRequestToJson(
   'emoji': ?instance.emoji,
   'path': ?instance.path,
   'isActive': ?instance.isActive,
+  'lastSyncedFileCount': ?instance.lastSyncedFileCount,
   'updatedAt': ?const TimestampOrDateTimeConverter().toJson(instance.updatedAt),
 };

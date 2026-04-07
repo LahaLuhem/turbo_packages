@@ -5,7 +5,7 @@ part 'instruction_dto.g.dart';
 
 @JsonSerializable(includeIfNull: true, explicitToJson: true)
 class InstructionDto extends TurboPromptable {
-  InstructionDto();
+  InstructionDto({super.metaData});
 
   static const fromJsonFactory = _$InstructionDtoFromJson;
   factory InstructionDto.fromJson(Map<String, dynamic> json) =>

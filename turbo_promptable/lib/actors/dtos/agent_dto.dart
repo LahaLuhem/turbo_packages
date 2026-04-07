@@ -7,17 +7,17 @@ part 'agent_dto.g.dart';
 
 @JsonSerializable(includeIfNull: true, explicitToJson: true)
 class AgentDto extends TurboPromptable {
-  AgentDto({
+  const AgentDto({
     required this.role,
     this.persona,
+    super.metaData,
   });
 
   final RoleDto role;
   final PersonaDto? persona;
 
   static const fromJsonFactory = _$AgentDtoFromJson;
-  factory AgentDto.fromJson(Map<String, dynamic> json) =>
-      _$AgentDtoFromJson(json);
+  factory AgentDto.fromJson(Map<String, dynamic> json) => _$AgentDtoFromJson(json);
   static const toJsonFactory = _$AgentDtoToJson;
   @override
   Map<String, dynamic> toJson() => _$AgentDtoToJson(this);

@@ -8,6 +8,7 @@ part 'area_dto.g.dart';
 class AreaDto extends TurboPromptable {
   AreaDto({
     this.roles,
+    super.metaData,
   });
 
   final List<RoleDto>? roles;

@@ -2,7 +2,7 @@
 library turbo_promptable;
 
 export 'activities/dtos/activity_dto.dart';
-export 'activities/dtos/end_goal_dto.dart';
+export 'activities/dtos/goal_dto.dart';
 export 'activities/dtos/guard_rail_dto.dart';
 export 'activities/enums/workflow_step_type.dart';
 export 'actors/dtos/agent_dto.dart';
@@ -38,12 +38,3 @@ export 'skills/tools/dtos/api_dto.dart';
 export 'skills/tools/dtos/tool_dto.dart';
 export 'skills/workflows/dtos/workflow_dto.dart';
 export 'skills/workflows/dtos/workflow_step.dart';
-export 'sources/inputs/dtos/draft_dto.dart';
-export 'sources/inputs/dtos/idea_dto.dart';
-export 'sources/inputs/dtos/insight_dto.dart';
-export 'sources/inputs/dtos/issue_dto.dart';
-export 'sources/inputs/dtos/request_dto.dart';
-export 'sources/inputs/dtos/spec_dto.dart';
-export 'sources/inputs/dtos/task_dto.dart';
-export 'sources/outputs/dtos/response_format_dto.dart';
-export 'sources/outputs/dtos/template_dto.dart';

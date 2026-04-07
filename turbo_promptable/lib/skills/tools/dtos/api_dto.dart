@@ -5,7 +5,7 @@ part 'api_dto.g.dart';
 
 @JsonSerializable(includeIfNull: true, explicitToJson: true)
 class ApiDto extends TurboPromptable {
-  ApiDto();
+  ApiDto({super.metaData});
 
   static const fromJsonFactory = _$ApiDtoFromJson;
   factory ApiDto.fromJson(Map<String, dynamic> json) => _$ApiDtoFromJson(json);

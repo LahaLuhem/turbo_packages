@@ -7,6 +7,7 @@ part 'collection_dto.g.dart';
 class CollectionDto extends TurboPromptable {
   CollectionDto({
     required this.items,
+    super.metaData,
   });
 
   final List<String> items;

@@ -8,6 +8,12 @@ import 'package:turbo_serializable/turbo_serializable.dart';
 
 part 'folder_dto.g.dart';
 
+/// DTO for a folder document in Firestore.
+///
+/// **copyWith and [lastSyncedFileCount]:** Like other fields, [copyWith] uses
+/// `??` fallbacks. Callers cannot set [lastSyncedFileCount] to `null` via
+/// [copyWith] (passing `null` keeps the previous value). Use a full
+/// [FolderDto] replacement if you need to clear the field locally.
 @JsonSerializable(includeIfNull: true, explicitToJson: true)
 class FolderDto extends TWriteableId implements TSearchable {
   FolderDto({
@@ -19,6 +25,7 @@ class FolderDto extends TWriteableId implements TSearchable {
     required this.isActive,
     required this.createdAt,
     required this.updatedAt,
+    this.lastSyncedFileCount,
   });
 
   factory FolderDto.create({
@@ -27,6 +34,7 @@ class FolderDto extends TWriteableId implements TSearchable {
     required String emoji,
     required String path,
     bool isActive = false,
+    int? lastSyncedFileCount,
   }) {
     return FolderDto(
       id: vars.id,
@@ -37,6 +45,7 @@ class FolderDto extends TWriteableId implements TSearchable {
       isActive: isActive,
       createdAt: vars.now,
       updatedAt: vars.now,
+      lastSyncedFileCount: lastSyncedFileCount,
     );
   }
 
@@ -54,6 +63,10 @@ class FolderDto extends TWriteableId implements TSearchable {
   @TimestampOrDateTimeConverter()
   final DateTime updatedAt;
 
+  /// Last synced count of markdown files in this folder; updated remotely only
+  /// when a scan finds a different value than stored in Firestore.
+  final int? lastSyncedFileCount;
+
   @override
   Map<String, dynamic> toJson() => _$FolderDtoToJson(this);
   factory FolderDto.fromJson(Map<String, dynamic> json) =>
@@ -66,6 +79,7 @@ class FolderDto extends TWriteableId implements TSearchable {
     String? emoji,
     String? path,
     bool? isActive,
+    int? lastSyncedFileCount,
   }) => FolderDto(
     id: id,
     userId: userId,
@@ -75,6 +89,7 @@ class FolderDto extends TWriteableId implements TSearchable {
     isActive: isActive ?? this.isActive,
     createdAt: createdAt,
     updatedAt: gNow,
+    lastSyncedFileCount: lastSyncedFileCount ?? this.lastSyncedFileCount,
   );
 
   @override
@@ -93,6 +108,7 @@ class UpdateFolderDtoRequest extends TWriteableId {
     this.emoji,
     this.path,
     this.isActive,
+    this.lastSyncedFileCount,
   });
 
   @override
@@ -103,6 +119,7 @@ class UpdateFolderDtoRequest extends TWriteableId {
   final String? emoji;
   final String? path;
   final bool? isActive;
+  final int? lastSyncedFileCount;
   @JsonKey(includeToJson: true)
   @TimestampOrDateTimeConverter()
   DateTime get updatedAt => gNow;
@@ -123,10 +140,12 @@ class UpdateFolderDtoRequest extends TWriteableId {
     String? emoji,
     String? path,
     bool? isActive,
+    int? lastSyncedFileCount,
   }) => UpdateFolderDtoRequest(
     name: name ?? this.name,
     emoji: emoji ?? this.emoji,
     path: path ?? this.path,
     isActive: isActive ?? this.isActive,
+    lastSyncedFileCount: lastSyncedFileCount ?? this.lastSyncedFileCount,
   );
 }

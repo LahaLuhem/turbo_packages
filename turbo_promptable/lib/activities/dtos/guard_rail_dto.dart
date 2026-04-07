@@ -10,7 +10,7 @@ part 'guard_rail_dto.g.dart';
 /// during workflow step execution or agent behavior.
 @JsonSerializable(includeIfNull: true, explicitToJson: true)
 class GuardRailDto extends TurboPromptable {
-  GuardRailDto();
+  GuardRailDto({super.metaData});
 
   static const fromJsonFactory = _$GuardRailDtoFromJson;
   factory GuardRailDto.fromJson(Map<String, dynamic> json) =>

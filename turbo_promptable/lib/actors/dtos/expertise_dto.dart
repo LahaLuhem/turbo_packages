@@ -9,6 +9,7 @@ class ExpertiseDto extends TurboPromptable {
     required this.field,
     required this.specialization,
     required this.experience,
+    super.metaData,
   });
 
   final String field;

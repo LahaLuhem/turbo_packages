@@ -5,7 +5,7 @@ part 'reference_dto.g.dart';
 
 @JsonSerializable(includeIfNull: true, explicitToJson: true)
 class ReferenceDto extends TurboPromptable {
-  ReferenceDto();
+  ReferenceDto({super.metaData});
 
   static const fromJsonFactory = _$ReferenceDtoFromJson;
   factory ReferenceDto.fromJson(Map<String, dynamic> json) =>

@@ -10,6 +10,7 @@ class WorkflowDto extends TurboPromptable {
   WorkflowDto({
     this.guardRails,
     required this.steps,
+    super.metaData,
   });
 
   final List<GuardRailDto>? guardRails;

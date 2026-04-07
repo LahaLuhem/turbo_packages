@@ -16,6 +16,7 @@ class WorkflowStep<INPUT, OUTPUT> extends TurboPromptable {
     this.guardRails,
     this.input,
     this.output,
+    super.metaData,
   });
 
   final INPUT? input;

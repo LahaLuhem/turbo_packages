@@ -1,5 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:turbo_promptable/actors/dtos/agent_dto.dart';
+import 'package:turbo_promptable/actors/dtos/persona_dto.dart';
+import 'package:turbo_promptable/actors/dtos/role_dto.dart';
 import 'package:turbo_promptable/shared/abstracts/has_to_json.dart';
 import 'package:turbo_promptable/skills/dtos/instruction_dto.dart';
 import 'package:turbo_promptable/skills/workflows/dtos/workflow_dto.dart';
@@ -21,13 +23,16 @@ class ActivityDto<INPUT extends HasToJson, OUTPUT extends HasToJson>
     this.input,
     this.instructions,
     this.agents,
+    super.metaData,
   });
 
+  final RoleDto? role;
+  final PersonaDto? persona;
   final INPUT? input;
-  final List<InstructionDto>? instructions;
+  final WorkflowDto workflow;
   final List<AgentDto>? agents;
   final OUTPUT? output;
-  final WorkflowDto workflow;
+  final List<InstructionDto>? instructions;
 
   static const fromJsonFactory = _$ActivityDtoFromJson;
   factory ActivityDto.fromJson(

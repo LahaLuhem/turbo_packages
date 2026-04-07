@@ -13,6 +13,7 @@ class ToolDto<INPUT, OUTPUT> extends TurboPromptable {
     this.input,
     this.output,
     this.instructions,
+    super.metaData,
   });
 
   final INPUT? input;
