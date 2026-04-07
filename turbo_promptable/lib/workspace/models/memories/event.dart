@@ -11,11 +11,9 @@ abstract class Event extends Memory {
     super.config,
   });
 
-  static final Event Function(Map<String, dynamic> json) fromJsonFactory =
-      _$EventFromJson;
+  static const Event Function(Map<String, dynamic> json) fromJsonFactory = _$EventFromJson;
   factory Event.fromJson(Map<String, dynamic> json) => _$EventFromJson(json);
-  static final Map<String, dynamic> Function(Event value) toJsonFactory =
-      _$EventToJson;
+  static const Map<String, dynamic> Function(Event value) toJsonFactory = _$EventToJson;
   @override
   Map<String, dynamic> toJson() => _$EventToJson(this);
 }

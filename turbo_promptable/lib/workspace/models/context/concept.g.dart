@@ -1,14 +1,14 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of '_script.dart';
+part of 'concept.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-TScript _$TScriptFromJson(Map<String, dynamic> json) =>
-    TScript(name: json['name'] as String);
+Concept _$ConceptFromJson(Map<String, dynamic> json) =>
+    Concept(name: json['name'] as String);
 
-Map<String, dynamic> _$TScriptToJson(TScript instance) => <String, dynamic>{
+Map<String, dynamic> _$ConceptToJson(Concept instance) => <String, dynamic>{
   'name': instance.name,
 };

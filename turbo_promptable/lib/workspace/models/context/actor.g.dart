@@ -1,14 +1,14 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'cli.dart';
+part of 'actor.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-TCli _$TCliFromJson(Map<String, dynamic> json) =>
-    TCli(name: json['name'] as String);
+Actor _$ActorFromJson(Map<String, dynamic> json) =>
+    Actor(name: json['name'] as String);
 
-Map<String, dynamic> _$TCliToJson(TCli instance) => <String, dynamic>{
+Map<String, dynamic> _$ActorToJson(Actor instance) => <String, dynamic>{
   'name': instance.name,
 };

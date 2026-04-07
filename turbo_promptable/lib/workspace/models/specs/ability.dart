@@ -11,8 +11,11 @@ class Ability extends Spec {
     super.config,
   });
 
-  factory Ability.fromJson(Map<String, dynamic> json) =>
-      _$TAbilityFromJson(json);
+  static final Ability Function(Map<String, dynamic> json) fromJsonFactory =
+      _$AbilityFromJson;
+  factory Ability.fromJson(Map<String, dynamic> json) => _$AbilityFromJson(json);
+  static final Map<String, dynamic> Function(Ability value) toJsonFactory =
+      _$AbilityToJson;
   @override
-  Map<String, dynamic> toJson() => _$TAbilityToJson(this);
+  Map<String, dynamic> toJson() => _$AbilityToJson(this);
 }
