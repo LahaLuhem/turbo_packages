@@ -1,7 +1,9 @@
 import 'package:turbo_promptable/workspace/abstracts/meta/t_promptable.dart';
 
- class Template extends TPromptable {
-  Template({
+export 'package:turbo_promptable/workspace/abstracts/meta/t_promptable.dart';
+
+ class Instruction extends TPromptable {
+  Instruction({
     required super.name,
     super.metaData,
     super.config,

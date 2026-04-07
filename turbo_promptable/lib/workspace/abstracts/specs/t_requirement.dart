@@ -1,16 +1,11 @@
-import 'package:turbo_promptable/workspace/abstracts/root/t_spec.dart';
+import 'package:turbo_promptable/workspace/abstracts/root/spec.dart';
 
-export 'package:turbo_promptable/workspace/abstracts/root/t_spec.dart';
+export 'package:turbo_promptable/workspace/abstracts/root/spec.dart';
 
-abstract class TRequirement extends TSpec {
+abstract class TRequirement extends Spec {
   TRequirement({
     required super.name,
-    super.renderType = TRenderType.embed,
-    super.bodyType = TBodyType.md,
-    super.emoji,
-    super.leadingBody,
-    super.bodyBuilder,
     super.metaData,
-    super.trailingBody,
+    super.config,
   });
 }

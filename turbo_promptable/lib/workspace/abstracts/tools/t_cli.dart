@@ -1,10 +1,9 @@
 import 'package:turbo_promptable/workspace/abstracts/root/t_tool.dart';
 
-abstract class TCli extends TTool {
+abstract class TCli extends Tool {
   TCli({
     required super.name,
-    super.renderType = TRenderType.embed,
-    super.bodyType = TBodyType.md,
+    super.description,
     super.emoji,
     super.leadingBody,
     super.bodyBuilder,

@@ -6,24 +6,27 @@ typedef TFrontMatter = TMetaData;
 
 class TMetaData {
   TMetaData({
-    required this.name,
     required this.description,
-    this.values,
-    this.tags,
+    required this.name,
     this.aliases,
+    this.emoji,
+    this.tags,
+    this.values,
   });
 
-  final String? name;
-  final String? description;
-  final List<TTag>? tags;
   final List<String>? aliases;
+  final List<TTag>? tags;
   final Map<String, Object>? values;
+  final String? description;
+  final String? emoji;
+  final String? name;
 
   Map<String, String> toMap() => {
-    if (name != null) TpKeys.name: name!,
-    if (description != null) TpKeys.description: description!,
-    if (tags != null) TpKeys.tags: tags!.toArrayString(),
     if (aliases != null) TpKeys.aliases: aliases!.toArrayString(),
+    if (description != null) TpKeys.description: description!,
+    if (emoji != null) TpKeys.emoji: emoji!,
+    if (name != null) TpKeys.name: name!,
+    if (tags != null) TpKeys.tags: tags!.toArrayString(),
     if (values != null)
       for (var entry in values!.entries) entry.key: entry.value.toString(),
   };

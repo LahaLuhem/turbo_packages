@@ -4,7 +4,10 @@ import 'package:turbo_promptable/workspace/abstracts/meta/t_promptable.dart';
 
 class TSpawnConfig {
   const TSpawnConfig({
-    required this.root, required this.systemPrompt, required this.folders, required this.files,
+    required this.root,
+    required this.systemPrompt,
+    required this.folders,
+    required this.files,
   });
 
   final String root;

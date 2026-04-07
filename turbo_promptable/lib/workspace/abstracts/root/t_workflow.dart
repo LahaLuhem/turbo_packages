@@ -1,18 +1,13 @@
 import 'package:turbo_promptable/workspace/abstracts/meta/t_promptable.dart';
-import 'package:turbo_promptable/workspace/abstracts/root/t_step.dart';
+import 'package:turbo_promptable/workspace/abstracts/workflows/step.dart';
 
-abstract class TWorkflow<STEP extends TStep> extends TPromptable {
-  TWorkflow({
+ class Workflow extends TPromptable {
+  Workflow({
     required super.name,
-    super.renderType = TRenderType.embed,
-    super.bodyType = TBodyType.md,
-    super.emoji,
-    super.leadingBody,
-    super.bodyBuilder,
     super.metaData,
-    super.trailingBody,
+    super.config,
     required this.steps,
   });
 
-  final List<STEP> steps;
+  final List<Step> steps;
 }

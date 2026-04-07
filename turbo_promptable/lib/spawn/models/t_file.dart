@@ -1,13 +1,13 @@
 import 'package:turbo_promptable/workspace/abstracts/meta/t_promptable.dart';
 
 class TFile {
-  final TPromptable value;
+  final TPromptable promptable;
   final String? _fileName;
 
   const TFile({
-    required this.value,
+    required this.promptable,
     String? fileName,
   }) : _fileName = fileName;
 
-  String get fileName => _fileName ?? value.fileName;
+  String get fileName => _fileName ?? promptable.fileName;
 }

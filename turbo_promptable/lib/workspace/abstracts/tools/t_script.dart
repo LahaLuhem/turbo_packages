@@ -1,10 +1,9 @@
 import 'package:turbo_promptable/workspace/abstracts/root/t_tool.dart';
 
-abstract class TScript extends TTool {
+abstract class TScript extends Tool {
   TScript({
     required super.name,
-    super.renderType = TRenderType.embed,
-    super.bodyType = TBodyType.md,
+    super.description,
     super.emoji,
     super.leadingBody,
     super.bodyBuilder,
