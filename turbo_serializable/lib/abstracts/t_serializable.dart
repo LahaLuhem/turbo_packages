@@ -56,7 +56,7 @@ abstract class TSerializable extends TWriteable {
   /// Throws an [UnimplementedError] if [xmlBuilder] is not provided.
   String toXml() {
     if (xmlBuilder == null) throw UnimplementedError();
-    return xmlBuilder!(toJson());
+    return xmlBuilder!(this);
   }
 
   /// Returns a function that builds an XML string from a JSON map.
@@ -64,5 +64,5 @@ abstract class TSerializable extends TWriteable {
   /// Subclasses should override this getter to supply their XML builder, or
   /// set it externally, if applicable. If not provided, [toXml()] will throw.
   @JsonKey(includeFromJson: false, includeToJson: false)
-  final String Function(Map<String, dynamic> json)? xmlBuilder;
+  final String Function(TWriteable writeable)? xmlBuilder;
 }
