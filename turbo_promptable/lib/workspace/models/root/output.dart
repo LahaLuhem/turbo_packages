@@ -1,6 +1,6 @@
 import 'package:turbo_promptable/workspace/abstracts/checklists/acceptance_criteria.dart';
 import 'package:turbo_promptable/workspace/abstracts/meta/t_promptable.dart';
-import 'package:turbo_promptable/workspace/abstracts/root/t_template.dart';
+import 'package:turbo_promptable/workspace/abstracts/root/template.dart';
 
  class Output extends TPromptable {
   Output({

@@ -1,4 +1,5 @@
-import 'package:turbo_promptable/workspace/abstracts/meta/t_promptable.dart';
+
+import 'package:turbo_promptable/workspace/models/meta/t_promptable.dart';
 
 class TFile {
   final TPromptable promptable;

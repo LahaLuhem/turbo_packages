@@ -1,4 +1,4 @@
-import 'package:turbo_promptable/workspace/abstracts/root/context.dart';
+import 'package:turbo_promptable/workspace/models/root/context.dart';
 
 abstract class Actor extends Context {
   Actor({

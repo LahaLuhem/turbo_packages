@@ -1,4 +1,4 @@
-import 'package:turbo_promptable/workspace/abstracts/root/checklist.dart';
+import 'package:turbo_promptable/workspace/models/root/checklist.dart';
 
 abstract class Constraints extends Checklist {
   Constraints({

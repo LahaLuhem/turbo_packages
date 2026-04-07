@@ -1,7 +1,7 @@
 import 'package:turbo_promptable/workspace/abstracts/meta/t_promptable.dart';
-import 'package:turbo_promptable/workspace/abstracts/root/output.dart';
 import 'package:turbo_promptable/workspace/abstracts/root/input.dart';
-import 'package:turbo_promptable/workspace/abstracts/root/t_workflow.dart';
+import 'package:turbo_promptable/workspace/abstracts/root/output.dart';
+import 'package:turbo_promptable/workspace/abstracts/root/workflow.dart';
 
  class Activity extends TPromptable {
   Activity({

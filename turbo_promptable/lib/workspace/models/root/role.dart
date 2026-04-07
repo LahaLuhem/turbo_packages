@@ -2,9 +2,9 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:turbo_promptable/workspace/abstracts/root/activity.dart';
 import 'package:turbo_promptable/workspace/abstracts/root/checklist.dart';
 import 'package:turbo_promptable/workspace/abstracts/root/instruction.dart';
-import 'package:turbo_promptable/workspace/abstracts/root/t_template.dart';
-import 'package:turbo_promptable/workspace/abstracts/root/t_tool.dart';
-import 'package:turbo_promptable/workspace/abstracts/root/t_workflow.dart';
+import 'package:turbo_promptable/workspace/abstracts/root/template.dart';
+import 'package:turbo_promptable/workspace/abstracts/root/tool.dart';
+import 'package:turbo_promptable/workspace/abstracts/root/workflow.dart';
 
 part 't_role.g.dart';
 
