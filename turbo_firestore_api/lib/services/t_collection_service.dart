@@ -71,6 +71,7 @@ abstract class TCollectionService<
   /// - [api] - The Firestore API instance for remote operations
   TCollectionService({
     required this.api,
+    super.initialiseStream = true,
   });
 
   // 📍 LOCATOR ------------------------------------------------------------------------------- \\
@@ -144,6 +145,7 @@ abstract class TCollectionService<
   /// - [error] - The Firestore exception that occurred
   @override
   void onError(TFirestoreException error) {
+    _isReady.completeIfNotComplete();
     log.warning('Collection service stream error: $error');
     super.onError(error);
   }

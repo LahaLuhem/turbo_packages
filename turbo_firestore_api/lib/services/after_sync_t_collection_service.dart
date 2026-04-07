@@ -14,7 +14,10 @@ abstract class AfterSyncTCollectionService<
 >
     extends TCollectionService<T, API> {
   /// Creates a new [AfterSyncTCollectionService] instance.
-  AfterSyncTCollectionService({required super.api});
+  AfterSyncTCollectionService({
+    required super.api,
+    super.initialiseStream = true,
+  });
 
   /// Called after the local state has been updated with new data.
   ///

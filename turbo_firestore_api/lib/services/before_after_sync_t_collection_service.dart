@@ -14,7 +14,10 @@ abstract class BeforeAfSyncTCollectionService<
 >
     extends TCollectionService<T, API> {
   /// Creates a new [BeforeAfSyncTCollectionService] instance.
-  BeforeAfSyncTCollectionService({required super.api});
+  BeforeAfSyncTCollectionService({
+    required super.api,
+    super.initialiseStream = true,
+  });
 
   /// Called before the local state is updated with new data.
   ///

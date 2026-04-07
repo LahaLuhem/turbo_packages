@@ -9,6 +9,12 @@ import 'package:turbo_serializable/markdown/factories/t_md_factory.dart';
 /// Requires concrete implementations to provide builder functions for
 /// each format they wish to support.
 abstract class TSerializable extends TWriteable {
+  const TSerializable({
+    this.yamlBuilder,
+    this.mdFactory,
+    this.xmlBuilder,
+  });
+
   /// Converts this object to a YAML string.
   ///
   /// Uses [yamlBuilder] to serialize the result of [toJson()].
@@ -23,7 +29,7 @@ abstract class TSerializable extends TWriteable {
   /// Subclasses should override this getter to supply their YAML builder, or
   /// set it externally, if applicable. If not provided, [toYaml()] will throw.
   @JsonKey(includeFromJson: false, includeToJson: false)
-  String Function(TWriteable writeable)? yamlBuilder;
+  final String Function(TWriteable writeable)? yamlBuilder;
 
   /// Converts this object to a Markdown string.
   ///
@@ -42,7 +48,7 @@ abstract class TSerializable extends TWriteable {
   /// Subclasses should override this getter to supply their Markdown builder, or
   /// set it externally, if applicable. If not provided, [toMarkdown()] will throw.
   @JsonKey(includeFromJson: false, includeToJson: false)
-  TMdFactory? mdFactory;
+  final TMdFactory? mdFactory;
 
   /// Converts this object to an XML string.
   ///
@@ -58,5 +64,5 @@ abstract class TSerializable extends TWriteable {
   /// Subclasses should override this getter to supply their XML builder, or
   /// set it externally, if applicable. If not provided, [toXml()] will throw.
   @JsonKey(includeFromJson: false, includeToJson: false)
-  String Function(Map<String, dynamic> json)? xmlBuilder;
+  final String Function(Map<String, dynamic> json)? xmlBuilder;
 }
