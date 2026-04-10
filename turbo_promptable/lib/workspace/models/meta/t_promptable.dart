@@ -10,13 +10,6 @@ import 'package:turbo_serializable/turbo_serializable.dart';
 export 'package:turbo_promptable/core/models/t_render_type.dart';
 export 'package:turbo_promptable/workspace/enums/t_body_type.dart';
 
-part 't_promptable.g.dart';
-
-@JsonSerializable(
-  explicitToJson: true,
-  includeIfNull: false,
-  createFactory: false,
-)
 /// Base class for all promptable models in the workspace.
 ///
 /// Provides a [name], optional [metaData] (frontmatter), and optional
@@ -61,11 +54,19 @@ abstract class TPromptable extends TSerializable {
 
   // 🧲 FETCHERS ------------------------------------------------------------------------------ \\
 
+  /// The kebab-case file name derived from [name].
   String get fileName => '${name.toKebabCase()}';
+
+  /// The PascalCase key used for XML serialization.
   String get xmlKey => '${name.toPascalCase()}';
+
+  /// The snake_case key used for YAML serialization.
   String get yamlKey => '${name.toSnakeCase()}';
+
+  /// The camelCase key used for JSON serialization.
   String get jsonKey => '${name.toCamelCase()}';
 
+  /// Builds the Markdown frontmatter map from [metaData].
   Map<String, dynamic> mdFrontMatter() {
     final map = metaData?.toJson() ?? {};
     if (config?.inheritMetaData ?? false) {
