@@ -8,7 +8,7 @@ part 'activity.g.dart';
 
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Activity extends TPromptable {
-  Activity({
+  const Activity({
     required super.name,
     required this.input,
     required this.output,

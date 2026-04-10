@@ -1,5 +1,4 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:turbo_promptable/workspace/models/meta/t_promptable.dart';
 import 'package:turbo_promptable/workspace/models/root/input.dart';
 import 'package:turbo_promptable/workspace/models/root/instruction.dart';
 import 'package:turbo_promptable/workspace/models/root/output.dart';
@@ -8,7 +7,7 @@ part 'step.g.dart';
 
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Step extends TPromptable {
-  Step({
+  const Step({
     required super.name,
     super.metaData,
     super.config,

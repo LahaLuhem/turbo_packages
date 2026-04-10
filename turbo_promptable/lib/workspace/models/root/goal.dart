@@ -5,7 +5,7 @@ part 'goal.g.dart';
 
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Goal extends TPromptable {
-  Goal({
+  const Goal({
     required super.name,
     super.metaData,
     super.config,

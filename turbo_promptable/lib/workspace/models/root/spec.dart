@@ -7,7 +7,7 @@ part 'spec.g.dart';
 
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Spec extends TPromptable {
-  Spec({
+  const Spec({
     required super.name,
     super.metaData,
     super.config,

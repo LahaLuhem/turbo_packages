@@ -1,4 +1,4 @@
-.PHONY: help build clean test format analyze fix watch get
+.PHONY: help build clean test format analyze fix watch get wb wb-get wb-build wb-watch wb-run wb-clean
 
 help: ## Show this help message
 	@echo 'Usage: make [target]'
@@ -35,3 +35,7 @@ analyze: ## Run static analysis
 
 get: ## Get dependencies
 	flutter pub get
+
+# --------------------------------------------------------------------------
+# Widgetbook
+# --------------------------------------------------------------------------

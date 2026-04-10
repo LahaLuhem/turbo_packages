@@ -4,7 +4,7 @@ import 'package:turbo_widgets/src/abstracts/t_contextual_buttons_service_interfa
 import 'package:turbo_widgets/src/models/t_contextual_buttons_config.dart';
 import 'package:turbo_widgets/src/services/t_contextual_buttons_service.dart';
 import 'package:turbo_widgets/src/typedefs/t_view_model_builder_def.dart';
-import 'package:turbo_widgets/src/widgets/t_contextual_buttons.dart';
+import 'package:turbo_widgets/src/widgets/contextual/t_contextual_buttons.dart';
 
 /// Callback that builds a contextual buttons config from a view model.
 typedef TViewContextualButtonsDef<T extends TBaseViewModel> =

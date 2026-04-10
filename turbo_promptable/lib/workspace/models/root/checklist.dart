@@ -7,7 +7,7 @@ part 'checklist.g.dart';
 
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Checklist extends TPromptable {
-  Checklist({
+  const Checklist({
     required super.name,
     super.config,
     super.metaData,

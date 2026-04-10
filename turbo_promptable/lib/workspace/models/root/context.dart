@@ -7,13 +7,14 @@ part 'context.g.dart';
 
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Context extends TPromptable {
-  Context({
+  const Context({
     required super.name,
     super.metaData,
     super.config,
   });
 
-  factory Context.fromJson(Map<String, dynamic> json) => _$ContextFromJson(json);
+  factory Context.fromJson(Map<String, dynamic> json) =>
+      _$ContextFromJson(json);
   @override
   Map<String, dynamic> toJson() => _$ContextToJson(this);
 }

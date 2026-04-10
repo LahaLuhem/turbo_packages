@@ -7,11 +7,28 @@ part 'instruction.g.dart';
 
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Instruction extends TPromptable {
-  Instruction({
+  const Instruction({
     required super.name,
     super.metaData,
     super.config,
+    this.principles,
+    this.rules,
+    this.reasons,
+    this.mindset,
+    this.approach,
+    this.responsibilities,
+    this.understandings,
+    this.examples,
   });
+
+  final List<String>? principles;
+  final List<String>? rules;
+  final List<String>? reasons;
+  final List<String>? mindset;
+  final List<String>? approach;
+  final List<String>? responsibilities;
+  final List<String>? understandings;
+  final List<String>? examples;
 
   factory Instruction.fromJson(Map<String, dynamic> json) =>
       _$InstructionFromJson(json);

@@ -10,9 +10,12 @@ import 'package:turbo_serializable/turbo_serializable.dart';
 export 'package:turbo_promptable/core/models/t_render_type.dart';
 export 'package:turbo_promptable/workspace/enums/t_body_type.dart';
 
+part 't_promptable.g.dart';
+
 @JsonSerializable(
   explicitToJson: true,
   includeIfNull: false,
+  createFactory: false,
 )
 abstract class TPromptable extends TSerializable {
   const TPromptable({
@@ -40,7 +43,8 @@ abstract class TPromptable extends TSerializable {
     mdSectionsBuilder: (writeable, frontmatter) => [
       if (writeable.config?.leadingBody != null) writeable.config!.leadingBody!,
       mdBody() ?? toJson().toMd(includeMetaData: false),
-      if (writeable.config?.trailingBody != null) writeable.config!.trailingBody!,
+      if (writeable.config?.trailingBody != null)
+        writeable.config!.trailingBody!,
     ],
     mdBodyBuilder: (writeable, frontmatter, sections) => sections.join('\n\n'),
     mdFileBuilder: (writeable, frontmatter, sections, body) =>
@@ -55,8 +59,8 @@ abstract class TPromptable extends TSerializable {
   String get yamlKey => '${name.toSnakeCase()}';
   String get jsonKey => '${name.toCamelCase()}';
 
-  Map<String, String> mdFrontMatter() {
-    final map = metaData?.toMap() ?? {};
+  Map<String, dynamic> mdFrontMatter() {
+    final map = metaData?.toJson() ?? {};
     if (config?.inheritMetaData ?? false) {
       map.putIfAbsent(
         TpKeys.name,

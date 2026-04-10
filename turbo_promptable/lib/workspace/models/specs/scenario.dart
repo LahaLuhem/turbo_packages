@@ -5,7 +5,7 @@ part 'scenario.g.dart';
 
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class TScenario extends Spec {
-  TScenario({
+  const TScenario({
     required super.name,
     super.metaData,
     super.config,

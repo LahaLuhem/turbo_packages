@@ -5,7 +5,7 @@ part 'issue.g.dart';
 
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Issue extends TPromptable {
-  Issue({
+  const Issue({
     required super.name,
     super.metaData,
     super.config,

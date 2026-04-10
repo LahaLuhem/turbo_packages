@@ -5,7 +5,7 @@ part 'journey.g.dart';
 
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class TJourney extends Spec {
-  TJourney({
+  const TJourney({
     required super.name,
     super.metaData,
     super.config,

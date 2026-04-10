@@ -5,7 +5,7 @@ part 'task.g.dart';
 
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class TTask extends TPromptable {
-  TTask({
+  const TTask({
     required super.name,
     super.metaData,
     super.config,

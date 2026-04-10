@@ -14,7 +14,6 @@
 - **Badge & Chip Widgets**: Ready-to-use badge and chip widgets for UI elements
 - **Contextual Buttons**: `TContextualButtons` for overlay buttons with position and variation support
 - **Navigation Components**: `TBottomNavigation`, `TTopNavigation`, `TSideNavigation` for flexible navigation bars
-- **Component Playground**: `TPlayground` for testing widgets with device frame preview
 - **View Builder**: `TViewBuilder` for combining `TContextualButtons` and `TViewModelBuilder` in a single widget
 
 ## Installation

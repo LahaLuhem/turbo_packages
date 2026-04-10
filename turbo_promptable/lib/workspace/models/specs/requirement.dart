@@ -7,7 +7,7 @@ part 'requirement.g.dart';
 
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class TRequirement extends Spec {
-  TRequirement({
+  const TRequirement({
     required super.name,
     super.metaData,
     super.config,

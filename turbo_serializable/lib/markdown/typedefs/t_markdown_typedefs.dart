@@ -1,7 +1,7 @@
 import 'package:turbo_serializable/abstracts/t_writeable.dart';
 
 /// A map representing Markdown frontmatter, where each key and value is a String.
-typedef TMdFrontmatter = Map<String, String>;
+typedef TMdFrontmatter = Map<String, dynamic>;
 
 /// Signature for building frontmatter from a TWriteable.
 typedef TMdFrontmatterBuilder<T extends TWriteable> =

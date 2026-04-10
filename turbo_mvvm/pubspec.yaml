@@ -1,6 +1,6 @@
 name: turbo_mvvm
 description: A lightweight MVVM state management solution inspired by the FilledStacks Stacked package.
-version: 1.1.0
+version: 1.2.0
 resolution: workspace
 repository: https://github.com/appboypov/turbo_packages/tree/main/turbo_mvvm
 homepage: https://github.com/appboypov/turbo_packages

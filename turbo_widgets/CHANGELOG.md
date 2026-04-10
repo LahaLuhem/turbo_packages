@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Removed
+- Component Playground (TPlayground) and its enums, constants, models, and widgets
+- `device_frame_plus`, `flutter_animate`, and `gap` dependencies no longer used after playground removal
+
+### Changed
+- Reorganised widgets under `lib/src/widgets/` into `contextual/` and `misc/` subfolders
+- Renamed `contextual_buttons_provider.dart` to `t_contextual_buttons_provider.dart`
+
 ## [1.1.0] - 2026-01-20
 
 ### Added

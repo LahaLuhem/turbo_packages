@@ -2,8 +2,8 @@ import 'package:turbo_promptable/workspace/models/root/context.dart';
 import 'package:turbo_serializable/turbo_serializable.dart';
 
 /// [T] is typically a [TWriteable]; items are encoded with [TWriteable.toJson].
-abstract class Collection<T extends Object> extends Context {
-  Collection({
+class Collection<T extends Object> extends Context {
+  const Collection({
     required super.name,
     super.config,
     super.metaData,

@@ -20,6 +20,7 @@ workspace:
   - turbo_template/flutter-app
   - turbo_widgets
   - turbo_widgets/example
+  - turbo_widgets/widgetbook
   - turbolytics
   - turbolytics/example
 

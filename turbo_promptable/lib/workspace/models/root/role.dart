@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:turbo_promptable/workspace/models/meta/t_promptable.dart';
+import 'package:turbo_promptable/core/models/t_config.dart';
+import 'package:turbo_promptable/workspace/models/meta/t_meta_data.dart';
 import 'package:turbo_promptable/workspace/models/root/activity.dart';
 import 'package:turbo_promptable/workspace/models/root/checklist.dart';
 import 'package:turbo_promptable/workspace/models/root/instruction.dart';
@@ -11,7 +12,7 @@ part 'role.g.dart';
 
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Role extends TPromptable {
-  Role({
+  const Role({
     required super.name,
     super.metaData,
     super.config,
@@ -32,11 +33,32 @@ class Role extends TPromptable {
   final List<Workflow>? workflows;
   final String expertise;
 
-  static final Role Function(Map<String, dynamic> json) fromJsonFactory =
-      _$RoleFromJson;
   factory Role.fromJson(Map<String, dynamic> json) => _$RoleFromJson(json);
-  static final Map<String, dynamic> Function(Role value) toJsonFactory =
-      _$RoleToJson;
+
   @override
   Map<String, dynamic> toJson() => _$RoleToJson(this);
+
+  Role copyWith({
+    String? name,
+    TMetaData? metaData,
+    TConfig? config,
+    String? expertise,
+    List<Activity>? activities,
+    List<Checklist>? checklists,
+    List<Instruction>? instructions,
+    List<Template>? templates,
+    List<Tool>? tools,
+    List<Workflow>? workflows,
+  }) => Role(
+    name: name ?? this.name,
+    metaData: metaData ?? this.metaData,
+    config: config ?? this.config,
+    expertise: expertise ?? this.expertise,
+    activities: activities ?? this.activities,
+    checklists: checklists ?? this.checklists,
+    instructions: instructions ?? this.instructions,
+    templates: templates ?? this.templates,
+    tools: tools ?? this.tools,
+    workflows: workflows ?? this.workflows,
+  );
 }

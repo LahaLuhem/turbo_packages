@@ -385,14 +385,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.5"
-  device_frame_plus:
-    dependency: transitive
-    description:
-      name: device_frame_plus
-      sha256: ccc94abccd4d9f0a9f19ef239001b3a59896e678ad42601371d7065889f2bf78
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.5.0"
   email_validator:
     dependency: transitive
     description:
@@ -751,14 +743,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  gap:
-    dependency: transitive
-    description:
-      name: gap
-      sha256: "976fa1e405d7d8249b3d2ec0e18a1eac116f0a86430c29a7485dff6f5326f03a"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.0"
   get_it:
     dependency: transitive
     description:
@@ -1308,6 +1292,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.2.1"
+  resizable_widget:
+    dependency: transitive
+    description:
+      name: resizable_widget
+      sha256: db2919754b93f386b9b3fb15e9f48f6c9d6d41f00a24397629133c99df86606a
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.5"
   rx:
     dependency: transitive
     description:
@@ -1793,6 +1785,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.0"
+  widgetbook:
+    dependency: transitive
+    description:
+      name: widgetbook
+      sha256: e294e08aeb5b85f0120a1148d3263466d9b6c3daa584ef4f41b18c2e00821ef2
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.0.0-beta.3"
+  widgetbook_generator:
+    dependency: transitive
+    description:
+      name: widgetbook_generator
+      sha256: "5a75eb5b9f24156f2201ccb724b2967c005b90b12fb9f46922e434319a409c6c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.0.0-alpha.4"
   win32:
     dependency: transitive
     description:
@@ -1843,4 +1851,4 @@ packages:
     version: "2.0.1"
 sdks:
   dart: ">=3.10.4 <4.0.0"
-  flutter: ">=3.35.0"
+  flutter: ">=3.38.0"

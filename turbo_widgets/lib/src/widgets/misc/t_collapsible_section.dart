@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
-import 'package:turbo_widgets/src/widgets/t_shrink.dart';
+import 'package:turbo_widgets/src/widgets/misc/t_shrink.dart';
 
 class TCollapsibleSection extends StatelessWidget {
   const TCollapsibleSection({

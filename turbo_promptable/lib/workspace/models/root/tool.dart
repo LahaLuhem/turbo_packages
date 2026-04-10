@@ -7,7 +7,7 @@ part 'tool.g.dart';
 
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Tool extends TPromptable {
-  Tool({
+  const Tool({
     required super.name,
     super.metaData,
     super.config,

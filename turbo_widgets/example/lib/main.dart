@@ -1,8 +1,4 @@
-import 'package:flutter/material.dart' show ThemeMode;
-import 'package:flutter/widgets.dart';
-import 'package:shadcn_ui/shadcn_ui.dart';
-import 'package:turbo_widgets/turbo_widgets.dart';
-import 'package:turbo_widgets_example/views/styling/styling_view.dart';
+import 'package:flutter/material.dart';
 
 void main() {
   runApp(const TurboWidgetsExampleApp());
@@ -13,24 +9,22 @@ class TurboWidgetsExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ShadApp(
-      title: 'Turbo Widgets',
+    return const MaterialApp(
+      title: 'turbo_widgets example',
       debugShowCheckedModeBanner: false,
-      themeMode: ThemeMode.dark,
-      theme: ShadThemeData(
-        colorScheme: const ShadZincColorScheme.light(),
-        brightness: Brightness.light,
-      ),
-      darkTheme: ShadThemeData(
-        colorScheme: const ShadZincColorScheme.dark(),
-        brightness: Brightness.dark,
-      ),
-      home: ShadToaster(
-        child: TContextualButtons(
-          service: TContextualButtonsService.instance,
-          child: const StylingView(),
-        ),
-      ),
+      home: _PlaceholderHome(),
+    );
+  }
+}
+
+class _PlaceholderHome extends StatelessWidget {
+  const _PlaceholderHome();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('turbo_widgets example')),
+      body: const SizedBox.shrink(),
     );
   }
 }

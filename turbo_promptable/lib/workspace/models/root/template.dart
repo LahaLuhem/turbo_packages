@@ -5,7 +5,7 @@ part 'template.g.dart';
 
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Template extends TPromptable {
-  Template({
+  const Template({
     required super.name,
     super.metaData,
     super.config,

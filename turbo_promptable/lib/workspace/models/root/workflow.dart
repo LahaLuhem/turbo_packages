@@ -6,7 +6,7 @@ part 'workflow.g.dart';
 
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Workflow extends TPromptable {
-  Workflow({
+  const Workflow({
     required super.name,
     super.metaData,
     super.config,
