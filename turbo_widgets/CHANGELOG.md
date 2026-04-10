@@ -5,15 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.2.0] - 2026-04-10
 
 ### Removed
 - Component Playground (TPlayground) and its enums, constants, models, and widgets
-- `device_frame_plus`, `flutter_animate`, and `gap` dependencies no longer used after playground removal
+- `device_frame_plus`, `flutter_animate`, and `gap` dependencies
 
 ### Changed
 - Reorganised widgets under `lib/src/widgets/` into `contextual/` and `misc/` subfolders
 - Renamed `contextual_buttons_provider.dart` to `t_contextual_buttons_provider.dart`
+- Updated `shadcn_ui` dependency from `^0.45.1` to `^0.53.5`
+- Updated `turbo_forms` dependency from `^1.0.1` to `^1.0.2`
 
 ## [1.1.0] - 2026-01-20
 

@@ -1,3 +1,4 @@
+/// A titled section of Markdown body content produced by a [TConfig.bodyBuilder].
 class TMdSection {
   const TMdSection({
     required this.title,

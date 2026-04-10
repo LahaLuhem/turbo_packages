@@ -32,7 +32,8 @@ abstract class TSerializable extends TWriteable {
   /// Subclasses should override this getter to supply their YAML builder, or
   /// set it externally, if applicable. If not provided, [toYaml()] will throw.
   @JsonKey(includeFromJson: false, includeToJson: false)
-  final String Function(TWriteable writeable, bool includeMetaData)? yamlBuilder;
+  final String Function(TWriteable writeable, bool includeMetaData)?
+  yamlBuilder;
 
   /// Converts this object to a Markdown string.
   ///
@@ -42,10 +43,11 @@ abstract class TSerializable extends TWriteable {
     bool includeMetaData = true,
   }) {
     final pMdFactory = mdFactory ?? this.mdFactory;
-    if (pMdFactory == null)
+    if (pMdFactory == null) {
       return toJson().toMd(
         includeMetaData: includeMetaData,
       );
+    }
     return includeMetaData ? pMdFactory.build() : pMdFactory.buildBody();
   }
 

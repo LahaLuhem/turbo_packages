@@ -4,6 +4,7 @@ import 'package:turbo_promptable/workspace/models/workflows/step.dart';
 
 part 'workflow.g.dart';
 
+/// An ordered sequence of [Step]s that define a process.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Workflow extends TPromptable {
   const Workflow({

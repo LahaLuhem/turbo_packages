@@ -17,6 +17,13 @@ part 't_promptable.g.dart';
   includeIfNull: false,
   createFactory: false,
 )
+/// Base class for all promptable models in the workspace.
+///
+/// Provides a [name], optional [metaData] (frontmatter), and optional
+/// [config] for controlling serialization and body rendering. Subclasses
+/// represent domain concepts (roles, agents, workflows, etc.) that can be
+/// serialized to Markdown, YAML, XML, or JSON via the turbo_serializable
+/// infrastructure.
 abstract class TPromptable extends TSerializable {
   const TPromptable({
     required this.name,

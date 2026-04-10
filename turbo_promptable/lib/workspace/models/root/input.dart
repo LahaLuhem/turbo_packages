@@ -8,6 +8,7 @@ import 'package:turbo_promptable/workspace/models/root/spec.dart';
 
 part 'input.g.dart';
 
+/// The input side of an [Activity]: a [request], [fields], and optional context.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Input extends TPromptable {
   const Input({

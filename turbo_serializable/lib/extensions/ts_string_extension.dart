@@ -2,13 +2,13 @@ extension TSStringExtension on String {
   List<String> get _words {
     if (isEmpty) return [];
     return replaceAllMapped(
-      RegExp(r'([a-z\d])([A-Z])'),
+          RegExp(r'([a-z\d])([A-Z])'),
           (match) => '${match[1]} ${match[2]}',
-    )
+        )
         .replaceAllMapped(
-      RegExp(r'([A-Z]+)([A-Z][a-z])'),
+          RegExp(r'([A-Z]+)([A-Z][a-z])'),
           (match) => '${match[1]} ${match[2]}',
-    )
+        )
         .replaceAll(RegExp(r'[_\-]+'), ' ')
         .trim()
         .split(RegExp(r'\s+'))
@@ -16,8 +16,9 @@ extension TSStringExtension on String {
         .toList();
   }
 
-  String _capitalize(String word) =>
-      word.isEmpty ? word : word[0].toUpperCase() + word.substring(1).toLowerCase();
+  String _capitalize(String word) => word.isEmpty
+      ? word
+      : word[0].toUpperCase() + word.substring(1).toLowerCase();
 
   /// Converts to `PascalCase`.
   ///
@@ -52,8 +53,7 @@ extension TSStringExtension on String {
   String toCamelCase() {
     final words = _words;
     if (words.isEmpty) return '';
-    return words.first.toLowerCase() +
-        words.skip(1).map(_capitalize).join();
+    return words.first.toLowerCase() + words.skip(1).map(_capitalize).join();
   }
 
   /// Converts to `lower case` (space-separated, all lowercase).

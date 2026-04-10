@@ -1,6 +1,6 @@
-
 import 'package:turbo_promptable/workspace/models/meta/t_promptable.dart';
 
+/// A file to be spawned from a [TPromptable], with an optional custom [fileName].
 class TFile {
   final TPromptable promptable;
   final String? _fileName;

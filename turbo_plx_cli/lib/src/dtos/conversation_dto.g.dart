@@ -24,16 +24,14 @@ Map<String, dynamic> _$ConversationDtoToJson(ConversationDto instance) =>
 
 ConversationMessageDto _$ConversationMessageDtoFromJson(
   Map<String, dynamic> json,
-) =>
-    ConversationMessageDto(
-      role: json['role'] as String,
-      content: json['content'] as String,
-    );
+) => ConversationMessageDto(
+  role: json['role'] as String,
+  content: json['content'] as String,
+);
 
 Map<String, dynamic> _$ConversationMessageDtoToJson(
   ConversationMessageDto instance,
-) =>
-    <String, dynamic>{
-      'role': instance.role,
-      'content': instance.content,
-    };
+) => <String, dynamic>{
+  'role': instance.role,
+  'content': instance.content,
+};

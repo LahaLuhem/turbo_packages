@@ -11,6 +11,7 @@ import 'package:turbo_promptable/workspace/models/root/workflow.dart';
 
 part 'persona.g.dart';
 
+/// A [Role] augmented with an [identity] that describes the persona's character.
 @JsonSerializable(
   explicitToJson: true,
   includeIfNull: false,

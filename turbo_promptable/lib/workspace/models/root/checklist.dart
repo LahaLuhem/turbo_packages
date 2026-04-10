@@ -5,6 +5,7 @@ export 'package:turbo_promptable/workspace/models/meta/t_promptable.dart';
 
 part 'checklist.g.dart';
 
+/// A named list of string [items] used for acceptance criteria, constraints, etc.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Checklist extends TPromptable {
   const Checklist({

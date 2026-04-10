@@ -268,7 +268,9 @@ class PlxClient implements PlxClientInterface {
   }
 
   @override
-  Future<List<SessionSummaryDto>> sendAgentSessionsList({String? dataDir}) async {
+  Future<List<SessionSummaryDto>> sendAgentSessionsList({
+    String? dataDir,
+  }) async {
     if (!_isConnected || _process == null) {
       throw StateError('PlxClient is not connected');
     }

@@ -3,6 +3,7 @@ import 'package:turbo_serializable/abstracts/t_serializable.dart';
 
 part 'prompt_field.g.dart';
 
+/// A typed parameter in an [Input] or [Output] with a [name], [type], and [description].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class PromptField extends TSerializable {
   const PromptField({

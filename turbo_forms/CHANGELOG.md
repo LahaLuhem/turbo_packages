@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.2
+
+### Changed
+- Updated `shadcn_ui` dependency from `^0.45.1` to `^0.53.5`
+
 ## 1.0.1
 
 - Initial release as part of turbo_packages monorepo

@@ -118,7 +118,9 @@ extension TSMapExtenionExtension on Map {
   String _mdTitle(String fallback, Map map) {
     final name = map['name'];
     final emoji = map['emoji'];
-    final title = name != null ? name.toString().toTitleCase() : fallback.toTitleCase();
+    final title = name != null
+        ? name.toString().toTitleCase()
+        : fallback.toTitleCase();
     if (emoji != null) return '$emoji $title';
     return title;
   }

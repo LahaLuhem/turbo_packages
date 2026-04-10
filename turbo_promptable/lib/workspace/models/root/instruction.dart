@@ -5,6 +5,7 @@ export 'package:turbo_promptable/workspace/models/meta/t_promptable.dart';
 
 part 'instruction.g.dart';
 
+/// Behavioural guidance containing [principles], [rules], [mindset], and [examples].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Instruction extends TPromptable {
   const Instruction({

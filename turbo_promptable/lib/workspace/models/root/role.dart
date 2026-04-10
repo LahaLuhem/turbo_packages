@@ -10,6 +10,8 @@ import 'package:turbo_promptable/workspace/models/root/workflow.dart';
 
 part 'role.g.dart';
 
+/// A named role with [expertise] and optional [activities], [instructions],
+/// [tools], [workflows], [templates], and [checklists].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Role extends TPromptable {
   const Role({

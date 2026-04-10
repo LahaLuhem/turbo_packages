@@ -2,6 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 't_tag.g.dart';
 
+/// A hashtag-style label attached to [TMetaData] for categorization.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class TTag {
   const TTag(this.value);

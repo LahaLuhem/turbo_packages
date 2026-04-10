@@ -30,7 +30,7 @@ dependencies:
   path_provider: ^2.1.5
   provider: ^6.1.5+1
   rxdart: ^0.28.0
-  shadcn_ui: ^0.45.1
+  shadcn_ui: ^0.53.5
   shake_gesture: ^2.0.0
   smooth_sheets: ^0.16.0
   top_snackbar_flutter: ^3.3.0

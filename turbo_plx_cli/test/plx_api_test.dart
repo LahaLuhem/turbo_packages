@@ -41,20 +41,19 @@ class MockPlxClient implements PlxClientInterface {
   }
 
   @override
-  Future<List<SessionSummaryDto>> sendAgentSessionsList({String? dataDir}) async =>
-      throw UnimplementedError();
+  Future<List<SessionSummaryDto>> sendAgentSessionsList({
+    String? dataDir,
+  }) async => throw UnimplementedError();
 
   @override
   Future<ConversationDto> sendAgentSessionGet({
     required String sessionId,
     String? projectPath,
     String? dataDir,
-  }) async =>
-      throw UnimplementedError();
+  }) async => throw UnimplementedError();
 
   @override
-  void sendAgentRun(AgentRunRequestDto request) =>
-      throw UnimplementedError();
+  void sendAgentRun(AgentRunRequestDto request) => throw UnimplementedError();
 
   @override
   Future<void> dispose() async {

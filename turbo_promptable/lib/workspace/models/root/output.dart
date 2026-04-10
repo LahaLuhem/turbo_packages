@@ -5,6 +5,7 @@ import 'package:turbo_promptable/workspace/models/root/template.dart';
 
 part 'output.g.dart';
 
+/// The output side of an [Activity]: [fields], optional [template], and [checklists].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Output extends TPromptable {
   const Output({

@@ -5,6 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.0] - 2026-04-10
+
+### Added
+- Workspace model system with 8 domain groups: checklists, context, instructions, memories, meta, root, specs, tools, and workflows
+- Checklist models: `TAcceptanceCriteria`, `TConstraints`, `TNonGoals` with JSON serialization
+- Context models: `TActor`, `TCollection`, `TConcept`, `TDocumentation`, `TReference`, `TStakeholder`, `TSubject` with JSON serialization
+- Instruction models: `TConvention`, `TSkill` with JSON serialization
+- Memory models: `TDecision`, `TEvent`, `TInsight`, `TMeeting`, `TProgress` with JSON serialization
+- Meta models: `TMetaData`, `TPromptable` with JSON serialization
+- Root models: `TActivity`, `TAgent`, `TChecklist`, `TContext`, `TGoal`, `TInput`, `TInstruction`, `TIssue`, `TMemory`, `TOutput`, `TPersona`, `TPromptField`, `TRole`, `TSpec`, `TTask`, `TTemplate`, `TTool`, `TWorkflow` with JSON serialization
+- Spec models: `TAbility`, `TFeature`, `TJourney`, `TRequirement`, `TScenario` with JSON serialization
+- Tool models: `TApi`, `TCli`, `TScript` with JSON serialization
+- Workflow model: `TStep` with JSON serialization
+- Enums: `TBodyType`, `TRefType`
+- Core extensions: `TCollectionExtensions` for YAML and XML serialization of lists/maps
+- Core models: `TConfig`, `TEmbedType`, `TMdSection`, `TRenderType`
+- Spawn models: `TFile`, `TFolder`, `TSpawnConfig`
+- `json_annotation` dependency for generated JSON serialization
+
+### Changed
+- **BREAKING**: Restructured from flat DTO-based architecture to domain-grouped workspace model system
+- **BREAKING**: Removed all previous DTO classes (TeamDto, AreaDto, RoleDto, CollectionDto, InstructionDto, etc.)
+- **BREAKING**: Removed example files and export configuration system (ExportConfig, ExportType, ExportResult)
+- Replaced `path` dependency on `turbo_serializable` with versioned constraint `^0.3.0`
+
+## [0.0.2] - 2026-03-19
+
+### Fixed
+- Included generated `.g.dart` files in package
+
+### Changed
+- Restructured into 6 domain groups with shared infrastructure
+
 ## [0.0.1] - 2026-01-01
 
 ### Added

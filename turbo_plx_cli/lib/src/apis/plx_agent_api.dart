@@ -42,12 +42,11 @@ class PlxAgentApi {
     required String sessionId,
     String? projectPath,
     String? dataDir,
-  }) =>
-      _plxClient.sendAgentSessionGet(
-        sessionId: sessionId,
-        projectPath: projectPath,
-        dataDir: dataDir,
-      );
+  }) => _plxClient.sendAgentSessionGet(
+    sessionId: sessionId,
+    projectPath: projectPath,
+    dataDir: dataDir,
+  );
 
   static int _runIdCounter = 0;
 

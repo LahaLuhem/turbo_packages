@@ -20,12 +20,12 @@ workspace:
   - turbo_template/flutter-app
   - turbo_widgets
   - turbo_widgets/example
-  - turbo_widgets/widgetbook
+
   - turbolytics
   - turbolytics/example
 
 dev_dependencies:
-  melos: ^7.3.0
+  melos: ^7.5.1
 
 melos:
   repository: https://github.com/appboypov/turbo_packages

@@ -12,6 +12,7 @@ import 'package:turbo_promptable/workspace/models/root/workflow.dart';
 
 part 'agent.g.dart';
 
+/// An autonomous agent built from a [Persona] with full role capabilities.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Agent extends Persona {
   const Agent({
