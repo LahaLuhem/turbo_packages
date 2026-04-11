@@ -1,0 +1,97 @@
+{
+  "title": "Implement _TDummyDocumentReference delegating to the in-memory store",
+  "status": "todo",
+  "type": "feature",
+  "phase": "7-batch-transaction-docref",
+  "order": 11,
+  "package": "turbo_firestore_api",
+  "spec": "workspace/specs/dummy-data/firestore/dummy-api-and-services-spec.json",
+  "mockup": "workspace/mockups/dummy-data/firestore/dummy-api-and-services-mockup.md",
+  "blocks": [
+    "Query filter/sort + exports tasks — they build on a fully-working dummy api surface."
+  ],
+  "depends_on": [
+    "workspace/tasks/dev/7-batch-transaction-docref/10-implement-dummy-write-batch-and-transaction-task.json"
+  ],
+  "status_instructions": {
+    "on_start": "Flip `status` to `in-progress`.",
+    "on_done": "Flip `status` to `done`, fill `worklog`, then `mv` to workspace/tasks/archive/dev/7-batch-transaction-docref/11-implement-dummy-document-reference-task.json.",
+    "on_followup": "If a downstream consumer needs additional delegated members, append to the final task's `side_context`."
+  },
+  "description": "Create a library-private `_TDummyDocumentReference<T>` that `implements DocumentReference<T>` and wraps a reference to the owning `TDummyFirestoreApi<T>` plus a concrete id. `.id`, `.path`, `.get()`, `.update(...)`, `.delete()`, `.snapshots()`, and any other member used inside the monorepo delegate back to the dummy api's in-memory store. Unsupported members (e.g. `.collection(subPath)`, `.parent`) throw `UnimplementedError` with a dummy-mode-guidance message. Replace the minimal placeholder used in task 09's createDoc response with this full class, and also wire `getDocRefById` / `getDocRefByIdWithConverter` overrides to return an instance bound to the requested id.",
+  "context_for_junior": "`createDoc` on the real api returns a `DocumentReference<T>`, and some services immediately call `.update(...)` or `.get()` on it. If our dummy returns a placeholder that throws on `.update(...)`, those services break. So we build a proper stub that forwards `.update(...)` into the dummy api's `updateDoc`, `.get()` into the dummy api's `getByIdWithConverter`, `.snapshots()` into the dummy api's `streamDocByIdWithConverter`, and `.delete()` into the dummy api's `deleteDoc`. Members we do not use in the monorepo (like subcollection navigation) stay unimplemented — we will add them only if and when a real caller needs them.",
+  "why_it_matters": "This is the last piece of the 'drop-in replacement' promise. With it, every existing service works unchanged in dummy mode.",
+  "instructions": [
+    "Create `_TDummyDocumentReference<T> implements DocumentReference<T>` as a library-private class colocated with the dummy api file (part file if you chose that route earlier).",
+    "State: `final TDummyFirestoreApi<T> _api`, `final String _id`.",
+    "`get id` returns `_id`. `get path` returns `'${_api._pathSnapshot}/$_id'` (expose `_pathSnapshot` via a package-private getter if needed).",
+    "`get()` calls `_api.getByIdWithConverter(id: _id)` and converts the TurboResponse to the DocumentSnapshot shape the real DocumentReference returns. Since building a full DocumentSnapshot is elaborate, return a minimal stub `DocumentSnapshot<T>` — create another library-private class `_TDummyDocumentSnapshot<T> implements DocumentSnapshot<T>` with `data()`, `exists`, `id`, `reference` delegating to the dummy api.",
+    "`update(Map<Object, Object?> data)` constructs a writeable-like merge against the stored map — or, more cleanly, delegates to a new package-private helper `_api.rawUpdateById(id: _id, data: data.cast<String, dynamic>())` that you add to the dummy api in this task. This helper must honour the latency + failure gate.",
+    "`delete()` delegates to `_api.deleteDoc(id: _id)`.",
+    "`snapshots()` returns a mapped stream from `_api.streamDocByIdWithConverter(id: _id)` that wraps each emitted `T?` in a `_TDummyDocumentSnapshot<T>` — including emitting a snapshot with `exists = false` when the underlying stream emits null.",
+    "Unsupported members (`collection`, `parent`, `withConverter`, any batch helpers) throw `UnimplementedError('dummy-mode: DocumentReference.<name> is not stubbed; if your feature needs it, extend _TDummyDocumentReference')`.",
+    "Replace every use of the placeholder from task 09 with this real stub.",
+    "Override `getDocRefById` / `getDocRefByIdWithConverter` on TDummyFirestoreApi<T> to return this stub directly (no store read — matches the real api's lazy-reference behaviour).",
+    "Run `make analyze package=turbo_firestore_api` and the new unit tests."
+  ],
+  "goals": [
+    "createDoc returns a DocumentReference that supports the monorepo's real call sites (.id, .path, .get, .update, .delete, .snapshots).",
+    "getDocRefById / getDocRefByIdWithConverter return the same stub shape.",
+    "Unsupported members fail loudly with actionable messages."
+  ],
+  "non_goals": [
+    "No sub-collection stubbing.",
+    "No `.parent` traversal.",
+    "No caching of snapshots across calls.",
+    "No integration with the query filter/sort task."
+  ],
+  "acceptance_criteria": [
+    "`make analyze package=turbo_firestore_api` passes.",
+    "Unit test: createDoc returns a DocumentReference whose `.id` and `.path` match the expected ids.",
+    "Unit test: the returned DocumentReference's `.get()` yields a DocumentSnapshot with the created entity's data.",
+    "Unit test: the returned DocumentReference's `.update(...)` mutates the store; a subsequent `.get()` reflects the update.",
+    "Unit test: `.delete()` removes the entity; `.get()` afterwards yields a snapshot with `exists = false`.",
+    "Unit test: `.snapshots()` emits the initial snapshot and re-emits null after delete.",
+    "Unit test: calling `.collection(...)` throws UnimplementedError with a dummy-mode message."
+  ],
+  "constraints": [
+    "Library-private visibility for both stub classes.",
+    "Reuse existing helpers — do not duplicate materialisation or latency code.",
+    "`rawUpdateById` applies timestamps via TTimestampType to stay consistent with updateDoc."
+  ],
+  "skills_to_read": [
+    "dev-conventions/conventions/apis.md",
+    "dev-conventions/conventions/class-structure.md",
+    "dev-conventions/conventions/firestore-services.md",
+    "dev-conventions/conventions/unit-tests.md"
+  ],
+  "tools": [
+    "RepoPrompt MCP for searching all call sites of `DocumentReference` across the monorepo to confirm which members are actually consumed",
+    "Edit",
+    "Bash for analyze + test"
+  ],
+  "verification": [
+    "make analyze package=turbo_firestore_api",
+    "cd turbo_firestore_api && dart test test/apis/t_dummy_firestore_api_doc_ref_test.dart"
+  ],
+  "testing": {
+    "rules": "No mocks. Use the synthetic DTO + writeable fixture from earlier tasks. Assert end-to-end: createDoc → DocumentReference → update/delete → store reflects → streams fan out.",
+    "scenarios": [
+      "Given createDoc returns a DocumentReference, When `.id` is read, Then it matches the id passed or the deterministically generated id.",
+      "Given the returned DocumentReference, When `.get()` is awaited, Then the snapshot's data matches the stored entity.",
+      "Given the returned DocumentReference, When `.update({fieldA: newValue})` is awaited, Then a subsequent `.get()` reflects the update.",
+      "Given an active `.snapshots()` subscription, When `.delete()` is called, Then the subscriber receives a snapshot with `exists = false`.",
+      "Given the stub, When an unsupported member like `.collection('children')` is called, Then an UnimplementedError with a dummy-mode message is thrown."
+    ],
+    "refactor_for_testability": "If `DocumentSnapshot` stubbing becomes awkward, hoist its construction into a private helper taking only `id` + `data` + `exists`."
+  },
+  "quality_bar": {
+    "maintainability": "Every member has a one-line dartdoc explaining the delegation path.",
+    "dry": "All delegation flows through existing dummy api methods — no new mutation logic lives here.",
+    "single_responsibility": "The stub does address + dispatch, nothing more.",
+    "performance": "Every member is O(1) plus whatever the delegated method costs.",
+    "abuse_resistance": "Unsupported members fail loudly with actionable messages rather than returning fake data."
+  },
+  "side_context": [],
+  "worklog": []
+}

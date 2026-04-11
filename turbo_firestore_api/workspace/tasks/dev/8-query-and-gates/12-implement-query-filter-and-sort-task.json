@@ -1,0 +1,99 @@
+{
+  "title": "Implement whereDescription-keyed query filters and sort comparators",
+  "status": "todo",
+  "type": "feature",
+  "phase": "8-query-and-gates",
+  "order": 12,
+  "package": "turbo_firestore_api",
+  "spec": "workspace/specs/dummy-data/firestore/dummy-api-and-services-spec.json",
+  "mockup": "workspace/mockups/dummy-data/firestore/dummy-api-and-services-mockup.md",
+  "blocks": [
+    "Public exports task."
+  ],
+  "depends_on": [
+    "workspace/tasks/dev/7-batch-transaction-docref/11-implement-dummy-document-reference-task.json"
+  ],
+  "status_instructions": {
+    "on_start": "Flip `status` to `in-progress`.",
+    "on_done": "Flip `status` to `done`, fill `worklog`, then `mv` to workspace/tasks/archive/dev/8-query-and-gates/12-implement-query-filter-and-sort-task.json.",
+    "on_followup": "If the semantics of `whereDescription` lookups need clarification for the exports task's examples, append to that task's `side_context`."
+  },
+  "description": "Replace the passthrough body of `_applyQueryFilterAndSort` with the real implementation: when a caller invokes `listByQuery*`, `streamByQuery*`, or `listBySearchTerm*` with a `whereDescription` string, look up the matching predicate in the constructor-supplied `queryFilters` map and the matching comparator in `querySort`. Apply the filter first (against the raw stored json maps), then the comparator, then materialise the result. With no matching key, behave like `listAll*` — full unsorted store. The search helper keeps a defaultable substring-match fallback over a configurable string field when no filter is registered.",
+  "context_for_junior": "Real Firestore query methods take a `whereDescription` string (used for logging) alongside the actual query. In dummy mode we reuse that string as a lookup key into the caller's filter/sort maps. This lets a feature say 'active' / 'archived' / 'draft' tabs work in dummy mode without subclassing anything — the caller passes `queryFilters: {'active': (doc) => doc['status'] == 'active', ...}` at construction and every listByQuery('active') call filters. Sort works the same way, with comparators. The contract is: filter predicates receive raw `Map<String, dynamic>` (not typed T), so they stay stable across re-materialisations.",
+  "why_it_matters": "Most real apps have at least one filtered list screen. Without this task those screens render the full store in dummy mode and look broken. With it, dummy mode handles Active/Archived/Draft tabs identically to production.",
+  "instructions": [
+    "Update `_applyQueryFilterAndSort` in the dummy api file so it takes `{required String? whereDescription, required List<Map<String, dynamic>> input}` and returns a new list.",
+    "When `whereDescription` is null, return `input` unchanged.",
+    "When `whereDescription` is non-null and `queryFilters` contains the key, apply the predicate via `input.where(pred).toList()`.",
+    "When `whereDescription` is non-null and `querySort` contains the key, apply the comparator via `filtered.sorted(comparator)` (use `package:collection` or a plain sort call — do not add new dependencies unless already declared).",
+    "When both are present, filter first then sort.",
+    "When only one is present, apply that one only.",
+    "When neither is present for the given key, return `input` unchanged (same as no key).",
+    "For `listBySearchTermWithConverter` / `listBySearchTerm`: when no filter is registered for the given `whereDescription`, fall back to a substring search over a configurable field. The configurable field defaults to `'name'`; expose a new optional constructor parameter `searchField: String = 'name'` on `TDummyFirestoreApi` and thread it into the search path. If a caller's DTO has no `name` field, the substring search returns the full store (not a crash).",
+    "Every read and stream method that accepted a `whereDescription` must pass it through to `_applyQueryFilterAndSort`. Double-check task 07 + task 08 outputs and patch any override that was emitting the full store unconditionally.",
+    "Run `make analyze package=turbo_firestore_api` and the new unit tests."
+  ],
+  "goals": [
+    "Filtered tabs work in dummy mode without custom service subclasses.",
+    "Sort order mirrors the real api's orderBy semantics at the level the caller controls.",
+    "Search falls back to substring match when no explicit filter is registered.",
+    "All existing read and stream tests still pass."
+  ],
+  "non_goals": [
+    "No Firestore-style query DSL parsing.",
+    "No cursor pagination.",
+    "No multi-field sort chaining beyond what a single comparator expresses.",
+    "No `isEqualTo` / `arrayContains` helpers."
+  ],
+  "acceptance_criteria": [
+    "`make analyze package=turbo_firestore_api` passes.",
+    "Unit test: with `queryFilters: {'active': pred}`, listByQueryWithConverter('active') returns only matching entities.",
+    "Unit test: with `querySort: {'active': comparator}`, the results are sorted per the comparator.",
+    "Unit test: with no registered key, listByQueryWithConverter('unknown') returns the full store unchanged.",
+    "Unit test: streamByQueryWithConverter reacts to writes with filters + sort reapplied on every re-emission.",
+    "Unit test: listBySearchTermWithConverter with no filter and default `searchField = 'name'` returns entities whose name contains the term.",
+    "Unit test: listBySearchTermWithConverter with no filter and a DTO that has no `name` field returns the full store (graceful degradation)."
+  ],
+  "constraints": [
+    "Predicates run against raw json, never typed T — stable across re-materialisations.",
+    "No new package dependencies.",
+    "Preserve determinism: sort must be stable for tied elements.",
+    "No workaround for the search fallback — if `searchField` is missing from the document, skip the predicate, do not throw."
+  ],
+  "skills_to_read": [
+    "dev-conventions/conventions/apis.md",
+    "dev-conventions/conventions/firestore-services.md",
+    "dev-conventions/conventions/unit-tests.md"
+  ],
+  "tools": [
+    "RepoPrompt MCP for reading how the real TFirestoreApi passes `whereDescription` through",
+    "Edit",
+    "Bash for analyze + test"
+  ],
+  "verification": [
+    "make analyze package=turbo_firestore_api",
+    "cd turbo_firestore_api && dart test test/apis/t_dummy_firestore_api_query_test.dart"
+  ],
+  "testing": {
+    "rules": "No mocks. Use a synthetic DTO with a `status` field and a `name` field. Seed the store with a mix of statuses and exercise filter, sort, and search paths.",
+    "scenarios": [
+      "Given `queryFilters: {'active': (doc) => doc['status'] == 'active'}`, When listByQueryWithConverter('active') is called, Then only active entities are returned.",
+      "Given `querySort: {'active': (a,b) => a['createdAt'].compareTo(b['createdAt'])}`, When the filter is applied then the sort, Then results come back in ascending createdAt order.",
+      "Given no registered filter/sort for 'unknown', When listByQueryWithConverter('unknown') is called, Then the entire store is returned unchanged.",
+      "Given a subscribed streamByQueryWithConverter('active'), When a new active entity is created, Then the subscriber receives a snapshot containing the new entity in the correct sorted position.",
+      "Given a subscribed streamByQueryWithConverter('active'), When an inactive entity is created, Then the subscriber receives a snapshot that does NOT include the new entity.",
+      "Given default `searchField = 'name'` and no filter, When listBySearchTermWithConverter is called with term 'ali', Then only entities whose name contains 'ali' are returned.",
+      "Given a DTO without a `name` field, When listBySearchTermWithConverter is called with any term, Then the full store is returned without crashing."
+    ],
+    "refactor_for_testability": "If test setup is noisy, extract a helper that builds a dummy api with a given filter map and queue of seeded entities."
+  },
+  "quality_bar": {
+    "maintainability": "Filter/sort lookup is one lookup per call — no cached indices that could drift on writes.",
+    "dry": "Every query-capable override routes through the same `_applyQueryFilterAndSort` seam.",
+    "single_responsibility": "The seam transforms a list; it does not own store, latency, or failure concerns.",
+    "performance": "O(N) filter + O(N log N) sort per call, matching user expectation for dummy data sizes.",
+    "abuse_resistance": "Predicates run in caller code — if they throw, let the exception propagate untouched so the caller sees the real bug instead of a silent empty list."
+  },
+  "side_context": [],
+  "worklog": []
+}

@@ -1,0 +1,94 @@
+{
+  "title": "Wire public exports for dummy api + generators and run final pub-check",
+  "status": "todo",
+  "type": "integration",
+  "phase": "9-exports-and-integration",
+  "order": 13,
+  "package": "turbo_firestore_api",
+  "spec": "workspace/specs/dummy-data/firestore/dummy-api-and-services-spec.json",
+  "mockup": "workspace/mockups/dummy-data/firestore/dummy-api-and-services-mockup.md",
+  "blocks": [],
+  "depends_on": [
+    "workspace/tasks/dev/8-query-and-gates/12-implement-query-filter-and-sort-task.json"
+  ],
+  "status_instructions": {
+    "on_start": "Flip `status` to `in-progress`.",
+    "on_done": "Flip `status` to `done`, fill `worklog`, then `mv` to workspace/tasks/archive/dev/9-exports-and-integration/13-wire-public-exports-and-pub-check-task.json.",
+    "on_followup": "This is the terminal task — if any prior archived task's side_context surfaced an unresolved question, flag it in this task's worklog so the feature is fully shippable."
+  },
+  "description": "Add the public exports the spec lists, verify turbo_firestore_api.dart re-exports them, run the full quality gate (analyze, test, pub-check), and write a minimal smoke test that exercises a real downstream service (e.g. a synthetic `TCollectionService` subclass) wired with a `TDummyFirestoreApi<T>` end-to-end: seed → stream → create → update → delete → stream re-emission, all passing through the service's public api.",
+  "context_for_junior": "Every new public file in `lib/` needs to be explicitly re-exported from the package's barrel file (`lib/turbo_firestore_api.dart`). Without the export, downstream callers cannot see the new types. The private probing map stays unexported. The final smoke test is the one integration proof that services + dummy api compose correctly — it must not mock the service or the dummy.",
+  "why_it_matters": "Missing exports silently ship a feature that callers cannot consume. The pub-check guard (160/160 pana score) catches packaging regressions before they reach pub.dev.",
+  "instructions": [
+    "Open `lib/turbo_firestore_api.dart` and add `export 'apis/t_dummy_firestore_api.dart';`, `export 'generators/t_value_generator.dart';`, `export 'generators/t_dummy_schema.dart';`, `export 'generators/t_value_generator_registry.dart';`, `export 'generators/t_value_specs.dart';`. Do NOT export `apis/_t_dummy_probing_map.dart` — it must stay library-private.",
+    "Run `make analyze package=turbo_firestore_api` — must pass with 0 warnings.",
+    "Run `make test package=turbo_firestore_api` — must pass with 0 failures.",
+    "Run `make pub-check package=turbo_firestore_api` — must score 160/160. If any checks fail, fix them; the only acceptable failure mode is the pana dev-dependency hint which already shows up on clean runs.",
+    "Write one new integration-style test file `test/apis/t_dummy_firestore_api_service_smoke_test.dart` that: (a) defines a synthetic TWriteableId DTO, (b) creates a minimal `TCollectionService<DTO, TDummyFirestoreApi<DTO>>` subclass the same way a real feature would, (c) constructs the dummy api with the synthetic DTO's fromJson/toJson, (d) subscribes to the service's stream, (e) observes the seeded snapshot, (f) calls `service.createDoc(writeable)` and asserts the stream re-emits with the new entity, (g) updates the entity via the returned DocumentReference, asserts the stream re-emits, (h) deletes and asserts the stream re-emits without the deleted entity.",
+    "The smoke test uses `Random(42)` via the `seed` constructor param so the run is deterministic.",
+    "Update the feature's task archive: move this task to archive after completion. Verify every task in the feature has been archived (each under workspace/tasks/archive/dev/<phase>/).",
+    "Update `CHANGELOG.md` for the package with a short entry describing the new dummy api feature. Do not touch other packages' changelogs."
+  ],
+  "goals": [
+    "Feature is fully consumable by downstream callers through the package barrel file.",
+    "Quality gates pass: analyze, test, pub-check.",
+    "One end-to-end smoke test proves the service + dummy api composition works.",
+    "Every task in this feature is archived."
+  ],
+  "non_goals": [
+    "No new features.",
+    "No public api changes to the real TFirestoreApi.",
+    "No changes to turbo_template or sibling packages.",
+    "No README rewrite."
+  ],
+  "acceptance_criteria": [
+    "`lib/turbo_firestore_api.dart` exports the five new files listed in the spec's `public_api.new_exports` and does not export `apis/_t_dummy_probing_map.dart`.",
+    "`make analyze package=turbo_firestore_api` — 0 warnings.",
+    "`make test package=turbo_firestore_api` — 0 failures.",
+    "`make pub-check package=turbo_firestore_api` — 160/160 score.",
+    "The smoke test file exists, runs green, and exercises seed → stream → create → update → delete → re-emit via a real TCollectionService subclass.",
+    "CHANGELOG.md has a new entry under the next version heading describing the dummy api.",
+    "All task files for this feature are in `workspace/tasks/archive/dev/**`."
+  ],
+  "constraints": [
+    "No workaround for pub-check failures — fix the underlying cause.",
+    "Smoke test does not mock the service, the dummy api, or the DTO.",
+    "CHANGELOG entry is two sentences max: what ships, why callers care."
+  ],
+  "skills_to_read": [
+    "dev-conventions/conventions/apis.md",
+    "dev-conventions/conventions/firestore-services.md",
+    "dev-conventions/conventions/unit-tests.md"
+  ],
+  "tools": [
+    "RepoPrompt MCP for inspecting `lib/turbo_firestore_api.dart` and existing TCollectionService subclasses in sibling packages",
+    "Edit for the barrel file and CHANGELOG",
+    "Write for the new smoke test file",
+    "Bash for analyze, test, pub-check, and final archive moves"
+  ],
+  "verification": [
+    "make analyze package=turbo_firestore_api",
+    "make test package=turbo_firestore_api",
+    "make pub-check package=turbo_firestore_api",
+    "cd turbo_firestore_api && dart test test/apis/t_dummy_firestore_api_service_smoke_test.dart"
+  ],
+  "testing": {
+    "rules": "No mocks anywhere in the smoke test. The service subclass is real, the dummy api is real, the DTO is a real synthetic class. Assert on stream emissions + store contents.",
+    "scenarios": [
+      "Given a real TCollectionService subclass wired to TDummyFirestoreApi, When the service is instantiated and its stream is subscribed, Then the subscriber receives a seeded snapshot with `defaultCollectionSize` entities.",
+      "Given the subscribed stream, When service.createDoc is called with a new writeable, Then the stream re-emits with the new entity included.",
+      "Given the created entity's id, When service.updateDoc is called with a partial writeable, Then the stream re-emits with the update applied.",
+      "Given the created entity's id, When service.deleteDoc is called, Then the stream re-emits without the deleted entity."
+    ],
+    "refactor_for_testability": "If a real TCollectionService requires an auth-sync layer we cannot stand up in the smoke test, use the closest service base class that does not require auth — look at turbo_firestore_api/lib/services/ to pick the minimal viable base."
+  },
+  "quality_bar": {
+    "maintainability": "Barrel file stays alphabetised.",
+    "dry": "No duplicated export lines, no duplicated smoke coverage already handled by earlier unit tests.",
+    "single_responsibility": "Smoke test validates composition — it does not re-test latency, failure, or determinism (those are covered per-task).",
+    "performance": "Smoke test runs under 1 second.",
+    "abuse_resistance": "pub-check score gate blocks any regression in packaging quality."
+  },
+  "side_context": [],
+  "worklog": []
+}

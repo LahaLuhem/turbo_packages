@@ -1,0 +1,579 @@
+{
+  "spec": {
+    "name": "TDummyFirestoreApi",
+    "package": "turbo_firestore_api",
+    "feature": "dummy-data",
+    "ability": "firestore",
+    "end_goal": "A consumer can swap any real TFirestoreApi<T>/service for a dummy variant that produces realistic fake data derived from the entity's field types and names, with per-feature overrides supplied through the dummy's constructor, and with configurable latency and random failure injection for realistic UX simulation.",
+    "status": "confirmed",
+    "source_mockup": "workspace/mockups/dummy-data/firestore/dummy-api-and-services-mockup.md"
+  },
+  "domain_areas": [
+    {
+      "name": "apis",
+      "path": "lib/apis/",
+      "purpose": "Houses TFirestoreApi and the new TDummyFirestoreApi that extends it. Part-file composition stays as-is; the prerequisite refactor promotes every extension method to a virtual instance method on TFirestoreApi so the dummy subclass can override them.",
+      "files": {
+        "existing_refactored": [
+          "lib/apis/t_firestore_api.dart",
+          "lib/apis/t_firestore_create_api.dart",
+          "lib/apis/t_firestore_delete_api.dart",
+          "lib/apis/t_firestore_get_api.dart",
+          "lib/apis/t_firestore_list_api.dart",
+          "lib/apis/t_firestore_search_api.dart",
+          "lib/apis/t_firestore_stream_api.dart",
+          "lib/apis/t_firestore_update_api.dart"
+        ],
+        "new": [
+          "lib/apis/t_dummy_firestore_api.dart",
+          "lib/apis/_t_dummy_probing_map.dart"
+        ]
+      }
+    },
+    {
+      "name": "generators",
+      "path": "lib/generators/",
+      "purpose": "New concept folder hosting the value generator system: the schema data class, the registry that merges name heuristics, type fallbacks, placeholders, and caller overrides, the TValueGenerator typedef, and the declarative spec factories.",
+      "files": {
+        "new": [
+          "lib/generators/t_value_generator.dart",
+          "lib/generators/t_dummy_schema.dart",
+          "lib/generators/t_value_generator_registry.dart",
+          "lib/generators/t_value_specs.dart"
+        ]
+      }
+    },
+    {
+      "name": "services",
+      "path": "lib/services/",
+      "purpose": "TCollectionService, TDocumentService, their sync variants, and TAuthSyncService stay untouched. They consume the abstract TFirestoreApi<T> through their API generic parameter, so swapping a real api for TDummyFirestoreApi<T> at construction time is the only wire-up change the caller makes.",
+      "files": {
+        "unchanged": [
+          "lib/services/t_collection_service.dart",
+          "lib/services/t_document_service.dart",
+          "lib/services/t_auth_sync_service.dart",
+          "lib/services/after_sync_t_collection_service.dart",
+          "lib/services/before_sync_t_collection_service.dart",
+          "lib/services/before_after_sync_t_collection_service.dart",
+          "lib/services/after_sync_t_document_service.dart",
+          "lib/services/before_sync_t_document_service.dart",
+          "lib/services/before_after_sync_t_document_service.dart"
+        ]
+      }
+    }
+  ],
+  "prerequisite_refactor": {
+    "title": "TFirestoreApi extensions -> virtual instance methods",
+    "ships_first": true,
+    "blocks": "TDummyFirestoreApi cannot override anything until the methods it needs to intercept live on the class body. Extension methods dispatch statically on receiver type, so subclasses cannot override them.",
+    "scope": {
+      "keep_on_class": [
+        "constructor",
+        "private fields",
+        "turboVars",
+        "writeBatch",
+        "collection",
+        "doc",
+        "genId",
+        "docExists",
+        "_extractDocumentData",
+        "_buildFullPath",
+        "_createException",
+        "_logResultLength",
+        "_handleBatchResponse",
+        "_handleBatchOperation",
+        "runTransaction"
+      ],
+      "promote_to_instance_methods": {
+        "t_firestore_create_api.dart": ["createDoc", "createDocInBatch", "createDocInTransaction"],
+        "t_firestore_update_api.dart": ["updateDoc", "updateDocInBatch", "updateDocInTransaction"],
+        "t_firestore_delete_api.dart": ["deleteDoc", "deleteDocInBatch", "deleteDocInTransaction"],
+        "t_firestore_get_api.dart": ["getById", "getByIdWithConverter", "getDocRefById", "getDocRefByIdWithConverter", "getDocSnapshotById", "getDocSnapshotByIdWithConverter"],
+        "t_firestore_list_api.dart": ["listByQuery", "listByQueryWithConverter", "listAll", "listAllWithConverter", "listCollectionReference", "listCollectionReferenceWithConverter"],
+        "t_firestore_search_api.dart": ["listBySearchTerm", "listBySearchTermWithConverter"],
+        "t_firestore_stream_api.dart": ["streamAll", "streamAllWithConverter", "streamByQuery", "streamByQueryWithConverter", "streamByDocId", "streamDocByIdWithConverter"]
+      },
+      "part_file_layout": "unchanged — part files remain, methods simply move from `extension TurboFirestoreXxxApi<T> on TFirestoreApi<T> { ... }` to direct members inside the `class TFirestoreApi<T>` part-of-body."
+    },
+    "api_surface_impact": {
+      "call_sites": "zero change — both extension calls and instance calls have identical receiver syntax",
+      "public_exports": "zero change",
+      "consumer_migration": "none"
+    }
+  },
+  "architecture": {
+    "class_hierarchy": "class TDummyFirestoreApi<T> extends TFirestoreApi<T>",
+    "substitutability": "Every service generic bound `API extends TFirestoreApi<T>` is satisfied by TDummyFirestoreApi<T>. No service change.",
+    "no_network_guarantee": "TDummyFirestoreApi overrides every method that touches `_firebaseFirestore` so the real Firestore instance is never read, even though it is accepted in the constructor for signature parity.",
+    "probing_model": {
+      "mechanism": "The dummy constructs a `_TDummyProbingMap` that implements `Map<String, dynamic>` and returns a type-correct stand-in for every `[] operator` lookup. It invokes the caller's own `fromJson` with the probing map as input; normal `json['field'] as Type` casts either succeed (and the field's resolved type is recorded) or throw (the probing map widens the last accessed key to the next candidate type and replays `fromJson`).",
+      "candidate_type_order": [
+        "String",
+        "int",
+        "double",
+        "num",
+        "bool",
+        "DateTime",
+        "Timestamp",
+        "List<dynamic>",
+        "Map<String, dynamic>",
+        "GeoPoint",
+        "DocumentReference",
+        "Blob",
+        "null"
+      ],
+      "unresolved_handling": "When no candidate satisfies a field's cast target, the field is marked unresolved and a visible placeholder generator is registered for it (string '[dummy]', int 0, epoch DateTime, empty list, empty map, false).",
+      "nested_dto_support": {
+        "policy": "When the probing map reaches a `Map<String, dynamic>` candidate for a field and the caller casts it to `Map<String, dynamic>` (as generated json_serializable code does for nested DTOs), the returned stand-in is itself a fresh `_TDummyProbingMap`. Any subsequent call inside the caller's code that does `NestedDto.fromJson(json['nested'] as Map<String, dynamic>)` recursively enters the nested DTO's `fromJson`, which the nested probing map satisfies the same way.",
+        "schema_shape": "TDummySchema becomes recursive: each resolved field is either a flat `Type` or a nested `TDummySchema` when the caller nested the value into another `fromJson`. Generator walks the tree depth-first when producing an entity.",
+        "result": "Out of the box, every nested DTO appears populated with realistic values with zero overrides. Callers only write overrides for fields they want to pin to domain-specific values (like a company-scoped email)."
+      },
+      "typed_collection_handling": {
+        "policy": "When the probing map resolves a field to `List<dynamic>`, the generator produces an empty list by default. The probing map does not attempt to infer element types from inside `.map((e) => e as X)` calls because catching element-cast exceptions inside iterator closures is brittle and varies with DTO style.",
+        "escape_hatch": "Callers populate lists with realistic items via fieldGenerators entries, e.g. `fieldGenerators: {'tags': oneOf([['flutter','dart'], ['firebase']])}` or a custom list generator.",
+        "visibility": "Empty lists are visible empty states in the UI — not crashes — so the dummy is never half-broken by default."
+      },
+      "converter_compatibility": {
+        "known_converters": "Converters like `TimestampConverter` in the monorepo read the raw json value and expect a `Timestamp`. Because `Timestamp` is in the candidate list, the probing loop will widen the field to a `Timestamp` stand-in, the converter will succeed, and the field type is recorded as `Timestamp`. The generator then produces `Timestamp` values for that field which the converter can consume on every read.",
+        "unknown_converters": "Any converter that expects a type outside the candidate list causes the field to be marked unresolved and a visible placeholder generator is registered. Callers override the field explicitly when the converter expects a domain-specific type."
+      }
+    },
+    "value_resolution_priority": [
+      "caller-supplied fieldGenerators[fieldName]",
+      "caller-supplied typeGenerators[runtimeType]",
+      "bundled field-name heuristics (name, email, url, createdAt, price, etc.)",
+      "bundled runtime-type fallbacks (String -> word, int -> 0..1000, bool -> random, etc.)",
+      "unresolved-field placeholder"
+    ],
+    "in_memory_store": {
+      "shape": "Map<String, Map<String, dynamic>>  — stored as raw json rather than typed T so that partial updates can be overlaid correctly before the next fromJson trip. The typed T is re-materialised every time a read emits.",
+      "scope": "one store per TDummyFirestoreApi<T> instance",
+      "seeding": "on first call that needs a snapshot (list* or stream*), the store is seeded with `defaultCollectionSize` generated entities; each seeded entity is produced via the generator as a json map and then (once) through fromJson to sanity-check it builds, but only the json map is retained.",
+      "mutation_semantics": {
+        "create": "generator produces a fresh json map using the schema + registry, idFieldName is injected with the provided-or-generated id, timestamps are applied via TTimestampType.add with createdAtFieldName/updatedAtFieldName parity with the real api, the writeable is validated via writeable.validate() first, the resulting map is stored, and the snapshot is re-emitted.",
+        "update": "the stored map for the id is looked up (404-style fail if missing — same behaviour the real api produces via a not-found exception), writeable.validate() runs, `writeable.toJson()` is merged ONTO the stored map (shallow overlay, matching Firestore's partial-update behaviour), timestamps are re-applied via TTimestampType.add, the merged map is stored, and the snapshot is re-emitted.",
+        "upsert": "if id exists -> update semantics; else create semantics.",
+        "delete": "map entry is removed, snapshot is re-emitted, any open single-doc stream for that id emits null once.",
+        "re_emit_rule": "every mutation walks the collection controllers and emits the freshly-materialised List<T> (every stored json map piped through fromJson each time)."
+      }
+    },
+    "stream_registry": {
+      "collection_controllers": "Set<StreamController<List<T>>> — one entry per open streamAll*/streamByQuery* subscription; broadcast controllers so multiple listeners on the same call share state",
+      "document_controllers": "Map<String, Set<StreamController<T?>>> — keyed by id, one entry per open streamDocByIdWithConverter subscription per document",
+      "re_emit_rule": "after any mutation the dummy walks both registries and emits the updated snapshot (collections) or the updated/null entity (documents) to every registered controller",
+      "cleanup": "controllers unregister themselves via onCancel; dispose closes all remaining controllers"
+    },
+    "latency_scope": {
+      "initial_stream_emission": "The latency gate runs before the first emission on every streamAll*/streamByQuery*/streamDocByIdWithConverter subscription, simulating a query round-trip.",
+      "subsequent_stream_emissions": "Re-emissions triggered by mutations (create/update/delete) are instant — no latency — mirroring Firestore's near-zero local-fan-out latency after a write lands.",
+      "one_shot_reads_and_writes": "getById*/listAll*/listByQuery*/createDoc*/updateDoc*/deleteDoc* all wait the latency gate exactly once per call."
+    },
+    "persistence": {
+      "scope": "in-memory only",
+      "rationale": "Dummy data is a dev/demo tool. Persisting across hot restarts would require platform storage and is out of scope. Determinism from the seed is enough to make fresh runs look identical to prior runs without real persistence.",
+      "implication": "Mutations made during a session are lost on app restart. Users running demos plan around this or hard-code scenarios into queryFilters."
+    },
+    "collection_path_snapshot": {
+      "policy": "collectionPath() is invoked once at construction time and the resulting string is captured for: (a) the seed fallback hash, (b) the WriteBatch/Transaction stub path field, (c) the stub DocumentReference.path. Subsequent reads still call collectionPath() for logging parity with the real api, but routing and seeding are pinned.",
+      "rationale": "If collectionPath() depends on runtime state (like the currently-selected org), calling it on every read would move the seed mid-run and break determinism."
+    },
+    "seeded_entity_timestamps": {
+      "policy": "When the store is seeded with `defaultCollectionSize` entities, each entity's createdAt is spread across the trailing `defaultCollectionSize` days (one per day, newest first), and updatedAt defaults to the same value. Bundled heuristic generators for createdAt/updatedAt are only consulted when the caller did NOT provide an override.",
+      "rationale": "If every seeded entity shared the same createdAt, sort-by-date feeds would render with unstable order and all items would look identical. Spreading across a week/month gives realistic feed visuals immediately."
+    },
+    "write_batch_and_transaction": {
+      "_TDummyWriteBatch": {
+        "path": "part of t_dummy_firestore_api.dart, library-private",
+        "implements": "WriteBatch",
+        "behaviour": "collects queued set/update/delete operations as closures; on commit(), the closures are applied in order against the in-memory store, and the snapshot is re-emitted once at the end",
+        "unsupported_operations": "throws UnimplementedError with a clear message when the caller touches a WriteBatch method the dummy has not stubbed"
+      },
+      "runTransaction": "the dummy overrides runTransaction and invokes the caller's transactionHandler with a _TDummyTransaction that reads from and writes to the in-memory store directly; commits happen inline when the handler returns; rollbacks are a no-op because there is no partial commit state to undo"
+    },
+    "_TDummyDocumentReference": {
+      "path": "part of t_dummy_firestore_api.dart, library-private",
+      "implements": "DocumentReference<T>",
+      "binding": "wraps a reference to the owning TDummyFirestoreApi and a concrete id so .get(), .update(), .delete(), .snapshots() and .path/.id all delegate back to the dummy api's in-memory store",
+      "unsupported_operations": "throws UnimplementedError with the dummy-mode guidance message when the caller touches a DocumentReference method the dummy has not stubbed (e.g. .collection(subPath) for sub-collections, .parent)"
+    },
+    "latency_and_failure_gate": {
+      "applies_to": [
+        "getByIdWithConverter",
+        "getById",
+        "listAllWithConverter",
+        "listAll",
+        "listByQueryWithConverter",
+        "listByQuery",
+        "listBySearchTermWithConverter",
+        "listBySearchTerm",
+        "streamAllWithConverter",
+        "streamAll",
+        "streamByQueryWithConverter",
+        "streamByQuery",
+        "streamDocByIdWithConverter",
+        "streamByDocId",
+        "createDoc",
+        "updateDoc",
+        "deleteDoc"
+      ],
+      "delay_duration": {
+        "type": "Duration",
+        "default_ms": 225,
+        "meaning": "fixed wait before any result is returned"
+      },
+      "delay_range": {
+        "type": "List<Duration>?",
+        "default": null,
+        "meaning": "when set, the delay is a uniform-random duration inside [min, max], overriding delay_duration"
+      },
+      "random_failure_percentage": {
+        "type": "double",
+        "default": 0,
+        "meaning": "0..100; percentage chance that the call returns TurboResponse.fail with a simulated error instead of success"
+      },
+      "failure_payload": {
+        "strategy": "The dummy constructs a real TFirestoreException subtype chosen from a weighted pool so every realistic failure branch is exercised in dummy mode. The chosen subtype is populated with the same context a real call would carry (path, id, operationType, query, a synthetic stack trace, and a simulated originalException marker).",
+        "pool": [
+          "TurboFirestorePermissionDeniedException",
+          "TurboFirestoreUnavailableException",
+          "TurboFirestoreNotFoundException",
+          "TurboFirestoreDeadlineExceededException",
+          "TurboFirestoreCancelledException",
+          "TurboFirestoreGenericException"
+        ],
+        "selection": "uniform random across the pool by default; each roll picks one exception subtype from the list above",
+        "per_operation_context": {
+          "reads_and_streams": "operationType = TOperationType.read or .stream, path = collectionPath(), id = requested id when applicable",
+          "writes": "operationType = TOperationType.write, path = collectionPath(), id = provided or generated id, documentData = writeable.toJson() when available"
+        },
+        "wrapping": "the constructed exception is handed to TurboResponse.fail(error: exception) exactly like the real api does in its catch blocks"
+      }
+    }
+  },
+  "public_api": {
+    "new_exports": [
+      "apis/t_dummy_firestore_api.dart",
+      "generators/t_value_generator.dart",
+      "generators/t_dummy_schema.dart",
+      "generators/t_value_generator_registry.dart",
+      "generators/t_value_specs.dart"
+    ],
+    "not_exported": [
+      "apis/_t_dummy_probing_map.dart"
+    ]
+  },
+  "dummy_api_class": {
+    "name": "TDummyFirestoreApi<T>",
+    "path": "lib/apis/t_dummy_firestore_api.dart",
+    "extends": "TFirestoreApi<T>",
+    "constructor": {
+      "super_parameters_forwarded_unchanged": [
+        "firebaseFirestore",
+        "collectionPath",
+        "toJson",
+        "fromJson",
+        "fromJsonError",
+        "tryAddLocalId",
+        "logger",
+        "createdAtFieldName",
+        "updatedAtFieldName",
+        "idFieldName",
+        "documentReferenceFieldName",
+        "isCollectionGroup",
+        "tryAddLocalDocumentReference",
+        "getOptions"
+      ],
+      "dummy_only_parameters": [
+        {
+          "name": "fieldGenerators",
+          "type": "Map<String, TValueGenerator>?",
+          "default": null,
+          "purpose": "caller overrides keyed by field name; merged at highest priority"
+        },
+        {
+          "name": "typeGenerators",
+          "type": "Map<Type, TValueGenerator>?",
+          "default": null,
+          "purpose": "caller overrides keyed by runtime type; merged above bundled type fallbacks"
+        },
+        {
+          "name": "defaultCollectionSize",
+          "type": "int",
+          "default": 20,
+          "purpose": "number of entities generated on first collection seed"
+        },
+        {
+          "name": "dummyDelayDuration",
+          "type": "Duration",
+          "default": "Duration(milliseconds: 225)",
+          "purpose": "fixed latency per call"
+        },
+        {
+          "name": "dummyDelayRange",
+          "type": "List<Duration>?",
+          "default": null,
+          "purpose": "when set, use uniform random latency inside [min, max] instead of the fixed duration"
+        },
+        {
+          "name": "randomFailurePercentage",
+          "type": "double",
+          "default": 0,
+          "purpose": "0..100; percentage chance a call returns TurboResponse.fail"
+        },
+        {
+          "name": "seed",
+          "type": "int?",
+          "default": "derived from collectionPath().hashCode when null",
+          "purpose": "Deterministic randomness source. The dummy constructs its Random from this seed so every run with the same configuration produces identical values, ids, and failure rolls. Setting a concrete int keeps the data stable across hot reloads, screenshots, and repeated acceptance-test runs. Setting it to a caller-provided value lets two dummy apis for different collections stay distinct without the caller thinking about it."
+        },
+        {
+          "name": "queryFilters",
+          "type": "Map<String, bool Function(Map<String, dynamic> doc)>?",
+          "default": null,
+          "purpose": "Named filter predicates keyed by `whereDescription`. When a caller invokes listByQuery*/streamByQuery* with a whereDescription that matches a key in this map, the dummy applies the predicate to the stored json maps and emits only the docs that pass. No matching key -> emit the full store (same as listAll). This lets filtered screens (Active/Archived/Draft tabs) work correctly in dummy mode without custom service subclasses."
+        },
+        {
+          "name": "querySort",
+          "type": "Map<String, int Function(Map<String, dynamic> a, Map<String, dynamic> b)>?",
+          "default": null,
+          "purpose": "Optional comparators keyed by whereDescription. When set for a given whereDescription, the dummy applies this comparator to the filtered store result before emitting, mirroring the real api's orderBy semantics at the level the caller cares about. Default (no entry) -> unsorted emission (same as the real api, which relies on a local sort in the consuming service)."
+        }
+      ]
+    },
+    "required_fromJson": "fromJson must be non-null on the dummy because the probe-pass and every generator pipe entities through the caller's fromJson. Passing a dummy api without fromJson is an assertion error at construction.",
+    "private_state": [
+      "final TDummySchema _schema",
+      "final TValueGeneratorRegistry _registry",
+      "final Map<String, Map<String, dynamic>> _store  (raw json maps, not typed T, so partial updates can be merged)",
+      "final Set<StreamController<List<T>>> _collectionControllers",
+      "final Map<String, Set<StreamController<T?>>> _docControllers",
+      "final Random _rng (seeded from the constructor `seed` parameter; falls back to `collectionPath().hashCode` when no seed is supplied so every api is deterministic by default but distinct per collection)"
+    ],
+    "determinism": {
+      "source": "Single Random instance created from the seed. Every generator that needs randomness (bundled type fallbacks, field-name heuristics, declarative spec factories) is wired through the same Random so ordering and output are reproducible.",
+      "id_generation": "Dummy ids are produced via Random-derived sequences rather than UUID v4, so the same run always produces the same id list. Format: 'dummy_<collectionPath>_<index>'.",
+      "failure_rolls": "randomFailurePercentage rolls use the same Random, so a given configuration fails on the same calls in the same order every run.",
+      "delay_randomness": "When dummyDelayRange is set, the picked duration also comes from the same Random — deterministic across runs with the same seed."
+    },
+    "init_pipeline": [
+      "1. _schema = _TDummyProbingMap.probe<T>(fromJson)",
+      "2. _registry = TValueGeneratorRegistry.build(fieldGenerators, typeGenerators, schema: _schema)",
+      "3. _store = {}; _collectionControllers = {}; _docControllers = {}"
+    ],
+    "internal_helpers": [
+      "Future<void> _applyLatency()",
+      "TFirestoreException _rollFailureException({required TOperationType operationType, String? id, Map<String, dynamic>? documentData}) — returns the exception to wrap in TurboResponse.fail, or null when the roll passes",
+      "Map<String, dynamic> _generateDocJson({required String id}) — walks _schema depth-first through _registry to produce a raw json map with idFieldName set to `id`",
+      "T _materialise(Map<String, dynamic> json) — pipes a stored map through the caller's fromJson to produce a typed entity",
+      "Map<String, dynamic> _applyTimestamps({required Map<String, dynamic> json, required TTimestampType type}) — mirrors the real api's TTimestampType.add",
+      "String _genDummyId() — deterministic per Random",
+      "void _emitCollections()",
+      "void _emitDoc(String id, T? entity)"
+    ],
+    "overrides": {
+      "reads": [
+        "getByIdWithConverter",
+        "getById",
+        "listAllWithConverter",
+        "listAll",
+        "listByQueryWithConverter (applies queryFilters[whereDescription] + querySort[whereDescription]; falls back to whole store when no entry)",
+        "listByQuery",
+        "listBySearchTermWithConverter (applies queryFilters[whereDescription] when set; otherwise falls back to a substring-match helper over a configurable string field, defaulting to whole store)",
+        "listBySearchTerm",
+        "docExists"
+      ],
+      "streams": [
+        "streamAllWithConverter",
+        "streamAll",
+        "streamByQueryWithConverter (applies queryFilters[whereDescription] + querySort[whereDescription] to every emission)",
+        "streamByQuery",
+        "streamDocByIdWithConverter",
+        "streamByDocId"
+      ],
+      "writes": [
+        "createDoc",
+        "createDocInBatch",
+        "createDocInTransaction",
+        "updateDoc",
+        "updateDocInBatch",
+        "updateDocInTransaction",
+        "deleteDoc",
+        "deleteDocInBatch",
+        "deleteDocInTransaction"
+      ],
+      "getDocRef": [
+        "getDocRefById returns a stub _TDummyDocumentReference bound to the in-memory store",
+        "getDocRefByIdWithConverter returns the same stub typed to T"
+      ],
+      "dispose": "close every StreamController in both registries; super.dispose()"
+    }
+  },
+  "supporting_types": {
+    "TValueGenerator": {
+      "path": "lib/generators/t_value_generator.dart",
+      "shape": "typedef TValueGenerator = dynamic Function();"
+    },
+    "TDummySchema": {
+      "path": "lib/generators/t_dummy_schema.dart",
+      "shape": "recursive tree of fields; each node is either a leaf (resolved Type) or a branch (nested TDummySchema discovered via recursive probing of a nested DTO's fromJson)",
+      "fields": [
+        "final Map<String, TDummySchemaField> fields",
+        "final Set<String> unresolved"
+      ],
+      "TDummySchemaField": {
+        "definition": "sealed TDummySchemaField with two variants",
+        "variants": [
+          "TDummySchemaLeaf(Type type) — a flat field whose resolved type came from a successful cast on the probing map",
+          "TDummySchemaBranch(TDummySchema nested) — a nested DTO field whose probing map recursed into another fromJson invocation and produced its own schema"
+        ]
+      }
+    },
+    "TValueGeneratorRegistry": {
+      "path": "lib/generators/t_value_generator_registry.dart",
+      "factory": "TValueGeneratorRegistry.build({fieldGenerators, typeGenerators, required schema})",
+      "internal_maps": [
+        "Map<String, TValueGenerator> _fieldGenerators",
+        "Map<Type, TValueGenerator> _typeGenerators",
+        "Map<String, TValueGenerator> _placeholders"
+      ],
+      "generate": "dynamic generate({required String field, required Type type})",
+      "bundled_field_heuristics": [
+        "id, uid, userId, ownerId -> uuid",
+        "name, firstName, lastName, fullName, displayName -> realistic person names",
+        "username, email, phone, phoneNumber",
+        "description, title, summary, content, body -> lorem text",
+        "url, avatarUrl, imageUrl, thumbnailUrl -> realistic URLs",
+        "address, street, city, country, zip, postalCode",
+        "createdAt, updatedAt, deletedAt, timestamp",
+        "age, count, quantity -> ranged int",
+        "price, amount, rating, score -> ranged double",
+        "isActive, isDeleted, enabled -> bool"
+      ],
+      "bundled_type_fallbacks": [
+        "String -> word",
+        "int -> 0..1000",
+        "double -> 0..1000",
+        "num -> 0..1000",
+        "bool -> random",
+        "DateTime -> recent past",
+        "Timestamp -> recent past",
+        "List -> 3..5 items",
+        "Map -> 2..3 entries",
+        "GeoPoint -> random lat/lng",
+        "DocumentReference -> stub reference",
+        "Blob -> empty blob"
+      ]
+    },
+    "declarative_value_specs": {
+      "path": "lib/generators/t_value_specs.dart",
+      "factories": [
+        "TValueGenerator oneOf<V>(List<V> values)",
+        "TValueGenerator oneOfEnum<E extends Enum>(List<E> values)",
+        "TValueGenerator rangeInt(int min, int max)",
+        "TValueGenerator rangeDouble(double min, double max)",
+        "TValueGenerator sentence({int wordCount = 8})",
+        "TValueGenerator words({int min = 1, int max = 3})",
+        "TValueGenerator paragraph({int sentences = 3})",
+        "TValueGenerator pastDate({Duration within = Duration(days: 365)})",
+        "TValueGenerator futureDate({Duration within = Duration(days: 365)})",
+        "TValueGenerator uuid()",
+        "TValueGenerator fixed<V>(V value)"
+      ]
+    },
+    "_TDummyProbingMap": {
+      "path": "lib/apis/_t_dummy_probing_map.dart",
+      "visibility": "library-private (underscore prefix); also part-of t_dummy_firestore_api.dart so only the dummy api can see it",
+      "implements": "Map<String, dynamic>",
+      "static_probe": "static TDummySchema probe<T>(T Function(Map<String, dynamic>) fromJson)",
+      "state": [
+        "Map<String, TDummySchemaField> _resolved",
+        "Map<String, _CandidateCursor> _cursors",
+        "Set<String> _unresolved",
+        "String? _lastKey"
+      ],
+      "map_override_behaviour": {
+        "operator_[]": "records the key as _lastKey, advances the cursor if needed. If the current candidate for this key is `Map<String, dynamic>`, returns a freshly-constructed child `_TDummyProbingMap` (which will itself observe whatever nested fromJson runs on it). For any other candidate, returns a flat stand-in of that type.",
+        "containsKey": "always true",
+        "keys": "resolved keys",
+        "length": "resolved count",
+        "other_members": "delegate to empty defaults"
+      },
+      "recursive_probing": "Each nested `_TDummyProbingMap` runs its own widening loop inside its parent's loop. When the nested probe completes, it hands back a `TDummySchema` that is attached as a `TDummySchemaBranch` on the parent's `_resolved` entry for that key.",
+      "loop_termination": "attempts bounded by candidateCount * maxFields; when exhausted, remaining keys are marked unresolved and probing stops"
+    }
+  },
+  "service_wireup_example": {
+    "pattern": "Feature-level locator decides between real and dummy api based on a dummy-mode flag; the service constructor remains identical.",
+    "example": "registerLazySingleton<UserApi>(() => isDummyMode ? TDummyFirestoreApi<User>(firebaseFirestore: firestore, collectionPath: () => 'users', fromJson: User.fromJson, toJson: (u) => u.toJson(), tryAddLocalId: true, fieldGenerators: {'email': oneOf(['a@acme.com', 'b@acme.com']), 'age': rangeInt(18, 80)}) : TFirestoreApi<User>(firebaseFirestore: firestore, collectionPath: () => 'users', fromJson: User.fromJson, toJson: (u) => u.toJson(), tryAddLocalId: true));"
+  },
+  "conventions_alignment": {
+    "apis": "TDummyFirestoreApi lives under apis/ because it is still an api (transport boundary). The transport happens to be an in-memory store, but the responsibility classification is unchanged.",
+    "services_unchanged": "No TCollectionService or TDocumentService subclass is touched. The dummy is a drop-in API substitute at DI wire-up.",
+    "results": "All fallible dummy operations return TurboResponse<T>. Random failures produce TurboResponse.fail with a simulated error payload.",
+    "class_structure": "TDummyFirestoreApi follows the section-header order: constructor -> DEPENDENCIES -> STATE -> UTIL (latency, failure roll, id gen) -> FETCHERS (read overrides) -> HELPERS (generate, emit, store write) -> MUTATORS (write overrides) -> dispose.",
+    "typedefs": "TValueGenerator is a cross-cutting callback signature, so it lives under generators/ as a dedicated file (the spec system treats it as a single-purpose generator alias; generators is the concept folder for this feature rather than typedefs/).",
+    "folders_and_file_types": "New generators/ concept folder is introduced under lib/ to host the generator system; one-type-per-file rule preserved."
+  },
+  "decisions": [
+    {
+      "number": 1,
+      "decision": "Exploration mode: With exploration — read real files between questions to ground decisions in actual code.",
+      "source": "User answer to context-gathering mode question"
+    },
+    {
+      "number": 2,
+      "decision": "Random failures in dummy mode construct real TFirestoreException subtypes (permission denied, unavailable, not found, deadline exceeded, cancelled, generic) uniformly sampled from a pool, with realistic context (path, id, operationType). The UI pattern-matches on the same sealed hierarchy as production.",
+      "source": "User answer to failure-shape question. Codebase evidence: lib/exceptions/t_firestore_exception.dart defines a sealed TFirestoreException with six final subclasses, so dummy-mode failures can be constructed via the same constructors."
+    },
+    {
+      "number": 3,
+      "decision": "Dummy data is deterministic by default. The dummy api owns one Random instance seeded from an optional constructor `seed` parameter. When seed is null, it falls back to `collectionPath().hashCode` so every collection has its own distinct but stable dataset. Identical values, ids, delay samples, and failure rolls across hot reloads, screenshots, and repeated acceptance-test runs.",
+      "source": "User answer to data-stability question. All randomness — value generators, id generation, failure rolls, delay sampling — routes through the same seeded Random for reproducibility."
+    },
+    {
+      "number": 4,
+      "decision": "Nested DTOs are auto-populated via recursive probing maps. When the caller does `NestedDto.fromJson(json['nested'] as Map<String, dynamic>)`, the probing map returns a child `_TDummyProbingMap` as the stand-in, which runs its own probing loop and produces a `TDummySchemaBranch` attached to the parent schema. Typed collections (List<String>, List<NestedDto>) default to empty lists — callers override per field when they want populated items, because inferring element types from inside iterator closures is brittle.",
+      "source": "User answer to nested-depth question. Codebase evidence: lib/core/auth/dtos/user_dto.dart uses json_serializable and nests UserLevelDto via `UserLevelDto.fromJson(json['userLevel'] as Map<String, dynamic>)`, and flattens tags via `(json['tags'] as List<dynamic>?)?.map((e) => e as String)`."
+    },
+    {
+      "number": 5,
+      "decision": "Dummy store holds raw `Map<String, dynamic>` json rather than typed `T`. Update writeables (which are partials like `UpdateUserDtoRequest`) are shallow-merged onto the stored json and re-timestamped via `TTimestampType.add` exactly like the real api's `documentReference.update(writeableAsJson)` path. Each read re-materialises `T` by piping the stored json through `fromJson`. This preserves behavioural parity with the real api for partial updates, validation, and timestamp management.",
+      "source": "Autonomous decision — codebase evidence. lib/apis/t_firestore_update_api.dart lines 129-142: real updateDoc calls `documentReference.update(writeableAsJson)` where `writeableAsJson = timestampType.add(writeable.toJson(), ...)`. Running a partial update writeable through `fromJson` in the dummy would either throw on missing required fields or produce an entity with null values, diverging from the real api."
+    },
+    {
+      "number": 6,
+      "decision": "Dummy api accepts `queryFilters: Map<String, bool Function(Map<String, dynamic>)>?` and `querySort: Map<String, Comparator<Map<String, dynamic>>>?` constructor parameters keyed by `whereDescription`. When a caller invokes listByQuery*/streamByQuery*/listBySearchTerm* with a whereDescription that matches a key, the dummy filters and sorts the in-memory store before emitting. No matching key -> unfiltered emission. Default behaviour is unchanged from the mockup; callers opt in per-feature at DI wire-up time.",
+      "source": "User answer to query-filtering question. The real api's streamByQuery/listByQuery always take a whereDescription string parameter, which is the natural key. Filtering on the stored json map (not the typed T) keeps the predicate contract stable even while re-materialisation happens."
+    },
+    {
+      "number": 7,
+      "decision": "Latency gate applies to initial stream emission + every one-shot call, but not to re-emissions triggered by mutations. Mutations in dummy mode produce instant cross-subscriber fan-out, matching Firestore's near-zero local latency after a write lands.",
+      "source": "Autonomous decision — matches Firestore's actual stream behaviour. Applying delay to every re-emission would make the UI feel jerky after every write in dummy mode."
+    },
+    {
+      "number": 8,
+      "decision": "Dummy store is in-memory only, not persisted across app restarts. Determinism from the seed makes fresh runs look identical to prior runs without needing platform storage.",
+      "source": "Autonomous decision — persistence is a separate concern and would require platform-specific storage integration outside the dummy api's scope."
+    },
+    {
+      "number": 9,
+      "decision": "collectionPath() is invoked once at construction for seed/path-snapshot purposes; subsequent reads still call it for logging parity with the real api. This keeps the dummy deterministic even when the caller's collectionPath() depends on runtime state like the currently-selected org.",
+      "source": "Autonomous decision — otherwise a caller using `() => 'orgs/${currentOrg.id}/projects'` would get a shifting seed mid-run, breaking deterministic data."
+    },
+    {
+      "number": 10,
+      "decision": "Seeded entities have createdAt timestamps spread across the trailing `defaultCollectionSize` days (newest first), with updatedAt matching createdAt by default. Overrides still win.",
+      "source": "Autonomous decision — otherwise every seeded entity would share one timestamp and sort-by-date feeds would render with unstable/identical order in dummy mode."
+    },
+    {
+      "number": 11,
+      "decision": "Dummy supports WriteBatch via a library-private `_TDummyWriteBatch` that queues set/update/delete closures and applies them in order on commit(), re-emitting the snapshot once at the end. `runTransaction` is overridden to drive the caller's handler against a `_TDummyTransaction` that reads and writes the in-memory store directly. Unsupported batch/transaction methods throw UnimplementedError with a clear dummy-mode-guidance message.",
+      "source": "Autonomous decision — the real api exposes `writeBatch`, `runTransaction`, `createDocInBatch`, `updateDocInBatch`, `deleteDocInBatch` and their transaction variants. Features using these would crash in dummy mode without stub support."
+    },
+    {
+      "number": 12,
+      "decision": "`_TDummyDocumentReference` wraps the owning dummy api and a concrete id so `.get()`, `.update()`, `.delete()`, `.snapshots()`, `.path`, `.id` all delegate to the in-memory store. Unsupported DocumentReference methods (like `.collection(...)` for sub-collections, or `.parent`) throw UnimplementedError with a clear dummy-mode-guidance message.",
+      "source": "Autonomous decision — callers use the DocumentReference returned by createDoc for follow-up reads and writes, so a no-op stub would crash the first feature that touches it. Delegating back to the owning api is the only behaviour consistent with the rest of the store."
+    }
+  ]
+}

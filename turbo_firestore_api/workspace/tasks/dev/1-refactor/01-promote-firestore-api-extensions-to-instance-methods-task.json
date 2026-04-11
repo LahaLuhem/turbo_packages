@@ -1,0 +1,81 @@
+{
+  "title": "Promote TFirestoreApi extension methods to virtual instance methods",
+  "status": "in-progress",
+  "type": "refactor",
+  "phase": "1-refactor",
+  "order": 1,
+  "package": "turbo_firestore_api",
+  "spec": "workspace/specs/dummy-data/firestore/dummy-api-and-services-spec.json",
+  "mockup": "workspace/mockups/dummy-data/firestore/dummy-api-and-services-mockup.md",
+  "blocks": [
+    "All dummy api tasks — a subclass cannot override extension methods in Dart, so every method the dummy needs to intercept has to live on the class body first."
+  ],
+  "depends_on": [],
+  "status_instructions": {
+    "on_start": "Update this file's `status` field to `in-progress` before any code edits, so no other agent picks the task up.",
+    "on_done": "Update `status` to `done`, fill the `worklog` with a terse list of what was done, then `mv` this file to workspace/tasks/archive/dev/1-refactor/01-promote-firestore-api-extensions-to-instance-methods-task.json.",
+    "on_followup": "Scan all sibling task files under workspace/tasks/dev/** and append clarifying notes to their `side_context` array only if your refactor revealed something the next agent must know (e.g. a helper's new signature, a subtle behavior you had to preserve). Never edit a task's original fields — only append to `side_context`."
+  },
+  "description": "The existing TFirestoreApi<T> class scatters its public operations across seven Dart extensions (create, delete, get, list, search, stream, update). Dart resolves extension method calls statically by the receiver's declared type, which means a subclass cannot override them. Before the dummy api can intercept any call, every extension method must be promoted to a virtual instance method on the TFirestoreApi<T> class body. Call sites, public exports, part file layout, and member ordering must remain externally identical.",
+  "context_for_junior": "The package lib/apis/ folder has one main file (t_firestore_api.dart) plus seven part files. Each part file currently defines an `extension TurboFirestoreXxxApi<T> on TFirestoreApi<T> { ... }` block that attaches methods to the class from the outside. Dart has a quirk: when you write `api.createDoc(...)` where `api` is typed as `TFirestoreApi<T>`, the compiler picks the extension method at compile time based on the static type — it does not look at the runtime type of the object. That means if we later make a `TDummyFirestoreApi<T> extends TFirestoreApi<T>` and try to override `createDoc`, the override will never be called. The fix is to take every method body out of the `extension ... on TFirestoreApi<T> { ... }` wrapper and place it directly inside the class. Part files stay, they just become `part of t_firestore_api.dart` contributions that extend the class body. From the caller's perspective nothing changes — `api.createDoc(...)` still compiles and runs the same — but from the subclass's perspective, the methods are now virtual and overridable.",
+  "why_it_matters": "Without this refactor every downstream task in this feature is physically impossible. This is a purely mechanical change but the test suite must stay green so we know we did not change observable behavior.",
+  "instructions": [
+    "Read the spec section `prerequisite_refactor` and follow its `scope.keep_on_class` / `scope.promote_to_instance_methods` lists exactly — do not promote members not listed there, and do not remove any member listed under `keep_on_class`.",
+    "For each of the seven part files listed in the spec, rewrite the file so the `extension` wrapper is replaced by a `part of t_firestore_api.dart;` directive (if it is not already a part file, convert it), and move the method bodies as direct members into the class TFirestoreApi<T> via the part file.",
+    "Preserve every public signature exactly — parameter names, defaults, return types, documentation comments, @override annotations where present.",
+    "Keep private helpers (`_extractDocumentData`, `_buildFullPath`, `_createException`, `_logResultLength`, `_handleBatchResponse`, `_handleBatchOperation`) on the class exactly as they are now.",
+    "Keep class-level section header comments in sync with `dev-conventions/conventions/class-structure.md` ordering: constructor → DEPENDENCIES → STATE → UTIL → FETCHERS → HELPERS → MUTATORS → dispose.",
+    "Update t_firestore_api.dart's `part` declarations if any part file name or boundary changes.",
+    "Run `make analyze package=turbo_firestore_api` and `make test package=turbo_firestore_api` from the monorepo root. Both must pass with zero warnings and zero test failures.",
+    "Do not delete any existing test, do not add new tests, do not touch services/, do not touch turbo_template or any sibling package."
+  ],
+  "goals": [
+    "Every method the dummy api will later need to override is a virtual instance method on class TFirestoreApi<T>.",
+    "Zero public api change, zero call-site change, zero test change.",
+    "Part file layout preserved."
+  ],
+  "non_goals": [
+    "No behavior changes.",
+    "No new methods.",
+    "No new files.",
+    "No renames.",
+    "No doc rewriting beyond moving comments with their methods.",
+    "No dummy api work — that belongs to later tasks."
+  ],
+  "acceptance_criteria": [
+    "Every method listed under `prerequisite_refactor.scope.promote_to_instance_methods` is declared inside the class body of TFirestoreApi<T> (via its part file) and is no longer wrapped in an `extension ... on TFirestoreApi<T>` block.",
+    "`make analyze package=turbo_firestore_api` completes with 0 warnings.",
+    "`make test package=turbo_firestore_api` completes with 0 failures.",
+    "Grep across lib/ and test/ reveals no `extension Turbo.*Api<T> on TFirestoreApi<T>` matches.",
+    "Public export surface of the package is byte-identical to before the refactor."
+  ],
+  "constraints": [
+    "No workarounds, no `dynamic` escape hatches, no method body rewrites beyond relocation.",
+    "Trailing commas required, single quotes preferred, `const` constructors enforced (inherited from monorepo analysis rules).",
+    "No changes to CLAUDE.md, dependencies, or Melos config."
+  ],
+  "skills_to_read": [
+    "dev-conventions/conventions/apis.md",
+    "dev-conventions/conventions/class-structure.md",
+    "dev-conventions/conventions/folders-and-file-types.md"
+  ],
+  "tools": [
+    "RepoPrompt MCP file_search / get_code_structure / read_file for codebase exploration",
+    "Edit + Read for the relocation edits",
+    "Bash for `make analyze` and `make test`"
+  ],
+  "verification": [
+    "make analyze package=turbo_firestore_api",
+    "make test package=turbo_firestore_api",
+    "Grep for any remaining `extension Turbo.*Api<T> on TFirestoreApi<T>` — must be zero results."
+  ],
+  "quality_bar": {
+    "maintainability": "The class stays scannable — keep the part-file split so the single class body does not balloon into one unreadable file.",
+    "dry": "Do not inline helper methods into their callers just because they are now in the same class.",
+    "single_responsibility": "Each part file still owns exactly one operation family (create, delete, get, list, search, stream, update).",
+    "performance": "No measurable change — this is a source reorganization only.",
+    "abuse_resistance": "Zero — nothing here is exposed to end users."
+  },
+  "side_context": [],
+  "worklog": []
+}

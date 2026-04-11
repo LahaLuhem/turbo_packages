@@ -1,0 +1,95 @@
+{
+  "title": "Implement _TDummyWriteBatch and dummy runTransaction against the in-memory store",
+  "status": "todo",
+  "type": "feature",
+  "phase": "7-batch-transaction-docref",
+  "order": 10,
+  "package": "turbo_firestore_api",
+  "spec": "workspace/specs/dummy-data/firestore/dummy-api-and-services-spec.json",
+  "mockup": "workspace/mockups/dummy-data/firestore/dummy-api-and-services-mockup.md",
+  "blocks": [
+    "DocumentReference task — it shares the in-memory store contract established here."
+  ],
+  "depends_on": [
+    "workspace/tasks/dev/6-writes/09-implement-dummy-write-overrides-task.json"
+  ],
+  "status_instructions": {
+    "on_start": "Flip `status` to `in-progress`.",
+    "on_done": "Flip `status` to `done`, fill `worklog`, then `mv` to workspace/tasks/archive/dev/7-batch-transaction-docref/10-implement-dummy-write-batch-and-transaction-task.json.",
+    "on_followup": "Append to the DocumentReference task's `side_context` if the batch/transaction stubs expose any shared helper it should reuse."
+  },
+  "description": "Create a library-private `_TDummyWriteBatch implements WriteBatch` and override `runTransaction` on TDummyFirestoreApi<T>. The write batch queues set/update/delete closures as they are added, applies them in order on `commit()`, and re-emits the collection snapshot once at the end. `runTransaction` wires the caller's handler to a `_TDummyTransaction` that reads and writes `_store` directly; commits inline, rollbacks are no-ops. Replace the `UnimplementedError` bodies from task 09 in `createDocInBatch`, `updateDocInBatch`, `deleteDocInBatch`, `createDocInTransaction`, `updateDocInTransaction`, `deleteDocInTransaction` with real implementations that route through the queued closures / transaction helper.",
+  "context_for_junior": "Firestore supports two bulk-write modes: WriteBatch (enqueue ops, commit them all at once) and runTransaction (read-then-write with conflict detection). Our dummy does not need real conflict detection — single-threaded in-memory writes cannot race. What it needs is for callers who already use `WriteBatch` and `runTransaction` to keep working without rewriting their feature code. The batch is a thin queue of closures; on `commit()` we loop through them against `_store`, then fire one collection emission. The transaction is even simpler: invoke the caller's handler with an object that reads and writes `_store` directly, then return whatever the handler returned.",
+  "why_it_matters": "Several services in the monorepo wrap multi-entity updates in WriteBatch or runTransaction. Without this task, those services crash the first time they touch a batch in dummy mode.",
+  "instructions": [
+    "Create `_TDummyWriteBatch` as a library-private class in the same file (or an additional part file) declared `implements WriteBatch`. Override every method the monorepo actually calls (`set`, `update`, `delete`, `commit`). For other methods the real WriteBatch exposes, override them to throw `UnimplementedError` with a clear dummy-mode message.",
+    "`_TDummyWriteBatch` carries a reference to its owning `TDummyFirestoreApi` and an internal `List<void Function()>` of queued operations. Each set/update/delete call appends a closure that applies the corresponding mutation against `_store`.",
+    "`commit()` walks the queued closures in order, applies them all, calls `_emitCollections()` and the appropriate `_emitDoc()` calls once per affected id, and returns `Future<void>`.",
+    "Override `writeBatch` on `TDummyFirestoreApi<T>` (the getter/method that the real api exposes) to return a fresh `_TDummyWriteBatch` bound to `this`.",
+    "Rewrite `createDocInBatch`, `updateDocInBatch`, `deleteDocInBatch`: accept the caller's `WriteBatch writeBatch` parameter and — when it is an instance of `_TDummyWriteBatch` bound to this api — enqueue the corresponding mutation closure. When the caller passes a real (non-dummy) WriteBatch, throw a clear error pointing the caller at the correct setup. (In practice the dummy api never produces real WriteBatches, so the wrong-type path should be unreachable.)",
+    "Override `runTransaction` on `TDummyFirestoreApi<T>`. Construct a `_TDummyTransaction` that implements the real Transaction interface with `get`, `set`, `update`, `delete` delegating to `_store`. Invoke the caller's handler with it, await the result, and return the handler's return value wrapped in the parent class's expected return type.",
+    "Implement `createDocInTransaction`, `updateDocInTransaction`, `deleteDocInTransaction` by routing through the `_TDummyTransaction` instance, mirroring the batch-variant contract.",
+    "All batch and transaction paths respect the latency + failure gate per the spec's `latency_and_failure_gate.applies_to` list (note: this list includes createDoc/updateDoc/deleteDoc but not the batch/transaction variants — double-check the spec before adding the gate; the spec only requires the gate on non-batched calls).",
+    "Unsupported Transaction / WriteBatch methods throw `UnimplementedError('dummy-mode: this WriteBatch/Transaction method is not stubbed; override in feature wiring or add it to the dummy api')`.",
+    "Run `make analyze package=turbo_firestore_api` and the new unit tests."
+  ],
+  "goals": [
+    "WriteBatch and runTransaction work end-to-end against the in-memory store.",
+    "Single snapshot emission on commit — no N emissions for N queued ops.",
+    "Transaction handlers read and write the store inline.",
+    "Unsupported operations fail loudly with clear guidance."
+  ],
+  "non_goals": [
+    "No real conflict detection.",
+    "No rollback semantics beyond no-op.",
+    "No DocumentReference stub improvements — next task.",
+    "No query filter/sort support — separate task."
+  ],
+  "acceptance_criteria": [
+    "`make analyze package=turbo_firestore_api` passes.",
+    "Unit test: enqueue three creates in a WriteBatch, commit, then assert the store has three entries and open collection streams received exactly one snapshot (not three).",
+    "Unit test: a runTransaction handler reads an entity, updates one field, returns — the store reflects the update after the handler returns.",
+    "Unit test: calling an unimplemented WriteBatch method throws UnimplementedError with a message containing the substring 'dummy-mode'.",
+    "Unit test: runTransaction returns the handler's return value to the caller unchanged."
+  ],
+  "constraints": [
+    "Library-private visibility for both stub classes.",
+    "No workarounds for missing Transaction methods — throw and document.",
+    "Reuse the write preamble helper from task 09 where appropriate; do not copy-paste."
+  ],
+  "skills_to_read": [
+    "dev-conventions/conventions/apis.md",
+    "dev-conventions/conventions/class-structure.md",
+    "dev-conventions/conventions/firestore-services.md",
+    "dev-conventions/conventions/unit-tests.md"
+  ],
+  "tools": [
+    "RepoPrompt MCP for inspecting how services in the monorepo use WriteBatch / runTransaction",
+    "Edit",
+    "Bash for analyze + test"
+  ],
+  "verification": [
+    "make analyze package=turbo_firestore_api",
+    "cd turbo_firestore_api && dart test test/apis/t_dummy_firestore_api_batch_test.dart"
+  ],
+  "testing": {
+    "rules": "No mocks. Set up a synthetic DTO + writeable fixture. Use a `@visibleForTesting` hook to count emitted snapshots on a collection stream so you can assert `commit()` emits exactly once.",
+    "scenarios": [
+      "Given an open collection stream, When three creates are enqueued in a batch and commit is called, Then the stream emits exactly one additional snapshot containing all three new entities.",
+      "Given a runTransaction handler that updates an entity's field, When the transaction completes, Then the store reflects the update and any open stream emits the updated snapshot.",
+      "Given a caller invokes an unimplemented WriteBatch method, Then an UnimplementedError is thrown with a dummy-mode message.",
+      "Given a runTransaction handler that returns a specific value, When awaited, Then the caller receives that exact value.",
+      "Given a batch that mixes create, update, delete on different ids, When committed, Then the store ends in the expected merged state and one single snapshot is emitted."
+    ],
+    "refactor_for_testability": "If counting snapshots is tricky, expose `_collectionControllers` snapshot count via `@visibleForTesting`."
+  },
+  "quality_bar": {
+    "maintainability": "Stub classes are small, single-purpose, and colocated with the dummy api for clarity.",
+    "dry": "Queued closures reuse the same mutation primitives already in task 09.",
+    "single_responsibility": "Batch owns queueing + commit; transaction owns handler dispatch.",
+    "performance": "Single snapshot emission per commit avoids quadratic fan-out cost under big batches.",
+    "abuse_resistance": "UnimplementedError on unstubbed methods makes missing coverage loud and fixable."
+  },
+  "side_context": [],
+  "worklog": []
+}

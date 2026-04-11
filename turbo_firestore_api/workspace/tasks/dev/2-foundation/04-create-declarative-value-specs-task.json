@@ -1,0 +1,91 @@
+{
+  "title": "Create declarative value-spec factories for dummy data overrides",
+  "status": "todo",
+  "type": "feature",
+  "phase": "2-foundation",
+  "order": 4,
+  "package": "turbo_firestore_api",
+  "spec": "workspace/specs/dummy-data/firestore/dummy-api-and-services-spec.json",
+  "mockup": "workspace/mockups/dummy-data/firestore/dummy-api-and-services-mockup.md",
+  "blocks": [
+    "Example caller wire-ups, documentation, and any downstream task that demonstrates dummy data overrides."
+  ],
+  "depends_on": [
+    "workspace/tasks/dev/2-foundation/02-create-value-generator-typedef-and-dummy-schema-task.json"
+  ],
+  "status_instructions": {
+    "on_start": "Flip `status` to `in-progress`.",
+    "on_done": "Flip `status` to `done`, fill `worklog`, then `mv` to workspace/tasks/archive/dev/2-foundation/04-create-declarative-value-specs-task.json.",
+    "on_followup": "If any factory needs a subtle semantic callers must know about (e.g. `oneOf` preserves order), append to the dummy api skeleton task's `side_context`."
+  },
+  "description": "Create `lib/generators/t_value_specs.dart` containing the declarative spec factories callers pass into `TDummyFirestoreApi`'s `fieldGenerators` / `typeGenerators` maps: `oneOf`, `oneOfEnum`, `rangeInt`, `rangeDouble`, `sentence`, `words`, `paragraph`, `pastDate`, `futureDate`, `uuid`, `fixed`. Every factory returns a `TValueGenerator` (dynamic Function()) that the registry can invoke without knowing anything about the spec internals.",
+  "context_for_junior": "Callers should not have to hand-write closures like `() => ['a@acme.com', 'b@acme.com'][random.nextInt(2)]` for every override. These factory functions wrap that boilerplate behind readable names. The key gotcha: all randomness must flow through a caller-supplied `Random` so the dummy api's determinism is preserved. Since these factories are created at construction time (before the dummy api exists), they accept a Random through a thread-local mechanism OR they are written as lazy generators that accept the Random on first call. The simpler choice — and the one we will use — is that every factory takes a `Random` positional or named parameter, and the dummy api forwards its own `Random` into the registry build step, which in turn passes it into any spec factories that need it. Since the spec factories must be plain `TValueGenerator` (no Random arg), we instead adopt a pattern where the factories are created with a Random closure captured at caller-site, OR the registry wraps non-Random-aware generators with its own Random. Read the spec's `determinism` section for the exact rule before picking an approach.",
+  "why_it_matters": "Callers touch these factories directly. A leaky abstraction here means every feature ends up writing its own closure soup. Determinism is non-negotiable — if a factory uses `Random()` from thin air, it breaks the seeded-run guarantee the entire feature promises.",
+  "instructions": [
+    "Create `lib/generators/t_value_specs.dart` exporting the factories listed in the spec's `declarative_value_specs.factories`.",
+    "Decide the Random-injection pattern before writing any factory: the approved approach is that every factory accepts an optional `Random? random` named parameter; when null, it captures the `Random` at invocation time from a package-private injection point the registry sets up during its `build` call. If that mechanism feels fragile, switch to making factories take `Random` explicitly and document in the factory's dartdoc that callers should pass the dummy api's seed through. Pick one pattern and keep every factory consistent.",
+    "Implement each factory exactly per the spec: `oneOf<V>(List<V> values)`, `oneOfEnum<E extends Enum>(List<E> values)`, `rangeInt(int min, int max)`, `rangeDouble(double min, double max)`, `sentence({int wordCount = 8})`, `words({int min = 1, int max = 3})`, `paragraph({int sentences = 3})`, `pastDate({Duration within = const Duration(days: 365)})`, `futureDate({Duration within = const Duration(days: 365)})`, `uuid()`, `fixed<V>(V value)`.",
+    "`fixed` returns the exact supplied value every call — it does not use Random at all.",
+    "`sentence`, `words`, `paragraph` produce lowercase lorem-style text using a small internal word pool declared as a `const List<String>`. Do not pull a package dependency for lorem.",
+    "`uuid` returns a deterministic id of the shape `'dummy_' + index.toString().padLeft(8, '0')` where `index` is sourced from the shared Random's next int call — not a true UUID v4, because determinism is the contract.",
+    "Every factory returns `TValueGenerator` (not a subclass). The registry adopts them as-is.",
+    "Run `make analyze package=turbo_firestore_api` and the new tests."
+  ],
+  "goals": [
+    "Every caller override listed in the spec is expressible in one line at the caller's DI wire-up.",
+    "All randomness routes through the caller-supplied Random.",
+    "No external dependencies added for text generation."
+  ],
+  "non_goals": [
+    "No real UUIDs — determinism wins over RFC correctness.",
+    "No locale-aware text.",
+    "No integration with the probing map.",
+    "No example usage docs in CLAUDE.md or README."
+  ],
+  "acceptance_criteria": [
+    "`make analyze package=turbo_firestore_api` passes.",
+    "Unit tests prove each factory returns a `TValueGenerator`.",
+    "Unit tests prove determinism: two Random(42)-seeded runs of the same factory chain produce identical outputs.",
+    "`fixed(42)` returns `42` on ten calls in a row.",
+    "`oneOf(['a','b','c'])` returns one of the supplied values on every call."
+  ],
+  "constraints": [
+    "No `dart:math` instances created inside factories — the Random must be injected.",
+    "No external packages.",
+    "No shared mutable state other than the injected Random.",
+    "Trailing commas, single quotes, const constructors."
+  ],
+  "skills_to_read": [
+    "dev-conventions/conventions/typedefs.md",
+    "dev-conventions/conventions/folders-and-file-types.md",
+    "dev-conventions/conventions/unit-tests.md"
+  ],
+  "tools": [
+    "Write + Edit",
+    "Bash for analyze and test"
+  ],
+  "verification": [
+    "make analyze package=turbo_firestore_api",
+    "cd turbo_firestore_api && dart test test/generators/t_value_specs_test.dart"
+  ],
+  "testing": {
+    "rules": "No mocks. Inject `Random(seed)` directly into every factory and assert on outcome shape. Avoid hardcoded string comparisons for text factories — assert structural properties (word count, contains a space, starts with a letter) instead.",
+    "scenarios": [
+      "Given `oneOf([1,2,3])` wired to `Random(0)`, When called 100 times, Then every returned value is in {1,2,3}.",
+      "Given `rangeInt(10, 20)`, When called 100 times, Then every returned value is in [10, 20).",
+      "Given `pastDate()`, When called, Then the returned DateTime is before `DateTime.now()`.",
+      "Given two factory chains built with `Random(42)`, When each is walked in the same order, Then their outputs are element-wise equal.",
+      "Given `fixed('pinned')`, When called repeatedly, Then every call returns `'pinned'`."
+    ],
+    "refactor_for_testability": "If the Random injection point becomes awkward (e.g. global setter), refactor factories to take Random as a required param and update dependent tasks' side_context."
+  },
+  "quality_bar": {
+    "maintainability": "Adding a new factory is one function plus one test file entry.",
+    "dry": "No duplicated randomness plumbing — shared helpers live in one private section.",
+    "single_responsibility": "Each factory produces exactly one value shape.",
+    "performance": "Each invocation is O(1) plus any list-size cost for `oneOf` (O(1) with nextInt).",
+    "abuse_resistance": "Factories that receive out-of-range args (`rangeInt(20, 10)`) throw ArgumentError at construction."
+  },
+  "side_context": [],
+  "worklog": []
+}
