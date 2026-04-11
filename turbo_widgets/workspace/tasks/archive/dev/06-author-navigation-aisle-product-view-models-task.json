@@ -1,0 +1,118 @@
+{
+  "title": "Author product-detail view models for the Navigation aisle",
+  "status": "done",
+  "phase": 3,
+  "order": 6,
+  "type": "dev",
+  "spec_ref": "workspace/specs/turbo-widgets-showcase/interactive-shop/shop-and-source-refactor-spec.json",
+  "depends_on": [
+    "workspace/tasks/archive/dev/02-bootstrap-example-scaffold-and-services-task.json"
+  ],
+  "blocks": [
+    "14-author-navigation-aisle-product-views-task"
+  ],
+
+  "description": "Author one product-detail view model per Navigation-aisle widget. Each view model owns the reactive state that drives the live preview and the debug controls for a single navigation widget.",
+
+  "context": {
+    "aisle_scope": "Navigation aisle contains: TContextualAppBar, TContextualBottomNavigation, TContextualSideNavigation, TContextualNavButton, TSideNavBar, TContextualButtons, ContextualButtonsProvider. Seven products total. Each needs its own view model.",
+    "what_a_product_view_model_does": "Every product page shows a live preview of its widget + debug controls (dropdowns, sliders, toggles, text fields) that mutate the widget's inputs in real time. The debug controls are bound to TNotifier cells on this view model, and the preview renders by listening to those cells via ValueListenableBuilder / MultiListenableBuilder.",
+    "which_props_become_controls": "Expose one control per publicly-tunable parameter that has a meaningful user-facing effect. Skip internal/layout-only props (borderRadius, padding, spacing) unless the widget has nothing else to vary. Callback props are wired to a 'last callback fired' observable so the view can toast when a callback fires.",
+    "structural_widgets_note": "TContextualButtons, ContextualButtonsProvider — these don't render visible chrome by themselves; they host it. Their 'preview' is a miniature demo embedding an example payload. Their view models still expose whatever knobs make sense (e.g. a test callback that flips a last-fired cell)."
+  },
+
+  "goals": [
+    "One view model per widget in the Navigation aisle, each under example/lib/showcase/feature/navigation/views/{widget_snake_case}_showcase/{widget_snake_case}_showcase_view_model.dart.",
+    "Each extends TBaseViewModel and follows dev-conventions exactly.",
+    "Each exposes read-only ValueListenables backed by TNotifier<T> for every tunable parameter.",
+    "Each consumes MockContentService via constructor injection for any placeholder content its preview needs.",
+    "Each exposes a 'last callback' observable for any callback-typed prop, so the ui layer can toast when the callback is invoked.",
+    "Disposal cleans up all notifiers."
+  ],
+
+  "non_goals": [
+    "Rendering previews — later ui task.",
+    "Owning theme state or shell routing.",
+    "Knowing about other aisles' widgets.",
+    "Creating debug controls for every private or layout-only parameter."
+  ],
+
+  "acceptance_criteria": [
+    "Exactly one view model per Navigation-aisle widget exists at the expected path.",
+    "For each, inspecting the widget's public API in turbo_widgets confirms the view model exposes the meaningful tunable params from that API.",
+    "Constructing each view model with a real MockContentService instance does not throw.",
+    "`flutter analyze` reports zero findings.",
+    "Unit tests cover the tunable-prop state transitions where the prop is more than a passthrough."
+  ],
+
+  "constraints": [
+    "Follow dev-conventions/mvvm.md, views-and-view-models.md, state.md, class-structure.md.",
+    "No state lives in the widget/preview itself — every knob is a cell on the view model.",
+    "One type per file. One view model file per widget.",
+    "No inventing props that don't exist on the underlying widget."
+  ],
+
+  "relevant_paths": {
+    "target_folder": "turbo_widgets/example/lib/showcase/feature/navigation/views/",
+    "source_widgets_to_read": "turbo_widgets/lib/src/navigation/shared/widgets/*.dart (post-phase-1-refactor)"
+  },
+
+  "skills_to_load": ["dev-conventions", "flutter-widgets"],
+  "convention_files_to_read": [
+    "~/.claude/skills/dev-conventions/conventions/mvvm.md",
+    "~/.claude/skills/dev-conventions/conventions/views-and-view-models.md",
+    "~/.claude/skills/dev-conventions/conventions/state.md",
+    "~/.claude/skills/dev-conventions/conventions/class-structure.md"
+  ],
+  "tools_to_use": [
+    "RepoPrompt MCP (read_file, get_code_structure) to enumerate each widget's public parameters.",
+    "dart-mcp for analyze + test."
+  ],
+
+  "testing_and_verification": {
+    "unit_tests": "For each view model that has non-trivial state transitions (more than a single passthrough cell), write at least one Gherkin-style unit test verifying cell updates propagate correctly and callback cells flip when invoked. Skip testing trivial single-cell passthroughs — that is coverage theatre. No mocks.",
+    "test_location": "example/test/showcase/feature/navigation/views/",
+    "verification_gate": [
+      "`flutter analyze` zero findings.",
+      "All authored unit tests pass."
+    ]
+  },
+
+  "quality_checklist": {
+    "maintainability": "A developer reading a view model should understand every knob it exposes without opening the widget source.",
+    "dry": "If two view models would share a cell pattern (e.g. 'label text' + 'is enabled'), extract a shared base or mixin only if it actively reduces cost — otherwise keep them simple and independent.",
+    "single_responsibility": "One widget, one view model.",
+    "performance": "No per-frame allocations. TNotifier updates are O(1).",
+    "abuse_resistance": "Not applicable."
+  },
+
+  "workflow_instructions": [
+    "`status` → `in-progress`.",
+    "Work one widget at a time: read source, enumerate meaningful props, author view model, run analyze.",
+    "Done: mark `done`, append `worklog` listing each widget handled, move file to `workspace/tasks/archive/dev/06-author-navigation-aisle-product-view-models-task.json`.",
+    "Add `follow_up_notes` to 14-author-navigation-aisle-product-views-task listing each view model's exposed cells so the ui task knows what to bind."
+  ],
+
+  "worklog": [
+    {
+      "date": "2026-04-11",
+      "summary": "Created 7 product-detail view models for the Navigation aisle, each with TNotifier cells for tunable widget parameters, callback observables, and sample button data.",
+      "changes": [
+        "Created t_contextual_app_bar_showcase_view_model.dart: title, showLabels, lastCallbackFired cells",
+        "Created t_contextual_bottom_navigation_showcase_view_model.dart: selectedKey, showLabels, lastSelectedKey cells + sampleButtons",
+        "Created t_contextual_side_navigation_showcase_view_model.dart: selectedKey, showLabels, spacing, lastSelectedKey cells + sampleButtons",
+        "Created t_contextual_nav_button_showcase_view_model.dart: showLabel, lastPressed cells",
+        "Created t_side_nav_bar_showcase_view_model.dart: layout, isExpanded, selectedKey, showDividers, buttonAlignment, lastSelectedKey cells + sampleButtons",
+        "Created t_contextual_buttons_showcase_view_model.dart: showTop/Bottom/Left/Right, allowFilter, lastConfigChange cells + derived hiddenPositions",
+        "Created contextual_buttons_provider_showcase_view_model.dart: lastLookupResult cell",
+        "Created test for TSideNavBarShowcaseViewModel: 15 tests covering state transitions, toggle interactions, reactive notifications",
+        "Created test for TContextualButtonsShowcaseViewModel: 17 tests covering position toggles, hiddenPositions derivation, allowFilter, reactive notifications",
+        "Fixed LucideIcons.home → LucideIcons.house (icon name mismatch in lucide_icons_flutter 3.0.6)"
+      ],
+      "verification": [
+        "flutter analyze: 0 issues",
+        "flutter test: 151/151 passed (115 existing + 36 new)"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,89 @@
+{
+  "title": "Author product-detail view models for the Utilities aisle",
+  "status": "in-progress",
+  "phase": 3,
+  "order": 10,
+  "type": "dev",
+  "spec_ref": "workspace/specs/turbo-widgets-showcase/interactive-shop/shop-and-source-refactor-spec.json",
+  "depends_on": [
+    "workspace/tasks/archive/dev/02-bootstrap-example-scaffold-and-services-task.json"
+  ],
+  "blocks": [
+    "18-author-utilities-aisle-product-views-task"
+  ],
+
+  "description": "Author one view model per widget in the Utilities aisle. These are structural helpers (TViewBuilder, TResponsiveBuilder, TMarkdownFileItem) whose showcases read live data out of the framework.",
+
+  "context": {
+    "aisle_scope": "Three products: TViewBuilder, TResponsiveBuilder, TMarkdownFileItem.",
+    "view_builder_specials": "TViewBuilder is a host — it hosts a view model + optionally the contextual buttons overlay. The product page demonstrates its lifecycle by exposing counters for onModelReady / onModelDispose fires, a 'recreate' button that flips an identity cell to force a rebuild, and a 'host contextual buttons' toggle.",
+    "responsive_builder_specials": "The product page reads the active TData and TTools values out of TResponsiveBuilder's builder callback. The view model does not own these values — it only exposes cells for any customisation knobs (e.g. a custom breakpoint override if meaningful). The live TData display happens in the view, reading from the TResponsiveBuilder callback params directly.",
+    "markdown_file_item_specials": "The view model exposes a fileName cell (selected from a dropdown of available markdown snippets from MockContentService.markdownContent()) and a 'last open tap' observable. The preview reads the markdown content via MockContentService."
+  },
+
+  "goals": [
+    "Three view models, one per widget, each at example/lib/showcase/feature/utilities/views/{widget_snake_case}_showcase/.",
+    "Each extends TBaseViewModel and exposes read-only ValueListenables.",
+    "MockContentService is consumed via constructor injection where needed."
+  ],
+
+  "non_goals": [
+    "Rendering.",
+    "Owning routing or theme state.",
+    "Mirroring TResponsiveBuilder's TData inside the view model (that data is read in the view from the builder callback)."
+  ],
+
+  "acceptance_criteria": [
+    "Three view model files exist at the expected paths.",
+    "`flutter analyze` zero findings.",
+    "Unit tests cover the non-trivial transitions (markdown filename selection, view builder identity flip)."
+  ],
+
+  "constraints": [
+    "Follow dev-conventions/mvvm.md, views-and-view-models.md, state.md, class-structure.md.",
+    "One type per file."
+  ],
+
+  "relevant_paths": {
+    "target_folder": "turbo_widgets/example/lib/showcase/feature/utilities/views/",
+    "source_widgets_to_read": [
+      "turbo_widgets/lib/src/navigation/shared/widgets/t_view_builder.dart",
+      "turbo_widgets/lib/src/utilities/shared/widgets/*.dart"
+    ]
+  },
+
+  "skills_to_load": ["dev-conventions", "flutter-widgets"],
+  "convention_files_to_read": [
+    "~/.claude/skills/dev-conventions/conventions/mvvm.md",
+    "~/.claude/skills/dev-conventions/conventions/views-and-view-models.md",
+    "~/.claude/skills/dev-conventions/conventions/state.md",
+    "~/.claude/skills/dev-conventions/conventions/class-structure.md"
+  ],
+  "tools_to_use": [
+    "RepoPrompt MCP to read each widget's source.",
+    "dart-mcp for analyze + test."
+  ],
+
+  "testing_and_verification": {
+    "unit_tests": "Test markdown filename selection updates observable content identifier correctly; view builder identity flip produces a new identity value each call. No mocks.",
+    "test_location": "example/test/showcase/feature/utilities/views/",
+    "verification_gate": [
+      "`flutter analyze` zero findings.",
+      "Unit tests pass."
+    ]
+  },
+
+  "quality_checklist": {
+    "maintainability": "These three view models are the thinnest in the repo — keep them that way.",
+    "dry": "No duplication.",
+    "single_responsibility": "One widget, one view model.",
+    "performance": "Not a concern.",
+    "abuse_resistance": "Not applicable."
+  },
+
+  "workflow_instructions": [
+    "`status` → `in-progress`.",
+    "Done: mark `done`, worklog, move to archive.",
+    "Update 18's `follow_up_notes`."
+  ]
+}

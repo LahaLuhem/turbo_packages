@@ -1,0 +1,105 @@
+{
+  "title": "Wire real routing and per-route contextual buttons configs",
+  "status": "todo",
+  "phase": 5,
+  "order": 19,
+  "type": "dev",
+  "spec_ref": "workspace/specs/turbo-widgets-showcase/interactive-shop/shop-and-source-refactor-spec.json",
+  "depends_on": [
+    "workspace/tasks/archive/ui/11-author-shell-view-and-root-chrome-task.json",
+    "workspace/tasks/archive/ui/12-author-shop-home-view-task.json",
+    "workspace/tasks/archive/ui/13-author-aisle-detail-view-task.json",
+    "workspace/tasks/archive/ui/14-author-navigation-aisle-product-views-task.json",
+    "workspace/tasks/archive/ui/15-author-collections-aisle-product-views-task.json",
+    "workspace/tasks/archive/ui/16-author-detail-and-forms-aisle-product-views-task.json",
+    "workspace/tasks/archive/ui/17-author-layout-and-motion-aisle-product-views-task.json",
+    "workspace/tasks/archive/ui/18-author-utilities-aisle-product-views-task.json"
+  ],
+  "blocks": [],
+
+  "description": "Replace placeholder routing with real wiring and register a per-route TViewButtonsConfig with ContextualButtonsProvider so the top, bottom, and side chrome swap correctly as the visitor navigates between shop home, aisle detail, and every product detail.",
+
+  "context": {
+    "what_is_left": "After phase 4, every view exists but the router still resolves to placeholders in some paths, and the ContextualButtonsProvider at the root has no per-route button builders. This task is the 'glue' that connects the already-built pieces.",
+    "contextual_buttons_contract": "ContextualButtonsProvider<ShowcaseRoute> takes a Map<ShowcaseRoute, TViewButtonsConfig<...>>. Each TViewButtonsConfig defines a mobile builder and a desktop builder. The shell's TContextualButtons host consumes whichever config the current route looks up, automatically resized by the TResponsiveBuilder device type.",
+    "per_route_chrome_rules": [
+      "shop_home: top app bar title 'Turbo Widgets Shop' + theme toggle action; no back button; nav shows 'Shop' highlighted on desktop side rail and no highlight on mobile bottom bar's aisle tabs.",
+      "aisle_detail: top app bar title = aisle label + theme toggle + back button; nav shows that aisle highlighted.",
+      "product_detail: top app bar title = widget name + theme toggle + back button; nav shows the product's aisle highlighted."
+    ]
+  },
+
+  "goals": [
+    "ShowcaseRouter resolves every ShowcaseRoute value to its real view (no placeholders left).",
+    "main.dart's ContextualButtonsProvider receives a complete Map<ShowcaseRoute, TViewButtonsConfig> covering every route.",
+    "Each TViewButtonsConfig defines separate mobile and desktop builders so that resizing the window visibly swaps the chrome.",
+    "Navigating between shop home, an aisle detail, and a product detail results in the correct title, back button, and nav highlight on both mobile and desktop window sizes.",
+    "No view receives placeholder content — the app is end-to-end complete after this task."
+  ],
+
+  "non_goals": [
+    "Building any new view or view model.",
+    "Creating new mock data.",
+    "Writing the README playbook (next task)."
+  ],
+
+  "acceptance_criteria": [
+    "`flutter run` launches and all navigation flows work: shop home → aisle → product → back → aisle → back → shop home.",
+    "Resizing the window across the breakpoint swaps bottom nav ↔ side rail cleanly on every route.",
+    "Theme toggle works from every route.",
+    "Back button appears only on detail routes.",
+    "`flutter analyze` zero findings."
+  ],
+
+  "constraints": [
+    "Follow dev-conventions/routing.md, views-and-view-models.md, state.md.",
+    "Route definitions live in one place — do not scatter route-to-view mappings across files.",
+    "The contextual buttons map is built in the DI composition root, not inside any view."
+  ],
+
+  "relevant_paths": {
+    "target_files": [
+      "turbo_widgets/example/lib/core/routing/showcase_router.dart",
+      "turbo_widgets/example/lib/core/globals/dependency_injection.dart",
+      "turbo_widgets/example/lib/main.dart"
+    ]
+  },
+
+  "skills_to_load": ["dev-conventions", "flutter-widgets"],
+  "convention_files_to_read": [
+    "~/.claude/skills/dev-conventions/conventions/routing.md",
+    "~/.claude/skills/dev-conventions/conventions/views-and-view-models.md",
+    "~/.claude/skills/dev-conventions/conventions/state.md",
+    "~/.claude/skills/dev-conventions/conventions/dependency-injection.md"
+  ],
+  "tools_to_use": [
+    "RepoPrompt MCP for reading ContextualButtonsProvider, TViewButtonsConfig, TContextualButtonsConfig sources.",
+    "dart-mcp for launch_app + hot_reload.",
+    "Bash for `flutter run` and `flutter analyze`."
+  ],
+
+  "testing_and_verification": {
+    "unit_tests": "Write Gherkin-style unit tests verifying ShowcaseRouter's route-to-view resolution is complete: iterate every ShowcaseRoute enum value and assert the router returns a non-null view builder for each. This catches the common 'forgot to register a new route' bug when a new widget is added later. No mocks.",
+    "test_location": "example/test/core/routing/showcase_router_test.dart",
+    "verification_gate": [
+      "`flutter analyze` zero findings.",
+      "Unit tests pass.",
+      "Manual end-to-end navigation verification across every route and both window sizes."
+    ]
+  },
+
+  "quality_checklist": {
+    "maintainability": "Adding a new widget means adding one enum value + one catalog entry + one router entry + a showcase view folder — nothing else.",
+    "dry": "Route registration is not duplicated between the router and the contextual buttons map — derive one from the other if practical, or centralise both behind the catalog service.",
+    "single_responsibility": "The router resolves routes. DI composition wires services. The shell renders. Do not conflate.",
+    "performance": "Contextual button builders are cheap — no heavy allocations per route lookup.",
+    "abuse_resistance": "Not applicable."
+  },
+
+  "workflow_instructions": [
+    "`status` → `in-progress`.",
+    "Read ContextualButtonsProvider and TViewButtonsConfig sources carefully — their exact shape determines the wiring.",
+    "Done: mark `done`, worklog, move to `workspace/tasks/archive/dev/19-wire-routing-and-contextual-buttons-integration-task.json`.",
+    "Update 20-author-example-readme-playbook-task's `follow_up_notes` with the exact list of files a future contributor must touch when adding a new widget — the README task consumes this list."
+  ]
+}

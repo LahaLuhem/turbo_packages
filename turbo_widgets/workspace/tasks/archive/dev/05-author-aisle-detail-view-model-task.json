@@ -1,0 +1,108 @@
+{
+  "title": "Author AisleDetailViewModel",
+  "status": "done",
+  "phase": 3,
+  "order": 5,
+  "type": "dev",
+  "spec_ref": "workspace/specs/turbo-widgets-showcase/interactive-shop/shop-and-source-refactor-spec.json",
+  "depends_on": [
+    "workspace/tasks/archive/dev/02-bootstrap-example-scaffold-and-services-task.json"
+  ],
+  "blocks": [
+    "13-author-aisle-detail-view-task"
+  ],
+
+  "description": "Create the view model for a single aisle's detail screen — the page that shows every product inside one aisle with a working toolbar and layout toggle. One view model serves every aisle; the aisle key is passed in at construction.",
+
+  "context": {
+    "screen_purpose": "When the visitor taps an aisle (e.g. 'Collections'), they see a header for that aisle and a collection section listing every widget in it. The toolbar works the same way it does on the shop home, but it operates on the products of a single aisle.",
+    "construction": "The view model takes an aisleKey at construction so it can ask ShowcaseCatalogService.byAisle(aisleKey) for its product list. It does not know about other aisles.",
+    "shared_patterns_with_shop_home": "Search / sort / layout toggle behaviour mirrors shop home — but sort by aisle makes no sense here (only one aisle present), so the sort modes are name ascending/descending only."
+  },
+
+  "goals": [
+    "AisleDetailViewModel extends TBaseViewModel and lives under example/lib/showcase/feature/aisle_detail/views/aisle_detail/.",
+    "Constructor takes aisleKey, ShowcaseCatalogService, and MockContentService.",
+    "Exposes read-only cells for searchQuery, sortMode, layout.",
+    "Derives the filtered/sorted product list from the cells and the catalog service.",
+    "Exposes an empty-state observable when filters produce zero results.",
+    "Opens a product by emitting a callback — does not navigate directly."
+  ],
+
+  "non_goals": [
+    "Routing itself.",
+    "Rendering.",
+    "Cross-aisle knowledge."
+  ],
+
+  "acceptance_criteria": [
+    "Constructing with aisleKey='navigation' exposes exactly the navigation aisle's products.",
+    "Search, sort, and layout toggles behave identically to shop home's equivalents.",
+    "Empty search result exposes the empty observable as true.",
+    "Swapping aisleKey (by constructing a new instance) yields a fully independent view model with no leaked state."
+  ],
+
+  "constraints": [
+    "Follow the same conventions as shop home view model (mvvm, views-and-view-models, state).",
+    "Do not subclass ShopHomeViewModel — favour composition of shared pure filter utilities if any logic is genuinely shareable; otherwise keep independent.",
+    "aisleKey is final and cannot change after construction."
+  ],
+
+  "relevant_paths": {
+    "target_file": "turbo_widgets/example/lib/showcase/feature/aisle_detail/views/aisle_detail/aisle_detail_view_model.dart"
+  },
+
+  "skills_to_load": ["dev-conventions", "flutter-widgets"],
+  "convention_files_to_read": [
+    "~/.claude/skills/dev-conventions/conventions/mvvm.md",
+    "~/.claude/skills/dev-conventions/conventions/views-and-view-models.md",
+    "~/.claude/skills/dev-conventions/conventions/state.md"
+  ],
+  "tools_to_use": [
+    "RepoPrompt MCP to check the shop home view model for shared patterns.",
+    "dart-mcp for analyze + test."
+  ],
+
+  "testing_and_verification": {
+    "unit_tests": "Verify: filter/sort/layout pipeline on the aisle's products, empty-state observable flips on impossible search, construction with different aisle keys yields independent instances. No mocks — use a real catalog fixture. Gherkin structure. Outcome-focused.",
+    "test_location": "example/test/showcase/feature/aisle_detail/views/aisle_detail/aisle_detail_view_model_test.dart",
+    "verification_gate": [
+      "`flutter analyze` zero findings.",
+      "Unit tests pass."
+    ]
+  },
+
+  "quality_checklist": {
+    "maintainability": "Adding a new aisle only requires adding entries to the catalog — the view model needs no changes.",
+    "dry": "Filter/sort logic is not duplicated from shop home verbatim. If shared, extract a pure helper into core/utils/.",
+    "single_responsibility": "One view model, one aisle's state at a time.",
+    "performance": "Derivation is O(n) over the aisle's products, not the full catalog.",
+    "abuse_resistance": "Not applicable."
+  },
+
+  "worklog": [
+    {
+      "date": "2026-04-11",
+      "summary": "Created AisleDetailViewModel with derived product list scoped to a single aisle, toolbar-driven search/sort/layout, and full Gherkin-style test coverage.",
+      "changes": [
+        "Created showcase/feature/aisle_detail/views/aisle_detail/aisle_detail_view_model.dart: TBaseViewModel<void> with final aisleKey, TNotifier<String> searchQuery, TNotifier<String?> sortValue, TNotifier<TCollectionSectionLayout> layout",
+        "Derived getter products: search by name/tagline (case-insensitive) → sort by Name A–Z or Name Z–A, scoped to byAisle(aisleKey)",
+        "Convenience getters: aisleLabel, aisleTagline, isProductsEmpty",
+        "Static sort option constants: sortByNameAsc, sortByNameDesc, sortOptions",
+        "Mutators: updateSearchQuery, updateSortValue, updateLayout, selectProduct (delegates to callback)",
+        "No GetIt registration — callback parameter makes factory registration awkward; view constructs inline",
+        "Created test/showcase/feature/aisle_detail/views/aisle_detail/aisle_detail_view_model_test.dart: 30 Gherkin-style tests covering search, sort, layout, empty state, combined search+sort, product selection, reactive notifications, independent instances"
+      ],
+      "verification": [
+        "flutter analyze: 0 issues",
+        "flutter test: 115/115 passed (85 existing + 30 new)"
+      ]
+    }
+  ],
+
+  "workflow_instructions": [
+    "`status` → `in-progress`.",
+    "Done: mark `done`, append `worklog`, move to archive.",
+    "Add `follow_up_notes` to 13-author-aisle-detail-view-task with the public surface."
+  ]
+}

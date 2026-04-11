@@ -1,0 +1,110 @@
+{
+  "title": "Author product-detail views for the Navigation aisle",
+  "status": "todo",
+  "phase": 4,
+  "order": 14,
+  "type": "ui",
+  "spec_ref": "workspace/specs/turbo-widgets-showcase/interactive-shop/shop-and-source-refactor-spec.json",
+  "depends_on": [
+    "workspace/tasks/archive/dev/06-author-navigation-aisle-product-view-models-task.json"
+  ],
+  "blocks": [
+    "19-wire-routing-and-contextual-buttons-integration-task"
+  ],
+
+  "description": "Author one stateless product-detail view per Navigation-aisle widget. Each view is a TViewBuilder<XxxProductViewModel> that renders the widget being demonstrated with a live preview panel, a debug-controls form bound to the view model's cells, a metadata row, an advanced collapsible section, and a usage-snippet markdown block.",
+
+  "context": {
+    "shared_page_structure": "Every product detail page has the same bones: TDetailHeader (widget name + tagline) → row of TKeyValueField metadata (aisle, source path, stateful/stateless, direct deps) → live preview panel that renders the widget using current view model cells → TFormSection 'Debug controls' with one shadcn_ui field per tunable cell → TCollapsibleSection 'Advanced' for rarely-used props → TMarkdownFileItem 'Usage snippet' showing the Dart code that produces the current preview.",
+    "aisle_scope": "Seven product detail views: TContextualAppBar, TContextualBottomNavigation, TContextualSideNavigation, TContextualNavButton, TSideNavBar, TContextualButtons, ContextualButtonsProvider.",
+    "structural_widgets_previews": "TContextualButtons and ContextualButtonsProvider do not render visible chrome by themselves. Their 'live preview' is a bounded demo region that wires a tiny internal example using them, so visitors can see the overlay happening."
+  },
+
+  "goals": [
+    "Seven product detail view files under example/lib/showcase/feature/navigation/views/{widget_snake_case}_showcase/{widget_snake_case}_showcase_view.dart.",
+    "Each view is a StatelessWidget wrapping TViewBuilder<XxxProductViewModel>.",
+    "Each view follows the shared page structure exactly — do not invent per-widget layout variation unless the widget genuinely requires it.",
+    "Debug controls are rendered through TFormSection with shadcn_ui inputs (ShadInput, ShadSelect, ShadSlider, ShadCheckbox) bound via ValueListenableBuilder to the view model's TNotifier cells.",
+    "Usage snippet markdown reflects the current cell values — update it live or render a static canonical snippet if live updates add noise."
+  ],
+
+  "non_goals": [
+    "Routing or theme toggling (the shell owns those).",
+    "Owning any state — every knob is a cell on the view model.",
+    "Per-widget bespoke page structures."
+  ],
+
+  "acceptance_criteria": [
+    "Opening each navigation product detail renders its header, metadata row, live preview, debug controls, advanced collapsible, and usage snippet.",
+    "Mutating a debug control updates the live preview within the same frame (verified visually via hot reload + manual interaction).",
+    "Callback-typed knobs produce a toast (via shadcn_ui snackbar / toaster or equivalent) when the callback fires.",
+    "No Material chrome is used — only turbo_widgets and shadcn_ui.",
+    "`flutter analyze` zero findings."
+  ],
+
+  "constraints": [
+    "Follow dev-conventions/views-and-view-models.md, state.md, folders-and-file-types.md.",
+    "Stateless views. Every cell-driven rebuild happens inside a ValueListenableBuilder / ValueListenableBuilderX2..X6 / MultiListenableBuilder.",
+    "Extract a shared product-detail page skeleton helper if all seven views repeat identical scaffolding — do not paste the skeleton seven times.",
+    "Icons from LucideIcons only."
+  ],
+
+  "relevant_paths": {
+    "target_folder": "turbo_widgets/example/lib/showcase/feature/navigation/views/",
+    "view_models": "turbo_widgets/example/lib/showcase/feature/navigation/views/*/navigation/*_showcase_view_model.dart"
+  },
+
+  "skills_to_load": [
+    "dev-conventions",
+    "flutter-widgets",
+    "ui-ux-conventions"
+  ],
+  "convention_files_to_read": [
+    "~/.claude/skills/dev-conventions/conventions/views-and-view-models.md",
+    "~/.claude/skills/dev-conventions/conventions/state.md",
+    "~/.claude/skills/dev-conventions/conventions/folders-and-file-types.md"
+  ],
+  "tools_to_use": [
+    "RepoPrompt MCP (read_file, get_code_structure) for each widget source and its corresponding view model.",
+    "dart-mcp for launch + hot reload iteration.",
+    "Bash for `flutter analyze` and `flutter run`."
+  ],
+
+  "testing_and_verification": {
+    "unit_tests": "None — stateless ui.",
+    "verification_gate": [
+      "`flutter analyze` zero findings.",
+      "Manual verification: open each of the seven product detail pages, move at least one debug control on each, confirm the preview updates, confirm the callback toast fires where applicable."
+    ]
+  },
+
+  "quality_checklist": {
+    "maintainability": "Shared page skeleton extracted — adding a new navigation widget means authoring a new view model + a thin new view that supplies cells into the shared skeleton.",
+    "dry": "No copy-pasted scaffolding across the seven views.",
+    "single_responsibility": "One view renders one widget's showcase.",
+    "performance": "Value listeners are scoped tight enough that sliding one slider does not rebuild unrelated sections of the page.",
+    "abuse_resistance": "Not applicable."
+  },
+
+  "workflow_instructions": [
+    "`status` → `in-progress`.",
+    "Start by extracting the shared page skeleton, then use it for all seven views.",
+    "Done: mark `done`, worklog, move to `workspace/tasks/archive/ui/14-author-navigation-aisle-product-views-task.json`.",
+    "Add `follow_up_notes` to 15, 16, 17, 18 pointing at the shared skeleton helper so those tasks reuse it instead of re-extracting."
+  ],
+
+  "follow_up_notes": [
+    "Phase 3 task 06 created 7 product-detail view models for the Navigation aisle. Summary:",
+    "",
+    "1. TContextualAppBarShowcaseViewModel — cells: title (String), showLabels (bool), lastCallbackFired (String?). Mutators: updateTitle, toggleShowLabels, onButtonPressed(String).",
+    "2. TContextualBottomNavigationShowcaseViewModel — cells: selectedKey (String?), showLabels (bool), lastSelectedKey (String?). Provides sampleButtons Map. Mutators: updateSelectedKey, toggleShowLabels, onSelect(String).",
+    "3. TContextualSideNavigationShowcaseViewModel — cells: selectedKey (String?), showLabels (bool), spacing (double), lastSelectedKey (String?). Provides sampleButtons Map. Mutators: updateSelectedKey, toggleShowLabels, updateSpacing, onSelect(String).",
+    "4. TContextualNavButtonShowcaseViewModel — cells: showLabel (bool), lastPressed (String?). Mutators: toggleShowLabel, onPressed.",
+    "5. TSideNavBarShowcaseViewModel — cells: layout (TSideNavBarLayout), isExpanded (bool), selectedKey (String?), showDividers (bool), buttonAlignment (TSideNavBarButtonAlignment), lastSelectedKey (String?). Provides sampleButtons Map. Mutators: updateLayout, toggleIsExpanded, updateSelectedKey, toggleShowDividers, updateButtonAlignment, onSelect(String).",
+    "6. TContextualButtonsShowcaseViewModel — cells: showTop (bool), showBottom (bool), showLeft (bool), showRight (bool), allowFilter (TContextualAllowFilter), lastConfigChange (String?). Derived: hiddenPositions (Set<TContextualPosition>). Mutators: toggleShowTop/Bottom/Left/Right, updateAllowFilter.",
+    "7. ContextualButtonsProviderShowcaseViewModel — cells: lastLookupResult (String?). Mutators: onLookupPerformed(String).",
+    "",
+    "File paths: example/lib/showcase/feature/navigation/views/{widget_snake_case}_showcase/{widget_snake_case}_showcase_view_model.dart",
+    "None registered in GetIt — construct inline in TViewBuilder."
+  ]
+}

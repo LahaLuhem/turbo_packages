@@ -1,0 +1,107 @@
+{
+  "title": "Author product-detail view models for the Layout & Motion aisle",
+  "status": "done",
+  "phase": 3,
+  "order": 9,
+  "type": "dev",
+  "spec_ref": "workspace/specs/turbo-widgets-showcase/interactive-shop/shop-and-source-refactor-spec.json",
+  "depends_on": [
+    "workspace/tasks/archive/dev/02-bootstrap-example-scaffold-and-services-task.json"
+  ],
+  "blocks": [
+    "17-author-layout-and-motion-aisle-product-views-task"
+  ],
+
+  "description": "Author one view model per widget in the Layout & Motion aisle. These widgets are small and focused on visual behaviour, so their view models are thin — mostly boolean toggles and counters that mutate the preview.",
+
+  "context": {
+    "aisle_scope": "Four products: TCalculatedHeight, TVerticalShrink, THorizontalShrink, TCollapsibleSection.",
+    "calculated_height_specials": "The view model exposes an item count cell; visitors add and remove items via buttons on the page to watch the height rescale.",
+    "vertical_horizontal_shrink_specials": "A boolean isVisible cell drives the shrink direction. A toggle button on the page flips it.",
+    "collapsible_section_specials": "An isExpanded cell is toggled by the visitor; a title cell sources its text from MockContentService."
+  },
+
+  "goals": [
+    "Four view models, one per widget, each at example/lib/showcase/feature/layout_and_motion/views/{widget_snake_case}_showcase/.",
+    "Each extends TBaseViewModel and exposes read-only ValueListenables.",
+    "Each consumes MockContentService via constructor injection where placeholder content is needed."
+  ],
+
+  "non_goals": [
+    "Rendering.",
+    "Owning global state.",
+    "Inventing knobs not backed by the widget's real API."
+  ],
+
+  "acceptance_criteria": [
+    "Four view model files exist at the expected paths.",
+    "Each state transition is reflected in a read-only ValueListenable.",
+    "`flutter analyze` zero findings.",
+    "Unit tests cover any non-trivial transitions (e.g. item count min/max bounds)."
+  ],
+
+  "constraints": [
+    "Follow dev-conventions/mvvm.md, views-and-view-models.md, state.md.",
+    "One type per file. snake_case filenames.",
+    "No setState anywhere."
+  ],
+
+  "relevant_paths": {
+    "target_folder": "turbo_widgets/example/lib/showcase/feature/layout_and_motion/views/",
+    "source_widgets_to_read": "turbo_widgets/lib/src/layout_and_motion/shared/widgets/*.dart"
+  },
+
+  "skills_to_load": ["dev-conventions", "flutter-widgets"],
+  "convention_files_to_read": [
+    "~/.claude/skills/dev-conventions/conventions/mvvm.md",
+    "~/.claude/skills/dev-conventions/conventions/views-and-view-models.md",
+    "~/.claude/skills/dev-conventions/conventions/state.md",
+    "~/.claude/skills/dev-conventions/conventions/class-structure.md"
+  ],
+  "tools_to_use": [
+    "RepoPrompt MCP to read each widget's source.",
+    "dart-mcp for analyze + test."
+  ],
+
+  "testing_and_verification": {
+    "unit_tests": "Test: item count in TCalculatedHeightProductViewModel respects a sensible non-negative bound; isVisible toggle flips cleanly; isExpanded toggle flips cleanly. Outcome tests only. No mocks.",
+    "test_location": "example/test/showcase/feature/layout_and_motion/views/",
+    "verification_gate": [
+      "`flutter analyze` zero findings.",
+      "Unit tests pass."
+    ]
+  },
+
+  "quality_checklist": {
+    "maintainability": "These view models are the simplest — keep them trivial and scannable.",
+    "dry": "No duplication of toggle logic.",
+    "single_responsibility": "One widget per view model.",
+    "performance": "Not a concern.",
+    "abuse_resistance": "Not applicable."
+  },
+
+  "workflow_instructions": [
+    "`status` → `in-progress`.",
+    "Done: mark `done`, worklog, move to archive.",
+    "Update 17's `follow_up_notes`."
+  ],
+
+  "worklog": [
+    {
+      "date": "2026-04-11",
+      "summary": "Created 4 product-detail view models for the Layout & Motion aisle, each with TNotifier cells for tunable widget parameters. Tests cover TCalculatedHeight count bounds and TCollapsibleSection lifecycle.",
+      "changes": [
+        "Created t_vertical_shrink_showcase_view_model.dart: isVisible (bool) cell + toggleVisibility mutator",
+        "Created t_horizontal_shrink_showcase_view_model.dart: isVisible (bool) cell + toggleVisibility mutator",
+        "Created t_calculated_height_showcase_view_model.dart: count (int), baseHeight (double), multiplierThreshold (double), minHeight (double?), maxHeight (double?) cells + addItem/removeItem/updateCount mutators with count clamped >= 0",
+        "Created t_collapsible_section_showcase_view_model.dart: isExpanded (bool), title (String from MockContentService) cells + toggleExpanded/updateTitle mutators. Constructor-injects MockContentService, title sourced during initialise().",
+        "Created t_calculated_height_showcase_view_model_test.dart: 17 tests covering defaults, add/remove/updateCount, negative clamp, bounds at 0, accumulated operations, parameter cell updates",
+        "Created t_collapsible_section_showcase_view_model_test.dart: 11 tests covering defaults, initialise sources from MockContentService, toggle expand, updateTitle, notifications"
+      ],
+      "verification": {
+        "analyze": "0 issues",
+        "tests": "250/250 passed (222 existing + 17 calculated height + 11 collapsible section)"
+      }
+    }
+  ]
+}
