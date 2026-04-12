@@ -1,6 +1,6 @@
 {
   "title": "Implement _TDummyDocumentReference delegating to the in-memory store",
-  "status": "todo",
+  "status": "in-progress",
   "type": "feature",
   "phase": "7-batch-transaction-docref",
   "order": 11,
