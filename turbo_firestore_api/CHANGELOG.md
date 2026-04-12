@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.0] - 2026-04-12
+
+### Added
+* `TDummyFirestoreApi<T>` — drop-in replacement for `TFirestoreApi<T>` that serves realistic, deterministic fake data from an in-memory store without contacting Firestore
+* `TValueGeneratorRegistry` — composable value generator system for producing typed dummy field values
+* `TValueSpecs` — declarative field-level specifications for controlling dummy data generation
+* `TDummySchema` — sealed type representing probed document structures (leaf vs branch fields)
+* In-memory `WriteBatch` and `Transaction` support with atomic commit/rollback semantics
+* Fully-stubbed `DocumentReference` with working `.get()`, `.update()`, `.delete()`, `.set()`, `.snapshots()`
+* Query filter, sort, and substring search support via constructor-supplied predicates
+
 ## [0.9.0] - 2026-01-18
 
 ### Fixes

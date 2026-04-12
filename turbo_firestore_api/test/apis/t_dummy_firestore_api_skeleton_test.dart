@@ -41,17 +41,16 @@ TDummyFirestoreApi<_SimpleDto> _createApi({
   double randomFailurePercentage = 0,
   Duration dummyDelayDuration = const Duration(milliseconds: 225),
   List<Duration>? dummyDelayRange,
-}) =>
-    TDummyFirestoreApi<_SimpleDto>(
-      firebaseFirestore: FakeFirebaseFirestore(),
-      collectionPath: collectionPath ?? () => 'testCollection',
-      fromJson: _SimpleDto.fromJson,
-      toJson: (dto) => dto.toJson(),
-      seed: seed,
-      randomFailurePercentage: randomFailurePercentage,
-      dummyDelayDuration: dummyDelayDuration,
-      dummyDelayRange: dummyDelayRange,
-    );
+}) => TDummyFirestoreApi<_SimpleDto>(
+  firebaseFirestore: FakeFirebaseFirestore(),
+  collectionPath: collectionPath ?? () => 'testCollection',
+  fromJson: _SimpleDto.fromJson,
+  toJson: (dto) => dto.toJson(),
+  seed: seed,
+  randomFailurePercentage: randomFailurePercentage,
+  dummyDelayDuration: dummyDelayDuration,
+  dummyDelayRange: dummyDelayRange,
+);
 
 /// Recursively compares two [TDummySchema] instances for structural equality.
 void _expectSchemasEqual(TDummySchema a, TDummySchema b) {

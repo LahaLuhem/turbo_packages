@@ -35,32 +35,27 @@ part '_t_dummy_probing_map.dart';
 @visibleForTesting
 TDummySchema probeDummySchemaForTesting<T>(
   T Function(Map<String, dynamic>) fromJson,
-) =>
-    _TDummyProbingMap.probe<T>(fromJson);
+) => _TDummyProbingMap.probe<T>(fromJson);
 
 /// Returns the probed schema from a [TDummyFirestoreApi] instance.
 @visibleForTesting
-TDummySchema dummySchemaForTesting<T>(TDummyFirestoreApi<T> api) =>
-    api._schema;
+TDummySchema dummySchemaForTesting<T>(TDummyFirestoreApi<T> api) => api._schema;
 
 /// Returns the value generator registry from a [TDummyFirestoreApi] instance.
 @visibleForTesting
 TValueGeneratorRegistry dummyRegistryForTesting<T>(
   TDummyFirestoreApi<T> api,
-) =>
-    api._registry;
+) => api._registry;
 
 /// Generates a deterministic dummy id from a [TDummyFirestoreApi] instance.
 @visibleForTesting
-String genDummyIdForTesting<T>(TDummyFirestoreApi<T> api) =>
-    api._genDummyId();
+String genDummyIdForTesting<T>(TDummyFirestoreApi<T> api) => api._genDummyId();
 
 /// Awaits the latency gate of a [TDummyFirestoreApi] instance.
 @visibleForTesting
 Future<void> applyDummyLatencyForTesting<T>(
   TDummyFirestoreApi<T> api,
-) =>
-    api._applyLatency();
+) => api._applyLatency();
 
 /// Rolls a simulated failure exception from a [TDummyFirestoreApi] instance.
 @visibleForTesting
@@ -69,20 +64,18 @@ TFirestoreException? rollDummyFailureExceptionForTesting<T>(
   required TOperationType operationType,
   String? id,
   Map<String, dynamic>? documentData,
-}) =>
-    api._rollFailureException(
-      operationType: operationType,
-      id: id,
-      documentData: documentData,
-    );
+}) => api._rollFailureException(
+  operationType: operationType,
+  id: id,
+  documentData: documentData,
+);
 
 /// Registers a collection stream controller for testing dispose behavior.
 @visibleForTesting
 void addCollectionControllerForTesting<T>(
   TDummyFirestoreApi<T> api,
   StreamController<List<T>> controller,
-) =>
-    api._collectionControllers.add(controller);
+) => api._collectionControllers.add(controller);
 
 /// Registers a document stream controller for testing dispose behavior.
 @visibleForTesting
@@ -90,8 +83,7 @@ void addDocControllerForTesting<T>(
   TDummyFirestoreApi<T> api,
   String id,
   StreamController<T?> controller,
-) =>
-    (api._docControllers[id] ??= {}).add(controller);
+) => (api._docControllers[id] ??= {}).add(controller);
 
 /// Exposes the query filter/sort seam for testing.
 @visibleForTesting
@@ -99,18 +91,16 @@ List<Map<String, dynamic>> applyDummyQueryFilterAndSortForTesting<T>(
   TDummyFirestoreApi<T> api, {
   required String? whereDescription,
   required List<Map<String, dynamic>> input,
-}) =>
-    api._applyQueryFilterAndSort(
-      whereDescription: whereDescription,
-      input: input,
-    );
+}) => api._applyQueryFilterAndSort(
+  whereDescription: whereDescription,
+  input: input,
+);
 
 /// Returns the raw in-memory store for testing.
 @visibleForTesting
 Map<String, Map<String, dynamic>> dummyStoreForTesting<T>(
   TDummyFirestoreApi<T> api,
-) =>
-    api._store;
+) => api._store;
 
 /// Returns the number of active typed collection stream controllers.
 @visibleForTesting
@@ -139,22 +129,21 @@ String dummyPathSnapshotForTesting<T>(TDummyFirestoreApi<T> api) =>
 
 /// Returns the query filters for testing.
 @visibleForTesting
-Map<String, bool Function(Map<String, dynamic>)>
-    dummyQueryFiltersForTesting<T>(TDummyFirestoreApi<T> api) =>
-        api._queryFilters;
+Map<String, bool Function(Map<String, dynamic>)> dummyQueryFiltersForTesting<T>(
+  TDummyFirestoreApi<T> api,
+) => api._queryFilters;
 
 /// Returns the query sort comparators for testing.
 @visibleForTesting
 Map<String, int Function(Map<String, dynamic>, Map<String, dynamic>)>
-    dummyQuerySortForTesting<T>(TDummyFirestoreApi<T> api) => api._querySort;
+dummyQuerySortForTesting<T>(TDummyFirestoreApi<T> api) => api._querySort;
 
 /// Generates a raw JSON map for a document with the given [id].
 @visibleForTesting
 Map<String, dynamic> generateDocJsonForTesting<T>(
   TDummyFirestoreApi<T> api, {
   required String id,
-}) =>
-    api._generateDocJson(id: id);
+}) => api._generateDocJson(id: id);
 
 /// Applies timestamps to a raw JSON map.
 @visibleForTesting
@@ -162,8 +151,7 @@ Map<String, dynamic> applyTimestampsForTesting<T>(
   TDummyFirestoreApi<T> api, {
   required Map<String, dynamic> json,
   required TTimestampType type,
-}) =>
-    api._applyTimestamps(json: json, type: type);
+}) => api._applyTimestamps(json: json, type: type);
 
 /// Re-emits the full store snapshot to every open collection controller.
 @visibleForTesting
@@ -223,7 +211,8 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
     int? seed,
     Map<String, bool Function(Map<String, dynamic> doc)>? queryFilters,
     Map<String, int Function(Map<String, dynamic> a, Map<String, dynamic> b)>?
-        querySort,
+    querySort,
+    String searchField = 'name',
   }) {
     assert(
       fromJson != null,
@@ -307,16 +296,20 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
       queryFilters: Map<String, bool Function(Map<String, dynamic>)>.of(
         queryFilters ?? const {},
       ),
-      querySort: Map<String,
-          int Function(Map<String, dynamic>, Map<String, dynamic>)>.of(
-        querySort ?? const {},
-      ),
+      querySort:
+          Map<
+            String,
+            int Function(Map<String, dynamic>, Map<String, dynamic>)
+          >.of(
+            querySort ?? const {},
+          ),
       pathSnapshot: pathSnapshot,
       rng: rng,
       schema: schema,
       registry: registry,
       firebaseFirestoreSnapshot: firebaseFirestore,
       isCollectionGroupSnapshot: isCollectionGroup,
+      defaultSearchField: searchField,
     );
   }
 
@@ -345,54 +338,58 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
     required List<Duration>? dummyDelayRange,
     required double randomFailurePercentage,
     required Map<String, bool Function(Map<String, dynamic>)> queryFilters,
-    required Map<String,
-            int Function(Map<String, dynamic>, Map<String, dynamic>)>
-        querySort,
+    required Map<
+      String,
+      int Function(Map<String, dynamic>, Map<String, dynamic>)
+    >
+    querySort,
     required String pathSnapshot,
     required Random rng,
     required TDummySchema schema,
     required TValueGeneratorRegistry registry,
     required FirebaseFirestore firebaseFirestoreSnapshot,
     required bool isCollectionGroupSnapshot,
-  })  : _firebaseFirestoreSnapshot = firebaseFirestoreSnapshot,
-        _fromJsonRequired = fromJsonRequired,
-        _isCollectionGroupSnapshot = isCollectionGroupSnapshot,
-        _createdAtFieldName = dummyCreatedAtFieldName,
-        _updatedAtFieldName = dummyUpdatedAtFieldName,
-        _idFieldName = dummyIdFieldName,
-        _defaultCollectionSize = defaultCollectionSize,
-        _dummyDelayDuration = dummyDelayDuration,
-        _dummyDelayRange = dummyDelayRange,
-        _randomFailurePercentage = randomFailurePercentage,
-        _queryFilters = queryFilters,
-        _querySort = querySort,
-        _pathSnapshot = pathSnapshot,
-        _rng = rng,
-        _schema = schema,
-        _registry = registry,
-        _store = {},
-        _collectionControllers = {},
-        _collectionControllerWhereDescriptions = {},
-        _rawCollectionControllers = {},
-        _rawCollectionControllerWhereDescriptions = {},
-        _docControllers = {},
-        _nextDummyId = 0,
-        super(
-          firebaseFirestore: firebaseFirestore,
-          collectionPath: collectionPath,
-          toJson: toJson,
-          fromJson: fromJson,
-          fromJsonError: fromJsonError,
-          tryAddLocalId: tryAddLocalId,
-          logger: logger,
-          createdAtFieldName: createdAtFieldName,
-          updatedAtFieldName: updatedAtFieldName,
-          idFieldName: idFieldName,
-          documentReferenceFieldName: documentReferenceFieldName,
-          isCollectionGroup: isCollectionGroup,
-          tryAddLocalDocumentReference: tryAddLocalDocumentReference,
-          getOptions: getOptions,
-        );
+    required String defaultSearchField,
+  }) : _firebaseFirestoreSnapshot = firebaseFirestoreSnapshot,
+       _fromJsonRequired = fromJsonRequired,
+       _isCollectionGroupSnapshot = isCollectionGroupSnapshot,
+       _defaultSearchField = defaultSearchField,
+       _createdAtFieldName = dummyCreatedAtFieldName,
+       _updatedAtFieldName = dummyUpdatedAtFieldName,
+       _idFieldName = dummyIdFieldName,
+       _defaultCollectionSize = defaultCollectionSize,
+       _dummyDelayDuration = dummyDelayDuration,
+       _dummyDelayRange = dummyDelayRange,
+       _randomFailurePercentage = randomFailurePercentage,
+       _queryFilters = queryFilters,
+       _querySort = querySort,
+       _pathSnapshot = pathSnapshot,
+       _rng = rng,
+       _schema = schema,
+       _registry = registry,
+       _store = {},
+       _collectionControllers = {},
+       _collectionControllerWhereDescriptions = {},
+       _rawCollectionControllers = {},
+       _rawCollectionControllerWhereDescriptions = {},
+       _docControllers = {},
+       _nextDummyId = 0,
+       super(
+         firebaseFirestore: firebaseFirestore,
+         collectionPath: collectionPath,
+         toJson: toJson,
+         fromJson: fromJson,
+         fromJsonError: fromJsonError,
+         tryAddLocalId: tryAddLocalId,
+         logger: logger,
+         createdAtFieldName: createdAtFieldName,
+         updatedAtFieldName: updatedAtFieldName,
+         idFieldName: idFieldName,
+         documentReferenceFieldName: documentReferenceFieldName,
+         isCollectionGroup: isCollectionGroup,
+         tryAddLocalDocumentReference: tryAddLocalDocumentReference,
+         getOptions: getOptions,
+       );
 
   // 🧩 DEPENDENCIES -------------------------------------------------------------------------- \\
 
@@ -427,12 +424,16 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
   /// Percentage chance (0..100) a call returns a simulated failure.
   final double _randomFailurePercentage;
 
+  /// Default field name used by the search fallback when no explicit
+  /// query filter is registered.
+  final String _defaultSearchField;
+
   /// Named filter predicates keyed by whereDescription.
   final Map<String, bool Function(Map<String, dynamic>)> _queryFilters;
 
   /// Optional comparators keyed by whereDescription.
   final Map<String, int Function(Map<String, dynamic>, Map<String, dynamic>)>
-      _querySort;
+  _querySort;
 
   // 🎩 STATE --------------------------------------------------------------------------------- \\
 
@@ -452,15 +453,15 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
   ///
   /// A `null` value means the stream is unfiltered (streamAllWithConverter).
   final Map<StreamController<List<T>>, String?>
-      _collectionControllerWhereDescriptions;
+  _collectionControllerWhereDescriptions;
 
   /// Open raw collection stream controllers (for streamByQuery).
   final Set<StreamController<List<Map<String, dynamic>>>>
-      _rawCollectionControllers;
+  _rawCollectionControllers;
 
   /// Per-controller whereDescription for raw collection streams.
   final Map<StreamController<List<Map<String, dynamic>>>, String>
-      _rawCollectionControllerWhereDescriptions;
+  _rawCollectionControllerWhereDescriptions;
 
   /// Open document stream controllers keyed by document id.
   final Map<String, Set<StreamController<T?>>> _docControllers;
@@ -712,7 +713,7 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
   @override
   Future<TurboResponse<List<Map<String, dynamic>>>> listByQuery({
     required CollectionReferenceDef<Map<String, dynamic>>
-        collectionReferenceQuery,
+    collectionReferenceQuery,
     required String whereDescription,
   }) async {
     try {
@@ -748,8 +749,13 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
       );
       if (failure != null) return TurboResponse.fail(error: failure);
       _seedStoreIfNeeded();
-      final filtered = _applyQueryFilterAndSort(
-        whereDescription: null,
+      final filtered = _applySearchFilter(
+        searchKey: searchField,
+        searchTerm: searchTerm,
+        searchField: searchField,
+        searchTermType: searchTermType,
+        doSearchNumberEquivalent: doSearchNumberEquivalent,
+        limit: limit,
         input: _rawStoreSnapshot(),
       );
       return TurboResponse.success(
@@ -776,8 +782,13 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
       if (failure != null) return TurboResponse.fail(error: failure);
       _seedStoreIfNeeded();
       return TurboResponse.success(
-        result: _applyQueryFilterAndSort(
-          whereDescription: null,
+        result: _applySearchFilter(
+          searchKey: searchField,
+          searchTerm: searchTerm,
+          searchField: searchField,
+          searchTermType: searchTermType,
+          doSearchNumberEquivalent: doSearchNumberEquivalent,
+          limit: limit,
           input: _rawStoreSnapshot(),
         ),
       );
@@ -896,11 +907,10 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
   @override
   Stream<List<Map<String, dynamic>>> streamByQuery({
     required CollectionReferenceDef<Map<String, dynamic>>?
-        collectionReferenceQuery,
+    collectionReferenceQuery,
     required String whereDescription,
   }) {
-    final controller =
-        StreamController<List<Map<String, dynamic>>>.broadcast();
+    final controller = StreamController<List<Map<String, dynamic>>>.broadcast();
     controller.onListen = () {
       _rawCollectionControllers.add(controller);
       _rawCollectionControllerWhereDescriptions[controller] = whereDescription;
@@ -933,8 +943,7 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
   Stream<DocumentSnapshot<Map<String, dynamic>>> streamByDocId({
     required String id,
     String? collectionPathOverride,
-  }) =>
-      throw UnimplementedError(_dummyStreamGuidance);
+  }) => throw UnimplementedError(_dummyStreamGuidance);
 
   @override
   Stream<T?> streamDocByIdWithConverter({
@@ -948,6 +957,18 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
       'collectionPathOverride containing all parent collection and document '
       'ids in order to make this method work.',
     );
+    return _createDocStream(id, autoCreate: true);
+  }
+
+  /// Creates a document-specific stream controller registered in
+  /// [_docControllers].
+  ///
+  /// When [autoCreate] is true (default), missing documents are generated
+  /// and stored on first emission — matching [streamDocByIdWithConverter]
+  /// behaviour. When false, missing documents emit `null` — suitable for
+  /// [_TDummyDocumentReference.snapshots] where non-existent docs should
+  /// report `exists == false`.
+  Stream<T?> _createDocStream(String id, {bool autoCreate = true}) {
     final controller = StreamController<T?>.broadcast();
     controller.onListen = () {
       (_docControllers[id] ??= {}).add(controller);
@@ -963,8 +984,15 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
           if (!controller.isClosed) controller.addError(failure);
           return;
         }
-        final stored = _getOrCreateStoredDoc(id);
-        if (!controller.isClosed) controller.add(_materialise(stored));
+        if (autoCreate) {
+          final stored = _getOrCreateStoredDoc(id);
+          if (!controller.isClosed) controller.add(_materialise(stored));
+        } else {
+          final stored = _store[id];
+          if (!controller.isClosed) {
+            controller.add(stored != null ? _materialise(stored) : null);
+          }
+        }
       });
     };
     controller.onCancel = () {
@@ -1009,16 +1037,131 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
     }
   }
 
-  /// Returns the full store values as raw JSON, passing through the
-  /// query filter/sort seam that is currently a no-op.
+  /// Applies query filtering and sorting to a raw store snapshot.
   ///
-  /// The seam accepts [whereDescription] for future Task 12 use and
-  /// returns [input] unchanged for now.
+  /// When [whereDescription] is null or has no registered filter/sort,
+  /// returns a shallow copy of [input] in original order. Otherwise
+  /// applies the filter first (if present), then the sort (if present).
+  ///
+  /// Sort is guaranteed stable for tied elements via a
+  /// decorate-sort-undecorate pattern that preserves insertion order.
   List<Map<String, dynamic>> _applyQueryFilterAndSort({
     required String? whereDescription,
     required List<Map<String, dynamic>> input,
-  }) =>
-      input;
+  }) {
+    if (whereDescription == null) return List<Map<String, dynamic>>.of(input);
+
+    final filter = _queryFilters[whereDescription];
+    final comparator = _querySort[whereDescription];
+
+    if (filter == null && comparator == null) {
+      return List<Map<String, dynamic>>.of(input);
+    }
+
+    var result = filter != null
+        ? input.where(filter).toList()
+        : List<Map<String, dynamic>>.of(input);
+
+    if (comparator != null) {
+      // Decorate-sort-undecorate to guarantee stable sort for tied elements.
+      final decorated = [
+        for (var i = 0; i < result.length; i++) (index: i, doc: result[i]),
+      ];
+      decorated.sort((a, b) {
+        final cmp = comparator(a.doc, b.doc);
+        return cmp != 0 ? cmp : a.index.compareTo(b.index);
+      });
+      result = [for (final e in decorated) e.doc];
+    }
+
+    return result;
+  }
+
+  /// Applies search-specific filtering with substring fallback.
+  ///
+  /// If [_queryFilters] contains [searchKey], delegates entirely to
+  /// [_applyQueryFilterAndSort]. Otherwise, performs a case-insensitive
+  /// substring match on the [searchField] (falling back to
+  /// [_defaultSearchField]) of each document. Documents that lack the
+  /// field or have a non-String value pass through unfiltered.
+  ///
+  /// After filtering, applies any matching sort from [_querySort], then
+  /// truncates to [limit] if non-null.
+  ///
+  /// Branches on [searchTermType]:
+  /// - [TSearchTermType.startsWith]: prefix match on String fields
+  /// - [TSearchTermType.arrayContains]: membership check on List fields
+  ///
+  /// When [doSearchNumberEquivalent] is true and the [searchTerm] parses as
+  /// a number, numeric fields are matched by equality.
+  ///
+  /// Documents whose target field is missing or has an incompatible type are
+  /// treated as non-matches (filtered out).
+  List<Map<String, dynamic>> _applySearchFilter({
+    required String searchKey,
+    required String searchTerm,
+    required String searchField,
+    required TSearchTermType searchTermType,
+    required bool doSearchNumberEquivalent,
+    required int? limit,
+    required List<Map<String, dynamic>> input,
+  }) {
+    List<Map<String, dynamic>> result;
+
+    if (_queryFilters.containsKey(searchKey)) {
+      // Registered filter takes full precedence (including sort).
+      result = _applyQueryFilterAndSort(
+        whereDescription: searchKey,
+        input: input,
+      );
+    } else {
+      // Prefer the method-level searchField; fall back to constructor default.
+      final targetField = input.any((doc) => doc[searchField] is String)
+          ? searchField
+          : _defaultSearchField;
+      final termLower = searchTerm.toLowerCase();
+      final numericTerm = doSearchNumberEquivalent
+          ? num.tryParse(searchTerm)
+          : null;
+
+      result = input.where((doc) {
+        final value = doc[targetField];
+
+        // Number equivalence check.
+        if (numericTerm != null && value is num) {
+          return value == numericTerm;
+        }
+
+        switch (searchTermType) {
+          case TSearchTermType.startsWith:
+            if (value is! String) return false;
+            return value.toLowerCase().startsWith(termLower);
+          case TSearchTermType.arrayContains:
+            if (value is List) return value.contains(searchTerm);
+            return false;
+        }
+      }).toList();
+
+      // Apply sort if one is registered for this search key.
+      final comparator = _querySort[searchKey];
+      if (comparator != null) {
+        final decorated = [
+          for (var i = 0; i < result.length; i++) (index: i, doc: result[i]),
+        ];
+        decorated.sort((a, b) {
+          final cmp = comparator(a.doc, b.doc);
+          return cmp != 0 ? cmp : a.index.compareTo(b.index);
+        });
+        result = [for (final e in decorated) e.doc];
+      }
+    }
+
+    if (limit != null && result.length > limit) {
+      result = result.sublist(0, limit);
+    }
+
+    return result;
+  }
 
   /// Returns a deep copy of a raw JSON map so callers cannot mutate
   /// the store.
@@ -1138,6 +1281,121 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
     }
   }
 
+  // 🔗 DOCUMENT REFERENCES -------------------------------------------------------------------- \\
+
+  @override
+  DocumentReference<Map<String, dynamic>> getDocRefById({
+    required String id,
+    String? collectionPathOverride,
+  }) {
+    assert(
+      _isCollectionGroupSnapshot == (collectionPathOverride != null),
+      'Firestore does not support finding a document by id when communicating '
+      'with a collection group, therefore, you must specify the '
+      'collectionPathOverride containing all parent collection and document '
+      'ids in order to make this method work.',
+    );
+    return _TDummyDocumentReference<Map<String, dynamic>, T>.raw(
+      api: this,
+      id: id,
+    );
+  }
+
+  @override
+  DocumentReference<T> getDocRefByIdWithConverter({
+    required String id,
+    String? collectionPathOverride,
+  }) {
+    assert(
+      _isCollectionGroupSnapshot == (collectionPathOverride != null),
+      'Firestore does not support finding a document by id when communicating '
+      'with a collection group, therefore, you must specify the '
+      'collectionPathOverride containing all parent collection and document '
+      'ids in order to make this method work.',
+    );
+    return _TDummyDocumentReference<T, T>.converted(api: this, id: id);
+  }
+
+  /// Raw map update used by [_TDummyDocumentReference.update].
+  ///
+  /// Applies latency + failure gate, shallow-merges [data] onto the stored
+  /// map, applies [TTimestampType.updatedAt] timestamps, preserves
+  /// [_idFieldName], and emits collection + doc streams.
+  Future<void> _rawUpdateById({
+    required String id,
+    required Map<String, dynamic> data,
+  }) async {
+    await _applyLatency();
+    final failure = _rollFailureException(
+      operationType: TOperationType.update,
+      id: id,
+      documentData: data,
+    );
+    if (failure != null) throw failure;
+
+    final existing = _store[id];
+    if (existing == null) {
+      throw _notFoundExceptionFor(id: id, documentData: data);
+    }
+
+    final updateJson = _applyTimestamps(
+      json: data,
+      type: TTimestampType.updatedAt,
+    );
+    final merged = Map<String, dynamic>.of(existing);
+    merged.addAll(updateJson);
+    merged[_idFieldName] = id;
+
+    _store[id] = merged;
+    _emitCollections();
+    _emitDoc(id, _materialise(merged));
+  }
+
+  /// Raw map set (overwrite) used by [_TDummyDocumentReference.set].
+  ///
+  /// Applies latency + failure gate, overwrites the stored map with [data],
+  /// applies [TTimestampType.createdAtAndUpdatedAt] timestamps for new docs
+  /// or preserves existing createdAt for overwrites, and emits streams.
+  Future<void> _rawSetById({
+    required String id,
+    required Map<String, dynamic> data,
+  }) async {
+    await _applyLatency();
+    final isCreate = !_store.containsKey(id);
+    final failure = _rollFailureException(
+      operationType: isCreate ? TOperationType.create : TOperationType.update,
+      id: id,
+      documentData: data,
+    );
+    if (failure != null) throw failure;
+
+    final json = Map<String, dynamic>.of(data);
+    if (isCreate) {
+      final timestamped = _applyTimestamps(
+        json: json,
+        type: TTimestampType.createdAtAndUpdatedAt,
+      );
+      timestamped[_idFieldName] = id;
+      _store[id] = timestamped;
+    } else {
+      // Preserve existing createdAt, refresh updatedAt.
+      final existing = _store[id]!;
+      final createdAt = existing[_createdAtFieldName];
+      final timestamped = _applyTimestamps(
+        json: json,
+        type: TTimestampType.updatedAt,
+      );
+      timestamped[_idFieldName] = id;
+      if (createdAt != null) {
+        timestamped[_createdAtFieldName] = createdAt;
+      }
+      _store[id] = timestamped;
+    }
+
+    _emitCollections();
+    _emitDoc(id, _materialise(_store[id]!));
+  }
+
   // 🪄 MUTATORS ------------------------------------------------------------------------------ \\
 
   // _dummyModeGuidance is intentionally on the API class so the private
@@ -1151,8 +1409,7 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
   /// Equivalent to the base class's `_handleBatchOperation` but accessible
   /// from the dummy library.
   Future<TurboResponse<DocumentReference>> _commitDummyBatch(
-    TurboResponse<TWriteBatchWithReference<Map<String, dynamic>>>
-        batchResponse,
+    TurboResponse<TWriteBatchWithReference<Map<String, dynamic>>> batchResponse,
   ) async {
     return batchResponse.when(
       success: (success) async {
@@ -1175,7 +1432,20 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
     int maxAttempts = 5,
   }) async {
     final txn = _TDummyTransaction<T>._(api: this);
-    final result = await transactionHandler(txn);
+    // Snapshot store for rollback — transactions are all-or-nothing.
+    final snapshot = {
+      for (final e in _store.entries) e.key: Map<String, dynamic>.of(e.value),
+    };
+    final E result;
+    try {
+      result = await transactionHandler(txn);
+    } catch (_) {
+      // Restore store on failure.
+      _store
+        ..clear()
+        ..addAll(snapshot);
+      rethrow;
+    }
     // Emit once for all mutations the handler performed.
     if (txn._touchedIds.isNotEmpty) {
       _emitCollections();
@@ -1226,8 +1496,8 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
     // finalisation emits once).
     if (transaction != null) {
       try {
-        final TurboResponse<DocumentReference>? invalidResponse =
-            writeable.validate();
+        final TurboResponse<DocumentReference>? invalidResponse = writeable
+            .validate();
         if (invalidResponse != null && invalidResponse.isFail) {
           return invalidResponse;
         }
@@ -1243,10 +1513,9 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
           transaction._touchedIds.add(effectiveId);
         }
         return TurboResponse.success(
-          result: _TDummyDocumentReference(
+          result: _TDummyDocumentReference<Map<String, dynamic>, T>.raw(
+            api: this,
             id: effectiveId,
-            collectionPath: _pathSnapshot,
-            firestore: _firebaseFirestoreSnapshot,
           ),
         );
       } catch (error) {
@@ -1254,8 +1523,14 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
       }
     }
 
-    // Direct path — latency + failure gate + immediate emission.
+    // Direct path — validate first, then latency + failure gate + emission.
     try {
+      final TurboResponse<DocumentReference>? invalidResponse = writeable
+          .validate();
+      if (invalidResponse != null && invalidResponse.isFail) {
+        return invalidResponse;
+      }
+
       await _applyLatency();
       final documentData = writeable.toJson();
       final failure = _rollFailureException(
@@ -1264,12 +1539,6 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
         documentData: documentData,
       );
       if (failure != null) return TurboResponse.fail(error: failure);
-
-      final TurboResponse<DocumentReference>? invalidResponse =
-          writeable.validate();
-      if (invalidResponse != null && invalidResponse.isFail) {
-        return invalidResponse;
-      }
 
       final effectiveId = id ?? _genDummyId();
       final json = _applyTimestamps(
@@ -1283,10 +1552,9 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
       _emitDoc(effectiveId, _materialise(_store[effectiveId]!));
 
       return TurboResponse.success(
-        result: _TDummyDocumentReference(
+        result: _TDummyDocumentReference<Map<String, dynamic>, T>.raw(
+          api: this,
           id: effectiveId,
-          collectionPath: _pathSnapshot,
-          firestore: _firebaseFirestoreSnapshot,
         ),
       );
     } catch (error) {
@@ -1333,8 +1601,8 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
             error: _notFoundExceptionFor(id: id, documentData: documentData),
           );
         }
-        final TurboResponse<DocumentReference>? invalidResponse =
-            writeable.validate();
+        final TurboResponse<DocumentReference>? invalidResponse = writeable
+            .validate();
         if (invalidResponse != null && invalidResponse.isFail) {
           return invalidResponse;
         }
@@ -1350,10 +1618,9 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
           transaction._touchedIds.add(id);
         }
         return TurboResponse.success(
-          result: _TDummyDocumentReference(
+          result: _TDummyDocumentReference<Map<String, dynamic>, T>.raw(
+            api: this,
             id: id,
-            collectionPath: _pathSnapshot,
-            firestore: _firebaseFirestoreSnapshot,
           ),
         );
       } catch (error) {
@@ -1361,8 +1628,14 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
       }
     }
 
-    // Direct path.
+    // Direct path — validate first, then latency + failure gate + emission.
     try {
+      final TurboResponse<DocumentReference>? invalidResponse = writeable
+          .validate();
+      if (invalidResponse != null && invalidResponse.isFail) {
+        return invalidResponse;
+      }
+
       await _applyLatency();
       final documentData = writeable.toJson();
       final failure = _rollFailureException(
@@ -1377,12 +1650,6 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
         return TurboResponse.fail(
           error: _notFoundExceptionFor(id: id, documentData: documentData),
         );
-      }
-
-      final TurboResponse<DocumentReference>? invalidResponse =
-          writeable.validate();
-      if (invalidResponse != null && invalidResponse.isFail) {
-        return invalidResponse;
       }
 
       final updateJson = _applyTimestamps(
@@ -1401,10 +1668,9 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
       _emitDoc(id, _materialise(merged));
 
       return TurboResponse.success(
-        result: _TDummyDocumentReference(
+        result: _TDummyDocumentReference<Map<String, dynamic>, T>.raw(
+          api: this,
           id: id,
-          collectionPath: _pathSnapshot,
-          firestore: _firebaseFirestoreSnapshot,
         ),
       );
     } catch (error) {
@@ -1416,20 +1682,19 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
   TurboFirestoreNotFoundException _notFoundExceptionFor({
     required String id,
     Map<String, dynamic>? documentData,
-  }) =>
-      TurboFirestoreNotFoundException(
-        message: '[Dummy] ${TErrorCodes.notFoundMessage}',
-        path: _pathSnapshot,
-        id: id,
-        operationType: TOperationType.update,
-        documentData: documentData,
-        stackTrace: StackTrace.current,
-        originalException: FirebaseException(
-          plugin: 'cloud_firestore',
-          code: TErrorCodes.notFound,
-          message: TErrorCodes.notFoundMessage,
-        ),
-      );
+  }) => TurboFirestoreNotFoundException(
+    message: '[Dummy] ${TErrorCodes.notFoundMessage}',
+    path: _pathSnapshot,
+    id: id,
+    operationType: TOperationType.update,
+    documentData: documentData,
+    stackTrace: StackTrace.current,
+    originalException: FirebaseException(
+      plugin: 'cloud_firestore',
+      code: TErrorCodes.notFound,
+      message: TErrorCodes.notFoundMessage,
+    ),
+  );
 
   @override
   Future<TurboResponse<void>> deleteDoc({
@@ -1488,7 +1753,7 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
 
   @override
   Future<TurboResponse<TWriteBatchWithReference<Map<String, dynamic>>>>
-      createDocInBatch({
+  createDocInBatch({
     required TWriteable writeable,
     String? id,
     WriteBatch? writeBatch,
@@ -1507,7 +1772,7 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
     );
     try {
       final TurboResponse<TWriteBatchWithReference<Map<String, dynamic>>>?
-          invalidResponse = writeable.validate();
+      invalidResponse = writeable.validate();
       if (invalidResponse != null && invalidResponse.isFail) {
         return invalidResponse;
       }
@@ -1517,10 +1782,9 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
           : (writeBatch ?? this.writeBatch) as _TDummyWriteBatch<T>;
 
       final effectiveId = id ?? _genDummyId();
-      final docRef = _TDummyDocumentReference(
+      final docRef = _TDummyDocumentReference<Map<String, dynamic>, T>.raw(
+        api: this,
         id: effectiveId,
-        collectionPath: _pathSnapshot,
-        firestore: _firebaseFirestoreSnapshot,
       );
 
       final documentData = writeable.toJson();
@@ -1549,7 +1813,7 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
 
   @override
   Future<TurboResponse<TWriteBatchWithReference<Map<String, dynamic>>>>
-      updateDocInBatch({
+  updateDocInBatch({
     required TWriteable writeable,
     required String id,
     WriteBatch? writeBatch,
@@ -1565,7 +1829,7 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
     );
     try {
       final TurboResponse<TWriteBatchWithReference<Map<String, dynamic>>>?
-          invalidResponse = writeable.validate();
+      invalidResponse = writeable.validate();
       if (invalidResponse != null && invalidResponse.isFail) {
         return invalidResponse;
       }
@@ -1574,10 +1838,9 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
           ? writeBatch
           : (writeBatch ?? this.writeBatch) as _TDummyWriteBatch<T>;
 
-      final docRef = _TDummyDocumentReference(
+      final docRef = _TDummyDocumentReference<Map<String, dynamic>, T>.raw(
+        api: this,
         id: id,
-        collectionPath: _pathSnapshot,
-        firestore: _firebaseFirestoreSnapshot,
       );
 
       final documentData = writeable.toJson();
@@ -1612,7 +1875,7 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
 
   @override
   Future<TurboResponse<TWriteBatchWithReference<Map<String, dynamic>>>>
-      deleteDocInBatch({
+  deleteDocInBatch({
     required String id,
     WriteBatch? writeBatch,
     String? collectionPathOverride,
@@ -1629,10 +1892,9 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
           ? writeBatch
           : (writeBatch ?? this.writeBatch) as _TDummyWriteBatch<T>;
 
-      final docRef = _TDummyDocumentReference(
+      final docRef = _TDummyDocumentReference<Map<String, dynamic>, T>.raw(
+        api: this,
         id: id,
-        collectionPath: _pathSnapshot,
-        firestore: _firebaseFirestoreSnapshot,
       );
 
       batch._enqueue(
@@ -1713,10 +1975,24 @@ class _TDummyWriteBatch<T> implements WriteBatch {
     }
     _committed = true;
 
+    // Snapshot store for rollback — batches are all-or-nothing.
+    final snapshot = {
+      for (final e in _api._store.entries)
+        e.key: Map<String, dynamic>.of(e.value),
+    };
+
     final appliedIds = <String>{};
-    for (final op in _queue) {
-      op.apply();
-      appliedIds.add(op.id);
+    try {
+      for (final op in _queue) {
+        op.apply();
+        appliedIds.add(op.id);
+      }
+    } catch (_) {
+      // Restore store on failure.
+      _api._store
+        ..clear()
+        ..addAll(snapshot);
+      rethrow;
     }
 
     // Single collection emission for the entire batch.
@@ -1800,11 +2076,28 @@ class _TDummyTransaction<T> implements Transaction {
   Future<DocumentSnapshot<R>> get<R extends Object?>(
     DocumentReference<R> documentReference,
   ) async {
+    final stored = _api._store[documentReference.id];
+    if (stored == null) {
+      return _TDummyDocumentSnapshot<R>._(
+        id: documentReference.id,
+        reference: documentReference,
+        data: null,
+        exists: false,
+      );
+    }
+    // Materialise through fromJson for converted refs; deep-copy for raw.
+    final R data;
+    if (documentReference is _TDummyDocumentReference<R, T> &&
+        !documentReference._isRaw) {
+      data = _api._materialise(stored) as R;
+    } else {
+      data = _api._copyRawDoc(stored) as R;
+    }
     return _TDummyDocumentSnapshot<R>._(
       id: documentReference.id,
       reference: documentReference,
-      data: _api._store[documentReference.id] as R?,
-      exists: _api._store.containsKey(documentReference.id),
+      data: data,
+      exists: true,
     );
   }
 
@@ -1883,15 +2176,15 @@ class _TDummyDocumentSnapshot<T extends Object?>
 
   @override
   SnapshotMetadata get metadata => throw UnimplementedError(
-        'dummy-mode: SnapshotMetadata is not available in dummy document '
-        'snapshots.',
-      );
+    'dummy-mode: SnapshotMetadata is not available in dummy document '
+    'snapshots.',
+  );
 
   @override
   dynamic get(Object field) => throw UnimplementedError(
-        'dummy-mode: DocumentSnapshot.get is not available in dummy document '
-        'snapshots. Use data() instead.',
-      );
+    'dummy-mode: DocumentSnapshot.get is not available in dummy document '
+    'snapshots. Use data() instead.',
+  );
 
   @override
   dynamic operator [](Object field) => get(field);
@@ -1901,84 +2194,184 @@ class _TDummyDocumentSnapshot<T extends Object?>
 // _TDummyDocumentReference
 // ---------------------------------------------------------------------------
 
-/// A minimal placeholder [DocumentReference] returned by dummy write methods.
+/// A [DocumentReference] stub that delegates to the owning
+/// [TDummyFirestoreApi]'s in-memory store.
 ///
-/// Only [id], [path], and [firestore] are functional. All other members throw
-/// [UnimplementedError]. The full document reference stub ships in a later task.
-class _TDummyDocumentReference
-    implements DocumentReference<Map<String, dynamic>> {
-  const _TDummyDocumentReference({
+/// Supports two modes:
+/// - **raw** — implements `DocumentReference<Map<String, dynamic>>` for
+///   [getDocRefById] and write-method return values.
+/// - **converted** — implements `DocumentReference<T>` for
+///   [getDocRefByIdWithConverter].
+///
+/// Supported members: [id], [path], [firestore], [get], [update], [delete],
+/// [set], [snapshots]. Unsupported members throw [UnimplementedError] with
+/// a dummy-mode guidance message.
+class _TDummyDocumentReference<R, T> implements DocumentReference<R> {
+  /// Creates a raw-mode reference returning `Map<String, dynamic>` data.
+  _TDummyDocumentReference.raw({
+    required TDummyFirestoreApi<T> api,
     required String id,
-    required String collectionPath,
-    required this.firestore,
-  })  : _id = id,
-        _collectionPath = collectionPath;
+  }) : _api = api,
+       _id = id,
+       _isRaw = true;
 
+  /// Creates a converted-mode reference returning typed `T` data.
+  _TDummyDocumentReference.converted({
+    required TDummyFirestoreApi<T> api,
+    required String id,
+  }) : _api = api,
+       _id = id,
+       _isRaw = false;
+
+  final TDummyFirestoreApi<T> _api;
   final String _id;
-  final String _collectionPath;
-
-  static const _guidance =
-      'TDummyDocumentReference is a minimal placeholder. '
-      'Full implementation ships in the document-reference task.';
+  final bool _isRaw;
 
   @override
   String get id => _id;
 
   @override
-  String get path => '$_collectionPath/$_id';
+  String get path => '${_api._pathSnapshot}/$_id';
 
   @override
-  final FirebaseFirestore firestore;
+  FirebaseFirestore get firestore => _api._firebaseFirestoreSnapshot;
 
   @override
-  CollectionReference<Map<String, dynamic>> get parent =>
-      throw UnimplementedError(_guidance);
+  Future<DocumentSnapshot<R>> get([GetOptions? options]) async {
+    await _api._applyLatency();
+    final failure = _api._rollFailureException(
+      operationType: TOperationType.read,
+      id: _id,
+    );
+    if (failure != null) throw failure;
+
+    final stored = _api._store[_id];
+    if (stored == null) {
+      return _TDummyDocumentSnapshot<R>._(
+        id: _id,
+        reference: this,
+        data: null,
+        exists: false,
+      );
+    }
+
+    final R data =
+        (_isRaw ? _api._copyRawDoc(stored) : _api._materialise(stored)) as R;
+    return _TDummyDocumentSnapshot<R>._(
+      id: _id,
+      reference: this,
+      data: data,
+      exists: true,
+    );
+  }
+
+  @override
+  Future<void> update(Map<Object, Object?> data) {
+    // Reject non-string keys (FieldPath not supported).
+    for (final key in data.keys) {
+      if (key is! String) {
+        throw UnimplementedError(
+          'dummy-mode: DocumentReference.update only supports String keys; '
+          'FieldPath keys are not stubbed.',
+        );
+      }
+    }
+    return _api._rawUpdateById(
+      id: _id,
+      data: Map<String, dynamic>.from(data),
+    );
+  }
+
+  @override
+  Future<void> delete() async {
+    final response = await _api.deleteDoc(id: _id);
+    response.when(
+      success: (_) {},
+      fail: (fail) => throw fail.error,
+    );
+  }
+
+  @override
+  Future<void> set(R data, [SetOptions? options]) {
+    if (data is Map<String, dynamic>) {
+      return _api._rawSetById(id: _id, data: data);
+    }
+    // Converted mode: serialise typed entity via TWriteable.toJson().
+    if (data is TWriteable) {
+      return _api._rawSetById(id: _id, data: data.toJson());
+    }
+    throw UnimplementedError(
+      'dummy-mode: DocumentReference.set only supports '
+      'Map<String, dynamic> or TWriteable data.',
+    );
+  }
+
+  @override
+  Stream<DocumentSnapshot<R>> snapshots({
+    bool includeMetadataChanges = false,
+    ListenSource source = ListenSource.defaultSource,
+  }) {
+    // Use autoCreate: false so absent docs emit exists == false instead
+    // of being silently generated.
+    return _api._createDocStream(_id, autoCreate: false).map((entity) {
+      if (entity == null) {
+        return _TDummyDocumentSnapshot<R>._(
+          id: _id,
+          reference: this,
+          data: null,
+          exists: false,
+        );
+      }
+      final R data =
+          (_isRaw
+                  ? (_api._store[_id] != null
+                        ? _api._copyRawDoc(_api._store[_id]!)
+                        : null)
+                  : entity)
+              as R;
+      return _TDummyDocumentSnapshot<R>._(
+        id: _id,
+        reference: this,
+        data: data,
+        exists: true,
+      );
+    });
+  }
+
+  @override
+  CollectionReference<R> get parent => throw UnimplementedError(
+    'dummy-mode: DocumentReference.parent is not stubbed; '
+    'if your feature needs it, extend _TDummyDocumentReference.',
+  );
 
   @override
   CollectionReference<Map<String, dynamic>> collection(
     String collectionPath,
-  ) =>
-      throw UnimplementedError(_guidance);
-
-  @override
-  Future<void> delete() => throw UnimplementedError(_guidance);
-
-  @override
-  Future<void> update(Map<Object, Object?> data) =>
-      throw UnimplementedError(_guidance);
-
-  @override
-  Future<DocumentSnapshot<Map<String, dynamic>>> get([GetOptions? options]) =>
-      throw UnimplementedError(_guidance);
-
-  @override
-  Stream<DocumentSnapshot<Map<String, dynamic>>> snapshots({
-    bool includeMetadataChanges = false,
-    ListenSource source = ListenSource.defaultSource,
-  }) =>
-      throw UnimplementedError(_guidance);
-
-  @override
-  Future<void> set(Map<String, dynamic> data, [SetOptions? options]) =>
-      throw UnimplementedError(_guidance);
+  ) => throw UnimplementedError(
+    'dummy-mode: DocumentReference.collection is not stubbed; '
+    'if your feature needs it, extend _TDummyDocumentReference.',
+  );
 
   @override
   DocumentReference<R> withConverter<R>({
     required FromFirestore<R> fromFirestore,
     required ToFirestore<R> toFirestore,
-  }) =>
-      throw UnimplementedError(_guidance);
+  }) => throw UnimplementedError(
+    'dummy-mode: DocumentReference.withConverter is not stubbed; '
+    'if your feature needs it, extend _TDummyDocumentReference.',
+  );
 
   @override
   bool operator ==(Object other) =>
-      other is _TDummyDocumentReference &&
-      other._id == _id &&
-      other._collectionPath == _collectionPath;
+      other is _TDummyDocumentReference<R, T> &&
+      identical(_api, other._api) &&
+      other._id == _id;
 
   @override
-  int get hashCode => Object.hash(_id, _collectionPath);
+  int get hashCode => Object.hash(identityHashCode(_api), _id);
 
   @override
   String toString() =>
-      'DocumentReference<Map<String, dynamic>>($_collectionPath/$_id)';
+      'DocumentReference<${_isRaw ? 'Map<String, dynamic>' : T}>'
+      '(${_api._pathSnapshot}/$_id)';
 }

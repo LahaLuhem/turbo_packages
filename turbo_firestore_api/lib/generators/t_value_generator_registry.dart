@@ -32,15 +32,14 @@ final class TValueGeneratorRegistry {
     required List<String> bundledHeuristicOrder,
     required Map<Type, TValueGenerator> bundledTypeGenerators,
     required Set<String> unresolvedFields,
-  })  : _callerFieldGenerators = callerFieldGenerators,
-        _callerTypeGenerators = callerTypeGenerators,
-        _bundledFieldResolvers = bundledFieldResolvers,
-        _bundledHeuristicOrder = bundledHeuristicOrder,
-        _bundledTypeGenerators = bundledTypeGenerators,
-        _unresolvedFields = unresolvedFields;
+  }) : _callerFieldGenerators = callerFieldGenerators,
+       _callerTypeGenerators = callerTypeGenerators,
+       _bundledFieldResolvers = bundledFieldResolvers,
+       _bundledHeuristicOrder = bundledHeuristicOrder,
+       _bundledTypeGenerators = bundledTypeGenerators,
+       _unresolvedFields = unresolvedFields;
 
   // 🧩 DEPENDENCIES -------------------------------------------------------------------------- \\
-
 
   // 🎩 STATE --------------------------------------------------------------------------------- \\
 
@@ -86,8 +85,9 @@ final class TValueGeneratorRegistry {
 
   /// Placeholder value for unresolved Timestamp fields.
   @visibleForTesting
-  static final Timestamp placeholderTimestamp =
-      Timestamp.fromDate(DateTime.utc(1970));
+  static final Timestamp placeholderTimestamp = Timestamp.fromDate(
+    DateTime.utc(1970),
+  );
 
   /// Placeholder value for unresolved List fields.
   @visibleForTesting
@@ -214,9 +214,12 @@ final class TValueGeneratorRegistry {
     return false;
   }
 
-  static bool _isUpperCase(String c) => c == c.toUpperCase() && c != c.toLowerCase();
-  static bool _isLowerCase(String c) => c == c.toLowerCase() && c != c.toUpperCase();
-  static bool _isDigit(String c) => c.codeUnitAt(0) >= 48 && c.codeUnitAt(0) <= 57;
+  static bool _isUpperCase(String c) =>
+      c == c.toUpperCase() && c != c.toLowerCase();
+  static bool _isLowerCase(String c) =>
+      c == c.toLowerCase() && c != c.toUpperCase();
+  static bool _isDigit(String c) =>
+      c.codeUnitAt(0) >= 48 && c.codeUnitAt(0) <= 57;
 
   // 🏭 FACTORY ------------------------------------------------------------------------------- \\
 
@@ -256,31 +259,106 @@ final class TValueGeneratorRegistry {
   ) {
     // -- Data pools --
     const firstNames = [
-      'Alice', 'Bob', 'Carol', 'Dave', 'Eve', 'Frank', 'Grace', 'Hank',
-      'Iris', 'Jack', 'Kate', 'Leo', 'Mia', 'Nate', 'Olga', 'Pete',
+      'Alice',
+      'Bob',
+      'Carol',
+      'Dave',
+      'Eve',
+      'Frank',
+      'Grace',
+      'Hank',
+      'Iris',
+      'Jack',
+      'Kate',
+      'Leo',
+      'Mia',
+      'Nate',
+      'Olga',
+      'Pete',
     ];
     const lastNames = [
-      'Smith', 'Jones', 'Brown', 'Davis', 'Clark', 'Lopez', 'Adams', 'Baker',
-      'Carter', 'Evans', 'Garcia', 'Hall', 'King', 'Lee', 'Moore', 'Perez',
+      'Smith',
+      'Jones',
+      'Brown',
+      'Davis',
+      'Clark',
+      'Lopez',
+      'Adams',
+      'Baker',
+      'Carter',
+      'Evans',
+      'Garcia',
+      'Hall',
+      'King',
+      'Lee',
+      'Moore',
+      'Perez',
     ];
     const loremWords = [
-      'lorem', 'ipsum', 'dolor', 'sit', 'amet', 'consectetur', 'adipiscing',
-      'elit', 'sed', 'do', 'eiusmod', 'tempor', 'incididunt', 'ut', 'labore',
-      'et', 'dolore', 'magna', 'aliqua', 'enim', 'ad', 'minim', 'veniam',
-      'quis', 'nostrud', 'exercitation', 'ullamco', 'laboris', 'nisi',
-      'aliquip', 'ex', 'ea', 'commodo', 'consequat',
+      'lorem',
+      'ipsum',
+      'dolor',
+      'sit',
+      'amet',
+      'consectetur',
+      'adipiscing',
+      'elit',
+      'sed',
+      'do',
+      'eiusmod',
+      'tempor',
+      'incididunt',
+      'ut',
+      'labore',
+      'et',
+      'dolore',
+      'magna',
+      'aliqua',
+      'enim',
+      'ad',
+      'minim',
+      'veniam',
+      'quis',
+      'nostrud',
+      'exercitation',
+      'ullamco',
+      'laboris',
+      'nisi',
+      'aliquip',
+      'ex',
+      'ea',
+      'commodo',
+      'consequat',
     ];
     const cities = [
-      'New York', 'London', 'Tokyo', 'Paris', 'Berlin', 'Sydney',
-      'Toronto', 'Amsterdam',
+      'New York',
+      'London',
+      'Tokyo',
+      'Paris',
+      'Berlin',
+      'Sydney',
+      'Toronto',
+      'Amsterdam',
     ];
     const countries = [
-      'United States', 'United Kingdom', 'Japan', 'France', 'Germany',
-      'Australia', 'Canada', 'Netherlands',
+      'United States',
+      'United Kingdom',
+      'Japan',
+      'France',
+      'Germany',
+      'Australia',
+      'Canada',
+      'Netherlands',
     ];
     const streets = [
-      'Main Street', 'Oak Avenue', 'Park Road', 'Elm Drive', 'Cedar Lane',
-      'Maple Boulevard', 'Pine Street', 'Birch Way',
+      'Main Street',
+      'Oak Avenue',
+      'Park Road',
+      'Elm Drive',
+      'Cedar Lane',
+      'Maple Boulevard',
+      'Pine Street',
+      'Birch Way',
     ];
 
     // Deterministic timestamp anchor — 2025-01-01 UTC.
@@ -366,15 +444,18 @@ final class TValueGeneratorRegistry {
         () => '${randomFirstName().toLowerCase()}${random.nextInt(9999)}',
       ),
       'email': stringOnly(
-        () => '${randomFirstName().toLowerCase()}${random.nextInt(9999)}'
+        () =>
+            '${randomFirstName().toLowerCase()}${random.nextInt(9999)}'
             '@example.com',
       ),
       'phone': stringOnly(
-        () => '+1-555-${random.nextInt(900) + 100}-'
+        () =>
+            '+1-555-${random.nextInt(900) + 100}-'
             '${random.nextInt(9000) + 1000}',
       ),
       'phonenumber': stringOnly(
-        () => '+1-555-${random.nextInt(900) + 100}-'
+        () =>
+            '+1-555-${random.nextInt(900) + 100}-'
             '${random.nextInt(9000) + 1000}',
       ),
 
@@ -387,7 +468,8 @@ final class TValueGeneratorRegistry {
 
       // URL fields.
       'url': stringOnly(
-        () => 'https://example.com/${loremWords[random.nextInt(loremWords.length)]}',
+        () =>
+            'https://example.com/${loremWords[random.nextInt(loremWords.length)]}',
       ),
       'avatarurl': stringOnly(
         () => 'https://example.com/avatars/${random.nextInt(1000)}.png',
@@ -401,7 +483,8 @@ final class TValueGeneratorRegistry {
 
       // Address fields.
       'address': stringOnly(
-        () => '${random.nextInt(9999) + 1} ${streets[random.nextInt(streets.length)]}',
+        () =>
+            '${random.nextInt(9999) + 1} ${streets[random.nextInt(streets.length)]}',
       ),
       'street': stringOnly(
         () => streets[random.nextInt(streets.length)],
@@ -458,8 +541,20 @@ final class TValueGeneratorRegistry {
     Random random,
   ) {
     const words = [
-      'alpha', 'bravo', 'charlie', 'delta', 'echo', 'foxtrot', 'golf',
-      'hotel', 'india', 'juliet', 'kilo', 'lima', 'mike', 'november',
+      'alpha',
+      'bravo',
+      'charlie',
+      'delta',
+      'echo',
+      'foxtrot',
+      'golf',
+      'hotel',
+      'india',
+      'juliet',
+      'kilo',
+      'lima',
+      'mike',
+      'november',
     ];
     final anchor = DateTime.utc(2025);
 
@@ -471,14 +566,14 @@ final class TValueGeneratorRegistry {
       bool: () => random.nextBool(),
       DateTime: () => anchor.subtract(Duration(days: random.nextInt(365) + 1)),
       Timestamp: () => Timestamp.fromDate(
-            anchor.subtract(Duration(days: random.nextInt(365) + 1)),
-          ),
+        anchor.subtract(Duration(days: random.nextInt(365) + 1)),
+      ),
       List<dynamic>: () => const <dynamic>[],
       Map<String, dynamic>: () => const <String, dynamic>{},
       GeoPoint: () => GeoPoint(
-            (random.nextDouble() * 180) - 90,
-            (random.nextDouble() * 360) - 180,
-          ),
+        (random.nextDouble() * 180) - 90,
+        (random.nextDouble() * 360) - 180,
+      ),
       DocumentReference<Map<String, dynamic>>: () => null,
       Blob: () => Blob(Uint8List(0)),
     };

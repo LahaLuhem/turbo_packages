@@ -227,8 +227,7 @@ class _TDummyProbingMap extends MapBase<String, dynamic> {
           if (child._resolved.isNotEmpty || child._unresolved.isNotEmpty) {
             fields[entry.key] = TDummySchemaBranch(child._buildSchema());
           } else {
-            fields[entry.key] =
-                const TDummySchemaLeaf(Map<String, dynamic>);
+            fields[entry.key] = const TDummySchemaLeaf(Map<String, dynamic>);
           }
       }
     }
@@ -260,8 +259,7 @@ class _TDummyProbingMap extends MapBase<String, dynamic> {
     // Special handling: Map<String, dynamic> candidate returns a cached child
     // probing map for recursive nested DTO discovery.
     if (tag == _CandidateTag.mapStringDynamic) {
-      final child =
-          _childMaps.putIfAbsent(key, _TDummyProbingMap.new);
+      final child = _childMaps.putIfAbsent(key, _TDummyProbingMap.new);
       _resolved[key] = _ResolvedBranch(child);
       return child;
     }

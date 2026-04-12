@@ -160,6 +160,8 @@ class TBentoGrid extends StatefulWidget {
     this.debounceDuration = const Duration(milliseconds: 150),
     this.maxHeight,
     this.maxWidth,
+    this.multiplierThreshold,
+    this.calculatedMinHeight,
   });
 
   /// The items to display in the grid.
@@ -183,6 +185,12 @@ class TBentoGrid extends StatefulWidget {
 
   final double? maxHeight;
   final double? maxWidth;
+
+  /// The number of items per row used for height calculation.
+  final int? multiplierThreshold;
+
+  /// The minimum calculated height of the grid.
+  final double? calculatedMinHeight;
 
   @override
   State<TBentoGrid> createState() => _TBentoGridState();
@@ -344,9 +352,30 @@ class _TBentoGridState extends State<TBentoGrid>
 
     return LayoutBuilder(
       builder: (context, constraints) {
+        double resolvedHeight;
+        if (widget.maxHeight != null) {
+          resolvedHeight = widget.maxHeight!;
+        } else if (widget.multiplierThreshold != null &&
+            widget.multiplierThreshold! > 0) {
+          final rows = (widget.items.length / widget.multiplierThreshold!)
+              .ceil();
+          final baseHeight = widget.calculatedMinHeight ?? 200;
+          resolvedHeight =
+              (rows * baseHeight) +
+              ((rows - 1).clamp(0, double.infinity) * widget.spacing);
+        } else if (constraints.hasBoundedHeight) {
+          resolvedHeight = constraints.maxHeight;
+        } else {
+          resolvedHeight = 400;
+        }
+        if (widget.calculatedMinHeight != null &&
+            resolvedHeight < widget.calculatedMinHeight!) {
+          resolvedHeight = widget.calculatedMinHeight!;
+        }
+
         final availableSize = Size(
           widget.maxWidth ?? constraints.maxWidth,
-          widget.maxHeight ?? (constraints.hasBoundedHeight ? constraints.maxHeight : 400),
+          resolvedHeight,
         );
 
         final sizes = widget.items.map((item) => item.size).toList();

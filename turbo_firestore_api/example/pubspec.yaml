@@ -19,7 +19,7 @@ dependencies:
   turbo_response: ^1.1.0
   turbo_notifiers: ^1.1.0
   turbo_serializable: ^0.3.0
-  turbo_firestore_api: ^0.9.0
+  turbo_firestore_api: ^0.10.0
   turbo_mvvm: ^1.1.0
 
 dev_dependencies:

@@ -40,6 +40,7 @@
 library;
 
 /// Main API class and extensions
+export 'apis/t_dummy_firestore_api.dart';
 export 'apis/t_firestore_api.dart';
 
 /// Constants
@@ -60,6 +61,12 @@ export 'exceptions/t_firestore_exception.dart';
 export 'extensions/completer_extension.dart';
 export 'extensions/t_list_extension.dart';
 export 'extensions/t_map_extension.dart';
+
+/// Generators for dummy data
+export 'generators/t_dummy_schema.dart';
+export 'generators/t_value_generator.dart';
+export 'generators/t_value_generator_registry.dart';
+export 'generators/t_value_specs.dart';
 
 /// Mixins for shared behavior
 export 'mixins/t_exception_handler.dart';

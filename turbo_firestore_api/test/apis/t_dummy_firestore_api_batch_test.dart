@@ -22,13 +22,13 @@ class _SimpleDto {
   });
 
   factory _SimpleDto.fromJson(Map<String, dynamic> json) => _SimpleDto(
-        id: json['id'] as String,
-        name: json['name'] as String,
-        age: json['age'] as int,
-        isActive: json['isActive'] as bool,
-        createdAt: json['createdAt'] as Timestamp?,
-        updatedAt: json['updatedAt'] as Timestamp?,
-      );
+    id: json['id'] as String,
+    name: json['name'] as String,
+    age: json['age'] as int,
+    isActive: json['isActive'] as bool,
+    createdAt: json['createdAt'] as Timestamp?,
+    updatedAt: json['updatedAt'] as Timestamp?,
+  );
 
   final String id;
   final String name;
@@ -55,10 +55,10 @@ class _CreateWriteable extends TWriteable {
 
   @override
   Map<String, dynamic> toJson() => {
-        'name': name,
-        'age': age,
-        'isActive': isActive,
-      };
+    'name': name,
+    'age': age,
+    'isActive': isActive,
+  };
 }
 
 class _UpdateWriteable extends TWriteable {
@@ -68,8 +68,8 @@ class _UpdateWriteable extends TWriteable {
 
   @override
   Map<String, dynamic> toJson() => {
-        if (name != null) 'name': name,
-      };
+    if (name != null) 'name': name,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -81,17 +81,16 @@ TDummyFirestoreApi<_SimpleDto> _createApi({
   double randomFailurePercentage = 0,
   Duration dummyDelayDuration = Duration.zero,
   int defaultCollectionSize = 0,
-}) =>
-    TDummyFirestoreApi<_SimpleDto>(
-      firebaseFirestore: FakeFirebaseFirestore(),
-      collectionPath: () => 'testCollection',
-      fromJson: _SimpleDto.fromJson,
-      toJson: null,
-      seed: seed,
-      randomFailurePercentage: randomFailurePercentage,
-      dummyDelayDuration: dummyDelayDuration,
-      defaultCollectionSize: defaultCollectionSize,
-    );
+}) => TDummyFirestoreApi<_SimpleDto>(
+  firebaseFirestore: FakeFirebaseFirestore(),
+  collectionPath: () => 'testCollection',
+  fromJson: _SimpleDto.fromJson,
+  toJson: null,
+  seed: seed,
+  randomFailurePercentage: randomFailurePercentage,
+  dummyDelayDuration: dummyDelayDuration,
+  defaultCollectionSize: defaultCollectionSize,
+);
 
 // ---------------------------------------------------------------------------
 // Tests
@@ -356,6 +355,97 @@ void main() {
         });
 
         expect(result, 42);
+      },
+    );
+
+    test(
+      'Given a batch where the second operation throws, '
+      'When commit is called, '
+      'Then the store is rolled back to its pre-commit state',
+      () async {
+        final api = _createApi(seed: 42);
+
+        // Seed an existing doc.
+        await api.createDoc(
+          writeable: _CreateWriteable(name: 'Alice', age: 30, isActive: true),
+          id: 'existing-1',
+        );
+
+        final storeBefore = Map<String, Map<String, dynamic>>.of(
+          dummyStoreForTesting(api),
+        );
+
+        final batch = api.writeBatch;
+        await api.createDocInBatch(
+          writeable: _CreateWriteable(name: 'New', age: 20, isActive: true),
+          id: 'new-1',
+          writeBatch: batch,
+        );
+        // Enqueue an update for a non-existent id — this will throw during
+        // commit because the closure checks for the doc's existence.
+        await api.updateDocInBatch(
+          writeable: _UpdateWriteable(name: 'Ghost'),
+          id: 'does-not-exist',
+          writeBatch: batch,
+        );
+
+        // Commit should throw.
+        expect(() => batch.commit(), throwsA(anything));
+
+        // Store should be exactly as it was before commit.
+        final storeAfter = dummyStoreForTesting(api);
+        expect(storeAfter.length, storeBefore.length);
+        expect(
+          storeAfter.containsKey('new-1'),
+          isFalse,
+          reason: 'First create rolled back',
+        );
+        expect(storeAfter['existing-1']!['name'], 'Alice');
+      },
+    );
+
+    test(
+      'Given a runTransaction handler that throws after mutating the store, '
+      'When awaited, '
+      'Then the store is rolled back and the error propagates',
+      () async {
+        final api = _createApi(seed: 42);
+
+        // Seed a doc.
+        await api.createDoc(
+          writeable: _CreateWriteable(name: 'Alice', age: 30, isActive: true),
+          id: 'doc-1',
+        );
+
+        final storeBefore = Map<String, Map<String, dynamic>>.of(
+          dummyStoreForTesting(api),
+        );
+
+        // Run a transaction that creates a doc then throws.
+        Object? caughtError;
+        try {
+          await api.runTransaction((txn) async {
+            await api.createDoc(
+              writeable: _CreateWriteable(name: 'Bob', age: 25, isActive: true),
+              id: 'doc-2',
+              transaction: txn,
+            );
+            throw StateError('intentional failure');
+          });
+        } catch (e) {
+          caughtError = e;
+        }
+        expect(caughtError, isA<StateError>());
+
+        // Store should be exactly as before the transaction.
+        final storeAfter = dummyStoreForTesting(api);
+        expect(storeAfter.length, storeBefore.length);
+        expect(
+          storeAfter.containsKey('doc-2'),
+          isFalse,
+          reason: 'Transaction create rolled back',
+        );
+        expect(storeAfter['doc-1']!['name'], 'Alice');
       },
     );
 

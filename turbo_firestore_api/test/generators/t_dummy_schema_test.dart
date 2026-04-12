@@ -5,8 +5,7 @@ import 'package:turbo_firestore_api/generators/t_dummy_schema.dart';
 /// Proves the sealed hierarchy is analyzer-enforced.
 String _describeField(TDummySchemaField field) => switch (field) {
   TDummySchemaLeaf(:final type) => 'leaf:$type',
-  TDummySchemaBranch(:final nested) =>
-    'branch:${nested.fields.length} fields',
+  TDummySchemaBranch(:final nested) => 'branch:${nested.fields.length} fields',
 };
 
 void main() {

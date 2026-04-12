@@ -20,13 +20,13 @@ class _SimpleDto {
   });
 
   factory _SimpleDto.fromJson(Map<String, dynamic> json) => _SimpleDto(
-        id: json['id'] as String,
-        name: json['name'] as String,
-        age: json['age'] as int,
-        isActive: json['isActive'] as bool,
-        createdAt: json['createdAt'] as Timestamp?,
-        updatedAt: json['updatedAt'] as Timestamp?,
-      );
+    id: json['id'] as String,
+    name: json['name'] as String,
+    age: json['age'] as int,
+    isActive: json['isActive'] as bool,
+    createdAt: json['createdAt'] as Timestamp?,
+    updatedAt: json['updatedAt'] as Timestamp?,
+  );
 
   final String id;
   final String name;
@@ -36,13 +36,13 @@ class _SimpleDto {
   final Timestamp? updatedAt;
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'age': age,
-        'isActive': isActive,
-        if (createdAt != null) 'createdAt': createdAt,
-        if (updatedAt != null) 'updatedAt': updatedAt,
-      };
+    'id': id,
+    'name': name,
+    'age': age,
+    'isActive': isActive,
+    if (createdAt != null) 'createdAt': createdAt,
+    if (updatedAt != null) 'updatedAt': updatedAt,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -55,17 +55,16 @@ TDummyFirestoreApi<_SimpleDto> _createApi({
   double randomFailurePercentage = 0,
   Duration dummyDelayDuration = Duration.zero,
   int defaultCollectionSize = 5,
-}) =>
-    TDummyFirestoreApi<_SimpleDto>(
-      firebaseFirestore: FakeFirebaseFirestore(),
-      collectionPath: collectionPath ?? () => 'testCollection',
-      fromJson: _SimpleDto.fromJson,
-      toJson: (dto) => dto.toJson(),
-      seed: seed,
-      randomFailurePercentage: randomFailurePercentage,
-      dummyDelayDuration: dummyDelayDuration,
-      defaultCollectionSize: defaultCollectionSize,
-    );
+}) => TDummyFirestoreApi<_SimpleDto>(
+  firebaseFirestore: FakeFirebaseFirestore(),
+  collectionPath: collectionPath ?? () => 'testCollection',
+  fromJson: _SimpleDto.fromJson,
+  toJson: (dto) => dto.toJson(),
+  seed: seed,
+  randomFailurePercentage: randomFailurePercentage,
+  dummyDelayDuration: dummyDelayDuration,
+  defaultCollectionSize: defaultCollectionSize,
+);
 
 // ---------------------------------------------------------------------------
 // Tests
@@ -291,9 +290,9 @@ void main() {
     );
 
     test(
-      'Given the query seam, '
+      'Given the query seam with no registered filter or sort, '
       'When applyDummyQueryFilterAndSortForTesting is called, '
-      'Then it returns input unchanged',
+      'Then it returns a copy with the same contents and order',
       () {
         final api = _createApi(seed: 42);
 
@@ -303,11 +302,16 @@ void main() {
         ];
         final output = applyDummyQueryFilterAndSortForTesting(
           api,
-          whereDescription: 'test',
+          whereDescription: 'unknown-key',
           input: input,
         );
 
-        expect(identical(output, input), isTrue);
+        expect(output, equals(input));
+        expect(
+          identical(output, input),
+          isFalse,
+          reason: 'Must return a new list instance',
+        );
       },
     );
 

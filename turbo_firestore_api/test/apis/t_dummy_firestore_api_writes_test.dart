@@ -23,13 +23,13 @@ class _SimpleDto {
   });
 
   factory _SimpleDto.fromJson(Map<String, dynamic> json) => _SimpleDto(
-        id: json['id'] as String,
-        name: json['name'] as String,
-        age: json['age'] as int,
-        isActive: json['isActive'] as bool,
-        createdAt: json['createdAt'] as Timestamp?,
-        updatedAt: json['updatedAt'] as Timestamp?,
-      );
+    id: json['id'] as String,
+    name: json['name'] as String,
+    age: json['age'] as int,
+    isActive: json['isActive'] as bool,
+    createdAt: json['createdAt'] as Timestamp?,
+    updatedAt: json['updatedAt'] as Timestamp?,
+  );
 
   final String id;
   final String name;
@@ -56,10 +56,10 @@ class _CreateWriteable extends TWriteable {
 
   @override
   Map<String, dynamic> toJson() => {
-        'name': name,
-        'age': age,
-        'isActive': isActive,
-      };
+    'name': name,
+    'age': age,
+    'isActive': isActive,
+  };
 }
 
 class _UpdateWriteable extends TWriteable {
@@ -69,8 +69,8 @@ class _UpdateWriteable extends TWriteable {
 
   @override
   Map<String, dynamic> toJson() => {
-        if (name != null) 'name': name,
-      };
+    if (name != null) 'name': name,
+  };
 }
 
 class _FailingWriteable extends TWriteable {
@@ -91,17 +91,16 @@ TDummyFirestoreApi<_SimpleDto> _createApi({
   double randomFailurePercentage = 0,
   Duration dummyDelayDuration = Duration.zero,
   int defaultCollectionSize = 0,
-}) =>
-    TDummyFirestoreApi<_SimpleDto>(
-      firebaseFirestore: FakeFirebaseFirestore(),
-      collectionPath: () => 'testCollection',
-      fromJson: _SimpleDto.fromJson,
-      toJson: null,
-      seed: seed,
-      randomFailurePercentage: randomFailurePercentage,
-      dummyDelayDuration: dummyDelayDuration,
-      defaultCollectionSize: defaultCollectionSize,
-    );
+}) => TDummyFirestoreApi<_SimpleDto>(
+  firebaseFirestore: FakeFirebaseFirestore(),
+  collectionPath: () => 'testCollection',
+  fromJson: _SimpleDto.fromJson,
+  toJson: null,
+  seed: seed,
+  randomFailurePercentage: randomFailurePercentage,
+  dummyDelayDuration: dummyDelayDuration,
+  defaultCollectionSize: defaultCollectionSize,
+);
 
 // ---------------------------------------------------------------------------
 // Tests
@@ -207,8 +206,7 @@ void main() {
         expect(store['doc-1']!['isActive'], true, reason: 'isActive preserved');
         expect(store['doc-1']!['id'], 'doc-1', reason: 'id preserved');
 
-        final updatedAtAfter =
-            store['doc-1']!['updatedAt'] as Timestamp;
+        final updatedAtAfter = store['doc-1']!['updatedAt'] as Timestamp;
         expect(
           updatedAtAfter.compareTo(updatedAtBefore),
           greaterThanOrEqualTo(0),
@@ -216,8 +214,7 @@ void main() {
         );
 
         // createdAt should be preserved from the original create.
-        final createdAtAfter =
-            store['doc-1']!['createdAt'] as Timestamp;
+        final createdAtAfter = store['doc-1']!['createdAt'] as Timestamp;
         expect(createdAtAfter, createdAt, reason: 'createdAt preserved');
       },
     );
@@ -264,9 +261,7 @@ void main() {
         // Open a doc stream and capture events.
         final events = <_SimpleDto?>[];
         final initialEvent = Completer<void>();
-        final sub = api
-            .streamDocByIdWithConverter(id: 'doc-1')
-            .listen((data) {
+        final sub = api.streamDocByIdWithConverter(id: 'doc-1').listen((data) {
           events.add(data);
           if (!initialEvent.isCompleted) initialEvent.complete();
         });

@@ -1,6 +1,6 @@
 {
   "title": "Implement _TDummyDocumentReference delegating to the in-memory store",
-  "status": "in-progress",
+  "status": "done",
   "type": "feature",
   "phase": "7-batch-transaction-docref",
   "order": 11,
@@ -101,5 +101,21 @@
     "_TDummyDocumentSnapshot<T> is a minimal stub: id, reference, exists, data() work; metadata and get() throw UnimplementedError with dummy-mode message.",
     "Test runner: /Users/codaveto/Flutter/bin/flutter test --no-pub works. 89 tests passing."
   ],
-  "worklog": []
+  "worklog": [
+    "Replaced placeholder _TDummyDocumentReference with a fully generic _TDummyDocumentReference<R, T> implementing DocumentReference<R>. Supports raw mode (R=Map<String, dynamic>) and converted mode (R=T) via named constructors .raw() and .converted().",
+    "Implemented .get() with latency + failure gate, returning _TDummyDocumentSnapshot<R> with exists=false for missing docs (no auto-creation).",
+    "Implemented .update(Map<Object, Object?>) delegating to new _rawUpdateById helper on the API. Rejects non-String keys with UnimplementedError.",
+    "Implemented .delete() delegating to api.deleteDoc(id:). Unwraps TurboResponse — throws on failure.",
+    "Implemented .set(R data, [SetOptions?]) delegating to new _rawSetById helper. Only supports Map<String, dynamic> data.",
+    "Implemented .snapshots() mapping streamDocByIdWithConverter into Stream<DocumentSnapshot<R>> with exists=false when null.",
+    "Added _rawUpdateById helper: latency + failure gate, shallow merge, TTimestampType.updatedAt, id preservation, emit collections + doc.",
+    "Added _rawSetById helper: latency + failure gate, overwrite semantics, TTimestampType.createdAtAndUpdatedAt for new docs, preserves existing createdAt for overwrites, emit streams.",
+    "Overrode getDocRefById to return _TDummyDocumentReference<Map<String, dynamic>, T>.raw — lazy reference, no store read.",
+    "Overrode getDocRefByIdWithConverter to return _TDummyDocumentReference<T, T>.converted — lazy reference, no store read.",
+    "Migrated all 8 existing constructor call sites from old (id, collectionPath, firestore) signature to new (api: this, id:) binding.",
+    "Unsupported members (.collection, .parent, .withConverter) throw UnimplementedError with dummy-mode guidance.",
+    "Updated _TDummyDocumentSnapshot doc comment to remove transaction-only framing.",
+    "8 new BDD tests in test/apis/t_dummy_firestore_api_doc_ref_test.dart covering all acceptance criteria.",
+    "dart analyze --fatal-infos: 0 issues. flutter test --no-pub: 97 tests passed (8 new + 89 existing)."
+  ]
 }

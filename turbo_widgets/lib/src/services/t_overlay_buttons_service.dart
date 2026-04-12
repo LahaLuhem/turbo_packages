@@ -23,13 +23,12 @@ class TOverlayButtonsService with Turbolytics {
   static TOverlayButtonsService get locate => GetIt.I.get();
   static void registerLazySingleton({
     Duration animationDuration = const Duration(milliseconds: 150),
-  }) =>
-      GetIt.I.registerLazySingleton(
-        () => TOverlayButtonsService(
-          baseRouterService: TBaseRouterServiceInterface.locate,
-          animationDuration: animationDuration,
-        ),
-      );
+  }) => GetIt.I.registerLazySingleton(
+    () => TOverlayButtonsService(
+      baseRouterService: TBaseRouterServiceInterface.locate,
+      animationDuration: animationDuration,
+    ),
+  );
 
   // 🧩 DEPENDENCIES -------------------------------------------------------------------------- \\
 

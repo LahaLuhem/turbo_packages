@@ -1,6 +1,6 @@
 {
   "title": "Implement whereDescription-keyed query filters and sort comparators",
-  "status": "todo",
+  "status": "done",
   "type": "feature",
   "phase": "8-query-and-gates",
   "order": 12,
@@ -95,8 +95,17 @@
     "abuse_resistance": "Predicates run in caller code — if they throw, let the exception propagate untouched so the caller sees the real bug instead of a silent empty list."
   },
   "side_context": [
+    "Task 11 added getDocRefById/getDocRefByIdWithConverter overrides, _rawUpdateById, _rawSetById helpers, and a fully-working _TDummyDocumentReference<R, T> delegating to the in-memory store. 97 tests passing.",
     "Task 07 read overrides: _applyQueryFilterAndSort({required String? whereDescription, required List<Map<String, dynamic>> input}) is a private method that currently returns input unchanged. It is called by listByQueryWithConverter, listByQuery, listBySearchTermWithConverter, and listBySearchTerm. Search methods pass whereDescription: null. The seam has a @visibleForTesting wrapper: applyDummyQueryFilterAndSortForTesting.",
     "_queryFilters and _querySort are dummy-local fields already available. _queryFilters is Map<String, bool Function(Map<String, dynamic>)> keyed by whereDescription. _querySort is Map<String, int Function(Map<String, dynamic>, Map<String, dynamic>)> keyed by whereDescription."
   ],
-  "worklog": []
+  "worklog": [
+    "Replaced _applyQueryFilterAndSort passthrough body with real filter + stable sort logic using decorate-sort-undecorate pattern for guaranteed stability on tied elements.",
+    "Added _applySearchFilter private helper for search methods: delegates to _applyQueryFilterAndSort when a registered filter exists, otherwise falls back to case-insensitive substring match on the target field with graceful degradation for missing/non-String fields.",
+    "Added searchField constructor parameter (default: 'name') stored as _defaultSearchField for fallback field resolution when method-level searchField yields no usable String values.",
+    "Updated listBySearchTermWithConverter and listBySearchTerm to route through _applySearchFilter instead of _applyQueryFilterAndSort(whereDescription: null).",
+    "Updated obsolete seam passthrough test in t_dummy_firestore_api_reads_test.dart to assert new contract (same contents, new list instance).",
+    "Created test/apis/t_dummy_firestore_api_query_test.dart with 7 BDD tests: filter-only, filter+sort, unknown key passthrough, stream re-emission includes matching write, stream re-emission excludes non-matching write, substring search fallback, missing-field graceful degradation.",
+    "dart analyze --fatal-infos: 0 issues. flutter test --no-pub: 104 tests passed (7 new + 97 existing)."
+  ]
 }

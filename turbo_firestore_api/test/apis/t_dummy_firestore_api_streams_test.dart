@@ -21,13 +21,13 @@ class _SimpleDto {
   });
 
   factory _SimpleDto.fromJson(Map<String, dynamic> json) => _SimpleDto(
-        id: json['id'] as String,
-        name: json['name'] as String,
-        age: json['age'] as int,
-        isActive: json['isActive'] as bool,
-        createdAt: json['createdAt'] as Timestamp?,
-        updatedAt: json['updatedAt'] as Timestamp?,
-      );
+    id: json['id'] as String,
+    name: json['name'] as String,
+    age: json['age'] as int,
+    isActive: json['isActive'] as bool,
+    createdAt: json['createdAt'] as Timestamp?,
+    updatedAt: json['updatedAt'] as Timestamp?,
+  );
 
   final String id;
   final String name;
@@ -46,17 +46,16 @@ TDummyFirestoreApi<_SimpleDto> _createApi({
   double randomFailurePercentage = 0,
   Duration dummyDelayDuration = Duration.zero,
   int defaultCollectionSize = 5,
-}) =>
-    TDummyFirestoreApi<_SimpleDto>(
-      firebaseFirestore: FakeFirebaseFirestore(),
-      collectionPath: () => 'testCollection',
-      fromJson: _SimpleDto.fromJson,
-      toJson: null,
-      seed: seed,
-      randomFailurePercentage: randomFailurePercentage,
-      dummyDelayDuration: dummyDelayDuration,
-      defaultCollectionSize: defaultCollectionSize,
-    );
+}) => TDummyFirestoreApi<_SimpleDto>(
+  firebaseFirestore: FakeFirebaseFirestore(),
+  collectionPath: () => 'testCollection',
+  fromJson: _SimpleDto.fromJson,
+  toJson: null,
+  seed: seed,
+  randomFailurePercentage: randomFailurePercentage,
+  dummyDelayDuration: dummyDelayDuration,
+  defaultCollectionSize: defaultCollectionSize,
+);
 
 // ---------------------------------------------------------------------------
 // Tests
@@ -99,10 +98,12 @@ void main() {
           if (!secondSnapshot.isCompleted) secondSnapshot.complete(data);
         });
 
-        final list1 =
-            await firstSnapshot.future.timeout(const Duration(seconds: 2));
-        final list2 =
-            await secondSnapshot.future.timeout(const Duration(seconds: 2));
+        final list1 = await firstSnapshot.future.timeout(
+          const Duration(seconds: 2),
+        );
+        final list2 = await secondSnapshot.future.timeout(
+          const Duration(seconds: 2),
+        );
 
         expect(list1.length, size);
         expect(list2.length, size);
