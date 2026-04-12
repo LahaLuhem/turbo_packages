@@ -15,9 +15,7 @@ dependencies:
   turbo_widgets: ^1.1.0
   turbo_mvvm: ^1.1.0
   turbo_notifiers: ^1.1.0
-  turbo_forms: ^1.0.2
-  turbolytics: ^1.0.0
-  get_it: ^9.2.0
+  cupertino_icons: ^1.0.8
   shadcn_ui: ^0.53.5
 
 dev_dependencies:

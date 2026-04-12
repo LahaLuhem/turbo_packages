@@ -1,0 +1,98 @@
+{
+  "title": "Create TValueGenerator typedef and TDummySchema sealed tree",
+  "status": "done",
+  "type": "feature",
+  "phase": "2-foundation",
+  "order": 2,
+  "package": "turbo_firestore_api",
+  "spec": "workspace/specs/dummy-data/firestore/dummy-api-and-services-spec.json",
+  "mockup": "workspace/mockups/dummy-data/firestore/dummy-api-and-services-mockup.md",
+  "blocks": [
+    "All later tasks that depend on a schema tree or a generator callback signature (registry, probing map, dummy api skeleton)."
+  ],
+  "depends_on": [
+    "workspace/tasks/dev/1-refactor/01-promote-firestore-api-extensions-to-instance-methods-task.json"
+  ],
+  "status_instructions": {
+    "on_start": "Flip `status` to `in-progress` first.",
+    "on_done": "Flip `status` to `done`, fill `worklog`, then `mv` to workspace/tasks/archive/dev/2-foundation/02-create-value-generator-typedef-and-dummy-schema-task.json.",
+    "on_followup": "If you discovered a naming or structural nuance the registry/probing tasks must honour, append to their `side_context`."
+  },
+  "description": "Introduce the generators/ concept folder under lib/ and create the two smallest but foundational types: the `TValueGenerator` callback typedef and the recursive `TDummySchema` tree with a sealed `TDummySchemaField` hierarchy (leaf for flat resolved types, branch for nested DTOs). These types are the shared vocabulary every other task in this feature will depend on.",
+  "context_for_junior": "This package currently has no generators/ folder. The spec introduces it as a new 'concept folder' that hosts the fake-data generator system for the dummy Firestore api. A typedef in Dart is just a named alias for a function signature — think of it as a single shorthand for `dynamic Function()` so every downstream file can say `TValueGenerator` instead of rewriting the signature. The schema type is the output of a probing phase that happens later: it describes 'for this entity type, field `name` resolved to String, field `nested` resolved to another nested schema, and field `customThing` could not be resolved'. We need the container type now because the probing map (later task), the registry (later task), and the dummy api itself all take or return a schema.",
+  "why_it_matters": "Every other feature task reads from or writes to these two types. Getting names, shapes, and visibility right now prevents a cascade of painful downstream edits.",
+  "instructions": [
+    "Create lib/generators/ if it does not exist. Respect one-type-per-file from dev-conventions/conventions/folders-and-file-types.md.",
+    "Create lib/generators/t_value_generator.dart containing ONLY `typedef TValueGenerator = dynamic Function();` and a short doc comment explaining it is the callback contract every value provider implements.",
+    "Create lib/generators/t_dummy_schema.dart containing: the sealed class `TDummySchemaField` with two final subclasses `TDummySchemaLeaf` and `TDummySchemaBranch`, plus the `TDummySchema` data class with `Map<String, TDummySchemaField> fields` and `Set<String> unresolved`.",
+    "TDummySchemaLeaf carries `Type type`. TDummySchemaBranch carries `TDummySchema nested`.",
+    "Both the typedef file and the schema file must be safe to export publicly.",
+    "Add short dartdoc on every public declaration: one sentence on purpose, one sentence on when the consumer will encounter it.",
+    "Run `make analyze package=turbo_firestore_api`. Must pass with 0 warnings."
+  ],
+  "goals": [
+    "Two new files that compile, lint-clean, and are ready to be imported by the registry + probing map + dummy api.",
+    "Recursive schema tree supports nested DTOs out of the box (a branch node contains another full TDummySchema).",
+    "Sealed hierarchy gives later code exhaustive pattern matching over leaf vs branch."
+  ],
+  "non_goals": [
+    "No registry logic.",
+    "No probing logic.",
+    "No JSON serialization.",
+    "No public exports from turbo_firestore_api.dart yet — that is task 11.",
+    "No equality/hashCode/copyWith helpers unless strictly required by analyzer."
+  ],
+  "acceptance_criteria": [
+    "`lib/generators/t_value_generator.dart` exists, analyzes clean, contains the typedef and nothing else.",
+    "`lib/generators/t_dummy_schema.dart` exists, analyzes clean, exports `TDummySchema`, `TDummySchemaField` (sealed), `TDummySchemaLeaf`, `TDummySchemaBranch`.",
+    "`make analyze package=turbo_firestore_api` passes with 0 warnings.",
+    "Unit test covering: (a) constructing a flat schema with two leaf fields, (b) constructing a nested schema branch, (c) verifying the sealed hierarchy exhaustively pattern-matches via a `switch` expression."
+  ],
+  "constraints": [
+    "One public type per file — do not co-locate TValueGenerator and TDummySchema.",
+    "No external dependencies added to pubspec.yaml.",
+    "Trailing commas, single quotes, const where possible."
+  ],
+  "skills_to_read": [
+    "dev-conventions/conventions/folders-and-file-types.md",
+    "dev-conventions/conventions/typedefs.md",
+    "dev-conventions/conventions/abstracts.md",
+    "dev-conventions/conventions/unit-tests.md"
+  ],
+  "tools": [
+    "RepoPrompt MCP for reading existing lib/ layout",
+    "Write + Edit for file creation",
+    "Bash for `make analyze`"
+  ],
+  "verification": [
+    "make analyze package=turbo_firestore_api",
+    "cd turbo_firestore_api && dart test test/generators/t_dummy_schema_test.dart"
+  ],
+  "testing": {
+    "rules": "Follow TestRulesAndReasons and dev-conventions/conventions/unit-tests.md. Test outcomes and state, not implementation details. No mocks — these types have no collaborators.",
+    "scenarios": [
+      "Given a flat schema with two leaf fields, When fields are inspected, Then each field reports the expected Type.",
+      "Given a schema with one branch field, When the branch is destructured, Then the nested TDummySchema is accessible and carries its own fields.",
+      "Given a sealed TDummySchemaField value, When pattern-matched in a switch expression, Then the Dart analyzer reports exhaustiveness with no default required."
+    ],
+    "no_mocks": true,
+    "refactor_for_testability": "If the schema constructor ends up hard to test, split into pure factory constructors per variant rather than reaching for mocks."
+  },
+  "quality_bar": {
+    "maintainability": "Sealed hierarchy keeps future additions (e.g. TDummySchemaListItem) explicit and forces downstream pattern matches to update.",
+    "dry": "The typedef lives once and is referenced everywhere downstream.",
+    "single_responsibility": "Schema describes shape, nothing else — no generation logic leaks into it.",
+    "performance": "n/a for pure data classes.",
+    "abuse_resistance": "n/a — internal vocabulary."
+  },
+  "side_context": [],
+  "worklog": [
+    "Created lib/generators/t_value_generator.dart with typedef TValueGenerator = dynamic Function(); and dartdoc.",
+    "Created lib/generators/t_dummy_schema.dart with sealed class TDummySchemaField, final class TDummySchemaLeaf(Type type), final class TDummySchemaBranch(TDummySchema nested), and final class TDummySchema({Map<String, TDummySchemaField> fields, Set<String> unresolved}). All const constructors, all dartdoc'd.",
+    "Created test/generators/t_dummy_schema_test.dart with 3 BDD-style tests: flat schema leaf inspection, nested branch destructuring, and exhaustive sealed switch expression (no default branch). Uses flutter_test matching existing package convention.",
+    "make analyze package=turbo_firestore_api: 0 issues.",
+    "flutter test: 4 tests passed (1 existing + 3 new), 0 failures.",
+    "No existing files modified. No barrel export changes (deferred to Task 13). No new dependencies.",
+    "Test imports use direct package path (package:turbo_firestore_api/generators/t_dummy_schema.dart) since barrel exports are not wired yet."
+  ]
+}

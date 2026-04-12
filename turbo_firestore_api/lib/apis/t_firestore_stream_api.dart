@@ -24,7 +24,7 @@ part of 't_firestore_api.dart';
 /// See also:
 /// [TurboFirestoreListApi] one-time list operations
 /// [TurboFirestoreSearchApi] search operations
-extension TurboFirestoreStreamApi<T> on TFirestoreApi<T> {
+mixin TurboFirestoreStreamApi<T> on _TFirestoreApiBase<T> {
   /// Streams all documents from a collection with exception handling
   ///
   /// Returns real-time updates for all documents with error conversion

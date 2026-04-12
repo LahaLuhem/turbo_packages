@@ -92,6 +92,10 @@
     "performance": "Every member is O(1) plus whatever the delegated method costs.",
     "abuse_resistance": "Unsupported members fail loudly with actionable messages rather than returning fake data."
   },
-  "side_context": [],
+  "side_context": [
+    "Task 09 created a minimal _TDummyDocumentReference placeholder in lib/apis/t_dummy_firestore_api.dart. It implements DocumentReference<Map<String, dynamic>> with id, path, firestore working; everything else throws UnimplementedError. Expand this class with full dummy implementations as needed.",
+    "_TDummyDocumentReference constructor: const _TDummyDocumentReference({required String id, required String collectionPath, required FirebaseFirestore firestore}). Created by createDoc and updateDoc success paths.",
+    "ignore_for_file: subtype_of_sealed_class is already set at the top of the file."
+  ],
   "worklog": []
 }

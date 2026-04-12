@@ -1,0 +1,117 @@
+{
+  "title": "Implement TDummyFirestoreApi write overrides with mutation fan-out",
+  "status": "done",
+  "type": "feature",
+  "phase": "6-writes",
+  "order": 9,
+  "package": "turbo_firestore_api",
+  "spec": "workspace/specs/dummy-data/firestore/dummy-api-and-services-spec.json",
+  "mockup": "workspace/mockups/dummy-data/firestore/dummy-api-and-services-mockup.md",
+  "blocks": [
+    "Batch/transaction task — it will build on the same create/update/delete primitives."
+  ],
+  "depends_on": [
+    "workspace/tasks/dev/5-streams/08-implement-dummy-stream-overrides-task.json"
+  ],
+  "status_instructions": {
+    "on_start": "Flip `status` to `in-progress`.",
+    "on_done": "Flip `status` to `done`, fill `worklog`, then `mv` to workspace/tasks/archive/dev/6-writes/09-implement-dummy-write-overrides-task.json.",
+    "on_followup": "If write semantics revealed a subtlety the batch/transaction task must honour, append to that task's `side_context`."
+  },
+  "description": "Override `createDoc`, `updateDoc`, `deleteDoc` (converter + non-converter forms exist on the real api — override what exists). Writes validate the writeable, apply timestamps via the real api's `TTimestampType.add`, mutate `_store` as raw json, and re-emit through `_emitCollections()` and `_emitDoc()` instantly. Creates return a stub `_TDummyDocumentReference` bound to the dummy api (the full stub class is a later task — for now, emit an absolutely minimal placeholder that implements enough of `DocumentReference` to return from `createDoc`). Updates shallow-merge the writeable's json onto the stored map. Deletes remove the map entry.",
+  "context_for_junior": "Writes are the second half of 'does this feature actually work?'. Every service in the monorepo calls `createDoc`, `updateDoc`, or `deleteDoc` through the api — your overrides must mimic Firestore's partial-update semantics (shallow merge) so the UI optimistic-update paths behave identically. Critical detail: the dummy store holds raw `Map<String, dynamic>`, not typed `T`. Writes update the map; reads re-materialise a typed `T` by piping the stored map through the caller's `fromJson`. That is the trick that lets partial update DTOs (which have many nullable fields) work without crashing — you never try to build a half-filled typed entity from a partial writeable.",
+  "why_it_matters": "Without correct write semantics the dummy diverges from Firestore's partial-update model and every caller using update DTOs gets either crashes or missing-field bugs in dummy mode.",
+  "instructions": [
+    "Override `createDoc`, `updateDoc`, `deleteDoc` on TDummyFirestoreApi<T>. Match parameter lists exactly to the parent class — after phase 1 they are all instance methods so overriding them compiles.",
+    "Every write begins with `await _applyLatency(); final failure = _rollFailureException(operationType: TOperationType.write, path: _pathSnapshot, id: effectiveId, documentData: writeable.toJson()); if (failure != null) return TurboResponse.fail(error: failure);`.",
+    "`createDoc`: (1) call `writeable.validate()` and return its failure if it fails; (2) compute the effective id from the caller's supplied `id` or `_genDummyId()`; (3) take the writeable's json and apply timestamps via the existing `TTimestampType.add(...)` using the parent class's `createdAtFieldName` and `updatedAtFieldName`; (4) inject `idFieldName` with the effective id; (5) write the json to `_store[effectiveId]`; (6) call `_emitCollections()` and `_emitDoc(effectiveId, _materialise(_store[effectiveId]!))`; (7) return `TurboResponse.success` with a minimal `_TDummyDocumentReference` carrying the dummy api reference and the id — the full stub class ships in a later task, for now a tiny private placeholder implementing only `.id`, `.path`, and throwing UnimplementedError on everything else is acceptable if the phase-7 task will replace it.",
+    "`updateDoc`: (1) look up `_store[id]`; if absent, return `TurboResponse.fail` with a `TurboFirestoreNotFoundException` constructed with the same context the real api produces; (2) call `writeable.validate()`; (3) take `writeable.toJson()`, apply timestamps via `TTimestampType.add`, shallow-merge the result onto the stored map (overlay: stored keys are overwritten by writeable keys; stored keys not in writeable are preserved); (4) write the merged map back; (5) `_emitCollections()` and `_emitDoc(id, _materialise(merged))`; (6) return `TurboResponse.success` with the same `_TDummyDocumentReference` stub.",
+    "`deleteDoc`: (1) `_store.remove(id)`; (2) `_emitCollections()`; (3) `_emitDoc(id, null)`; (4) return `TurboResponse.success`.",
+    "If the parent class also exposes `createDocInBatch`, `updateDocInBatch`, `deleteDocInBatch`, `createDocInTransaction`, `updateDocInTransaction`, `deleteDocInTransaction` — override those too but leave their bodies throwing `UnimplementedError('wired by the batch/transaction task')`. The batch/transaction task will replace these bodies.",
+    "Mutation fan-out is instant — no latency gate on re-emission, matching the spec's `latency_scope.subsequent_stream_emissions` rule.",
+    "Run `make analyze package=turbo_firestore_api` and the new unit tests."
+  ],
+  "goals": [
+    "Writes mutate the in-memory store, validate writeables, apply timestamps, and fan out through the stream registries.",
+    "Partial updates behave like Firestore's shallow merge.",
+    "Create returns a usable minimal DocumentReference stub.",
+    "Delete nullifies every open doc-stream listener for the deleted id."
+  ],
+  "non_goals": [
+    "No batch / transaction semantics — later task.",
+    "No full DocumentReference implementation — later task.",
+    "No query filter/sort logic.",
+    "No persistence across restarts."
+  ],
+  "acceptance_criteria": [
+    "`make analyze package=turbo_firestore_api` passes.",
+    "Unit test: createDoc writes the entity to the store and open collection streams receive the updated snapshot instantly.",
+    "Unit test: updateDoc with a partial writeable (only `name` set) preserves other fields and overwrites `name`.",
+    "Unit test: updateDoc on an unknown id returns `TurboResponse.fail` wrapping `TurboFirestoreNotFoundException`.",
+    "Unit test: deleteDoc removes the entry and any open doc stream for that id emits `null`.",
+    "Unit test: two open collection streams both receive the snapshot after a createDoc — no drift.",
+    "Unit test: with `randomFailurePercentage = 100`, writes return TurboResponse.fail without mutating the store.",
+    "Unit test: createdAt is set from TTimestampType.add on the first write, updatedAt is updated on subsequent update writes."
+  ],
+  "constraints": [
+    "Shallow merge only — no recursive merge, matching Firestore's `update` semantics.",
+    "No workaround for validation — if validate() fails, return its failure unchanged.",
+    "Instant re-emission on mutation; never await the latency gate after the initial write latency.",
+    "All batch/transaction overrides that remain unimplemented throw `UnimplementedError` with a message pointing to the batch/transaction task."
+  ],
+  "skills_to_read": [
+    "dev-conventions/conventions/apis.md",
+    "dev-conventions/conventions/results.md",
+    "dev-conventions/conventions/firestore-services.md",
+    "dev-conventions/conventions/exceptions.md",
+    "dev-conventions/conventions/unit-tests.md"
+  ],
+  "tools": [
+    "RepoPrompt MCP for reading the real TFirestoreApi write methods (createDoc/updateDoc/deleteDoc) to match parameters, validation, and timestamp handling",
+    "Edit",
+    "Bash for analyze + test"
+  ],
+  "verification": [
+    "make analyze package=turbo_firestore_api",
+    "cd turbo_firestore_api && dart test test/apis/t_dummy_firestore_api_writes_test.dart"
+  ],
+  "testing": {
+    "rules": "No mocks. Use a synthetic DTO with a matching writeable (both create and update variants) defined inline in the test file. Assert on store contents (via a `@visibleForTesting` getter) and on emitted stream snapshots.",
+    "scenarios": [
+      "Given an empty store, When createDoc is called with a writeable, Then the store has one entry with the writeable's fields plus timestamps and id.",
+      "Given a store with one entity and an open collection stream, When createDoc adds a second entity, Then the stream emits a two-element snapshot within one microtask.",
+      "Given an existing entity, When updateDoc is called with a partial writeable setting only one field, Then the stored map has the original fields merged with the updated field and the updatedAt timestamp is newer.",
+      "Given an unknown id, When updateDoc is called, Then the result is TurboResponse.fail wrapping TurboFirestoreNotFoundException.",
+      "Given an existing id with an open doc stream, When deleteDoc is called, Then the stream emits null.",
+      "Given `randomFailurePercentage = 100`, When createDoc is called, Then the store is unchanged and the result is TurboResponse.fail.",
+      "Given two open collection streams, When createDoc fires, Then both streams receive the identical new snapshot."
+    ],
+    "refactor_for_testability": "If asserting on timestamp equality flakes because of wall-clock nondeterminism, inject a `DateTime Function()` clock into the dummy api as an optional constructor parameter (default `DateTime.now`) and flow it through `_applyTimestamps`. Update the spec alignment in `side_context` of the skeleton task."
+  },
+  "quality_bar": {
+    "maintainability": "Write preamble (latency + failure roll + validation) is hoisted into one private helper.",
+    "dry": "No duplicated merge/serialize code across create/update/delete — use the same helpers.",
+    "single_responsibility": "Writes mutate state + fan out; stream management is untouched.",
+    "performance": "O(store size) for snapshot re-emission, which is intrinsic to Firestore semantics.",
+    "abuse_resistance": "validate() is invoked on every writeable path — callers cannot slip through malformed inputs. NotFound errors are typed so UI pattern-matching stays sound."
+  },
+  "side_context": [
+    "Task 08 stream overrides: _collectionControllers and _rawCollectionControllers are now populated by active stream subscriptions. _emitCollections() fans out to both typed and raw registries with per-controller whereDescription via _applyQueryFilterAndSort. _emitDoc(id, entity) fans out T? to _docControllers[id]. Write overrides must call _emitCollections() after every mutation and _emitDoc(id, null) after deletes.",
+    "Stream registration happens in onListen (not at method-call time). onCancel cleans up. Broadcast controllers only. No sync:true.",
+    "streamAll() and streamByDocId() throw UnimplementedError — only WithConverter variants are supported in dummy mode.",
+    "New state fields added: _collectionControllerWhereDescriptions, _rawCollectionControllers, _rawCollectionControllerWhereDescriptions. dispose() closes all of them.",
+    "Test runner: ~/Flutter/bin/flutter test works. 73 tests passing. Stream test file at test/apis/t_dummy_firestore_api_streams_test.dart."
+  ],
+  "worklog": [
+    "Implemented 3 @override write methods on TDummyFirestoreApi<T>: createDoc, updateDoc, deleteDoc — each follows the preamble (await _applyLatency → _rollFailureException → validate → mutate _store → _emitCollections + _emitDoc → return TurboResponse.success with _TDummyDocumentReference).",
+    "createDoc: computes effective id (caller-supplied or _genDummyId), applies createTimeStampType timestamps via _applyTimestamps, injects _idFieldName, stores raw map, fans out instantly to all collection and doc stream controllers.",
+    "updateDoc: checks _store[id] existence (returns TurboFirestoreNotFoundException if absent), validates writeable, applies timestampType timestamps, shallow-merges onto stored map (addAll), re-forces id field to prevent drift, fans out.",
+    "deleteDoc: idempotent _store.remove(id), _emitCollections(), _emitDoc(id, null). No existence check — matches Firestore delete semantics.",
+    "Added 3 @override batch stubs: createDocInBatch, updateDocInBatch, deleteDocInBatch — all throw UnimplementedError with guidance pointing to the batch/transaction task.",
+    "Created _TDummyDocumentReference private class implementing DocumentReference<Map<String, dynamic>> with working id, path, firestore getters; all other members throw UnimplementedError. Added ignore_for_file: subtype_of_sealed_class since DocumentReference is @sealed.",
+    "Added _firebaseFirestoreSnapshot field on TDummyFirestoreApi<T> to pass the FirebaseFirestore instance to _TDummyDocumentReference (the parent's field is library-private).",
+    "Added imports: turbo_serializable/abstracts/t_writeable.dart, turbo_firestore_api/models/t_write_batch_with_reference.dart.",
+    "Created test/apis/t_dummy_firestore_api_writes_test.dart with 9 BDD tests covering all 8 acceptance criteria: create with store mutation + stream fan-out, update shallow merge with timestamp progression, unknown-id not-found failure, delete with null doc stream emission, dual-collection-stream sync after create, 100% failure roll prevents mutation (create + update + delete), validation failure prevents mutation, auto-generated dummy id.",
+    "Verification: dart analyze --fatal-infos: 0 issues. flutter test: 82 tests passed (9 new + 73 existing)."
+  ]
+}

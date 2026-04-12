@@ -25,7 +25,7 @@ part of 't_firestore_api.dart';
 /// See also:
 /// [TurboFirestoreListApi] list operations
 /// [TurboFirestoreGetApi] single document retrieval
-extension TurboFirestoreSearchApi<T> on TFirestoreApi<T> {
+mixin TurboFirestoreSearchApi<T> on _TFirestoreApiBase<T> {
   /// Searches for documents matching a search term
   ///
   /// Returns raw Firestore data without type conversion

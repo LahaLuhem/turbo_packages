@@ -20,7 +20,7 @@ part of 't_firestore_api.dart';
 /// See also:
 /// [TFirestoreUpdateApi] document updates
 /// [TFirestoreCreateApi] document creation
-extension TFirestoreDeleteApi<T> on TFirestoreApi<T> {
+mixin TFirestoreDeleteApi<T> on _TFirestoreApiBase<T> {
   /// Deletes a document from Firestore
   ///
   /// Permanently removes document and all its data

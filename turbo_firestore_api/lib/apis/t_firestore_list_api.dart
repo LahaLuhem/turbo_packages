@@ -21,7 +21,7 @@ part of 't_firestore_api.dart';
 /// See also:
 /// [TurboFirestoreGetApi] single document retrieval
 /// [TurboFirestoreSearchApi] search operations
-extension TurboFirestoreListApi<T> on TFirestoreApi<T> {
+mixin TurboFirestoreListApi<T> on _TFirestoreApiBase<T> {
   /// Lists documents matching a custom query
   ///
   /// Returns raw Firestore data without type conversion
@@ -336,6 +336,7 @@ extension TurboFirestoreListApi<T> on TFirestoreApi<T> {
   /// See also:
   /// [listCollectionReferenceWithConverter] type-safe references
   /// [listByQuery] direct query access
+  @override
   Query<Map<String, dynamic>> listCollectionReference() {
     _log.debug(
       message: 'Finding collection..',
@@ -422,6 +423,7 @@ extension TurboFirestoreListApi<T> on TFirestoreApi<T> {
   /// See also:
   /// [listCollectionReference] raw data references
   /// [listByQueryWithConverter] direct type-safe queries
+  @override
   Query<T> listCollectionReferenceWithConverter() {
     _log.debug(
       message: 'Finding collection with converter..',

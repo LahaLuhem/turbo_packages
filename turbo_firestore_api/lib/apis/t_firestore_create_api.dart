@@ -23,7 +23,7 @@ part of 't_firestore_api.dart';
 /// See also:
 /// [TFirestoreUpdateApi] document updates
 /// [TFirestoreDeleteApi] document deletion
-extension TFirestoreCreateApi<T> on TFirestoreApi {
+mixin TFirestoreCreateApi<T> on _TFirestoreApiBase<T> {
   /// Creates or writes a document to Firestore.
   ///
   /// This method provides a flexible way to create or update documents with various options

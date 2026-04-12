@@ -94,6 +94,9 @@
     "performance": "O(N) filter + O(N log N) sort per call, matching user expectation for dummy data sizes.",
     "abuse_resistance": "Predicates run in caller code — if they throw, let the exception propagate untouched so the caller sees the real bug instead of a silent empty list."
   },
-  "side_context": [],
+  "side_context": [
+    "Task 07 read overrides: _applyQueryFilterAndSort({required String? whereDescription, required List<Map<String, dynamic>> input}) is a private method that currently returns input unchanged. It is called by listByQueryWithConverter, listByQuery, listBySearchTermWithConverter, and listBySearchTerm. Search methods pass whereDescription: null. The seam has a @visibleForTesting wrapper: applyDummyQueryFilterAndSortForTesting.",
+    "_queryFilters and _querySort are dummy-local fields already available. _queryFilters is Map<String, bool Function(Map<String, dynamic>)> keyed by whereDescription. _querySort is Map<String, int Function(Map<String, dynamic>, Map<String, dynamic>)> keyed by whereDescription."
+  ],
   "worklog": []
 }

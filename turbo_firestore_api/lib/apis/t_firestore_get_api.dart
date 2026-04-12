@@ -21,7 +21,7 @@ part of 't_firestore_api.dart';
 /// See also:
 /// - [TFirestoreCreateApi] document creation and updates
 /// - [TFirestoreDeleteApi] document deletion
-extension TurboFirestoreGetApi<T> on TFirestoreApi<T> {
+mixin TurboFirestoreGetApi<T> on _TFirestoreApiBase<T> {
   /// Retrieves a document by its unique identifier
   ///
   /// Returns raw Firestore data without type conversion. Useful for direct data access
@@ -250,6 +250,7 @@ extension TurboFirestoreGetApi<T> on TFirestoreApi<T> {
   /// See also:
   /// - [getDocRefByIdWithConverter] type-safe references
   /// - [getById] direct data access
+  @override
   DocumentReference<Map<String, dynamic>> getDocRefById({
     required String id,
     String? collectionPathOverride,
@@ -353,6 +354,7 @@ extension TurboFirestoreGetApi<T> on TFirestoreApi<T> {
   /// See also:
   /// - [getDocRefById] raw data references
   /// - [getByIdWithConverter] direct typed access
+  @override
   DocumentReference<T> getDocRefByIdWithConverter({
     required String id,
     String? collectionPathOverride,

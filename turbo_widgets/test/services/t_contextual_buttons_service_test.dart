@@ -1,8 +1,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:turbo_widgets/src/navigation/shared/enums/t_contextual_position.dart';
-import 'package:turbo_widgets/src/navigation/shared/models/t_contextual_buttons_config.dart';
-import 'package:turbo_widgets/src/navigation/shared/services/t_contextual_buttons_service.dart';
+import 'package:turbo_widgets/src/enums/t_contextual_position.dart';
+import 'package:turbo_widgets/src/models/t_contextual_buttons_config.dart';
+import 'package:turbo_widgets/src/services/t_contextual_buttons_service.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

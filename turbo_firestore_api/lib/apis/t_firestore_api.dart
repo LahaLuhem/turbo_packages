@@ -23,98 +23,12 @@ part 't_firestore_search_api.dart';
 part 't_firestore_stream_api.dart';
 part 't_firestore_update_api.dart';
 
-/// A powerful, type-safe wrapper around Cloud Firestore operations.
+/// Library-private base class that holds all state and helpers for [TFirestoreApi].
 ///
-/// The [TFirestoreApi] provides a high-level interface for interacting with Firestore,
-/// offering automatic type conversion, validation, and enhanced error handling.
-///
-/// Type parameter [T] represents the model type this API instance will work with.
-///
-/// Features:
-/// - Automatic type conversion between Firestore documents and Dart objects
-/// - Built-in validation through [TWriteable]
-/// - Automatic timestamp management for createdAt/updatedAt fields
-/// - Local ID management for easier document tracking
-/// - Sensitive data handling
-/// - Comprehensive logging
-/// - Collection group support
-/// - Batch operation capabilities
-///
-/// Example usage with a custom model:
-/// ```dart
-/// class User {
-///   User({required this.name, this.age});
-///
-///   final String name;
-///   final int? age;
-///
-///   factory User.fromJson(Map<String, dynamic> json) => User(
-///     name: json['name'] as String,
-///     age: json['age'] as int?,
-///   );
-///
-///   Map<String, dynamic> toJson() => {
-///     'name': name,
-///     'age': age,
-///   };
-/// }
-///
-/// final api = TurboFirestoreApi<User>(
-///   firebaseFirestore: FirebaseFirestore.instance,
-///   collectionPath: () => 'users',
-///   fromJson: User.fromJson,
-///   toJson: (user) => user.toJson(),
-/// );
-///
-/// // Create a new user
-/// final user = User(name: 'John', age: 30);
-/// await api.set(data: user);
-///
-/// // Query users
-/// final adults = await api.query(
-///   where: (ref) => ref.where('age', isGreaterThanOrEqualTo: 18),
-/// );
-/// ```
-class TFirestoreApi<T> {
-  /// Creates a new instance of [TFirestoreApi].
-  ///
-  /// Required parameters:
-  /// - [firebaseFirestore] The Firestore instance to use for operations
-  /// - [collectionPath] Function that returns the path to the Firestore collection
-  ///
-  /// Optional parameters for type conversion:
-  /// - [toJson] Converts instances of [T] to Firestore-compatible maps
-  /// - [fromJson] Creates instances of [T] from Firestore documents
-  /// - [fromJsonError] Alternative conversion for error cases
-  ///
-  /// Document ID management:
-  /// - [tryAddLocalId] When true, adds document ID to local objects
-  /// - [idFieldName] Field name for document ID (default: 'id')
-  ///
-  /// Timestamp fields:
-  /// - [createdAtFieldName] Field for creation timestamp (default: 'createdAt')
-  /// - [updatedAtFieldName] Field for update timestamp (default: 'updatedAt')
-  ///
-  /// Advanced features:
-  /// - [logger] Custom logger for operation tracking
-  /// - [isCollectionGroup] Enable collection group queries
-  /// - [tryAddLocalDocumentReference] Add document reference to local objects
-  /// - [documentReferenceFieldName] Field for document reference
-  /// - [getOptions] Custom options for get operations
-  /// - [TFirestoreLogger.showSensitiveData] Control sensitive data visibility in logs
-  ///
-  /// Example:
-  /// ```dart
-  /// final api = TurboFirestoreApi<User>(
-  ///   firebaseFirestore: FirebaseFirestore.instance,
-  ///   collectionPath: () => 'users',
-  ///   fromJson: User.fromJson,
-  ///   toJson: (user) => user.toJson(),
-  ///   tryAddLocalId: true,
-  ///   logger: CustomLogger(),
-  /// );
-  /// ```
-  TFirestoreApi({
+/// Operation-family mixins constrain on this base to access private fields
+/// and helpers while remaining in separate part files for code organization.
+abstract class _TFirestoreApiBase<T> {
+  _TFirestoreApiBase({
     required FirebaseFirestore firebaseFirestore,
     required String Function() collectionPath,
     Map<String, dynamic> Function(T value)? toJson,
@@ -392,6 +306,14 @@ class TFirestoreApi<T> {
     }
   }
 
+  // 🎬 DISPOSE ------------------------------------------------------------------------------- \\
+
+  /// Releases resources held by this API instance.
+  ///
+  /// Subclasses override to close stream controllers and other owned
+  /// resources, then chain to `super.dispose()`.
+  Future<void> dispose() async {}
+
   // 🪄 MUTATORS ------------------------------------------------------------------------------ \\
 
   /// Helper method to run a [Transaction] from [_firebaseFirestore]..
@@ -404,4 +326,154 @@ class TFirestoreApi<T> {
     timeout: timeout,
     maxAttempts: maxAttempts,
   );
+
+  // 🔗 CROSS-MIXIN DECLARATIONS -------------------------------------------------------------- \\
+
+  /// Gets a document reference by ID for raw data access.
+  ///
+  /// Declared here so that base-class helpers (e.g. [docExists]) and
+  /// operation-family mixins can call it. Concrete implementation lives
+  /// in [TurboFirestoreGetApi].
+  DocumentReference<Map<String, dynamic>> getDocRefById({
+    required String id,
+    String? collectionPathOverride,
+  });
+
+  /// Gets a document reference with type conversion.
+  ///
+  /// Declared here so that operation-family mixins can call it.
+  /// Concrete implementation lives in [TurboFirestoreGetApi].
+  DocumentReference<T> getDocRefByIdWithConverter({
+    required String id,
+    String? collectionPathOverride,
+  });
+
+  /// Gets a collection reference for raw data access.
+  ///
+  /// Declared here so that operation-family mixins can call it.
+  /// Concrete implementation lives in [TurboFirestoreListApi].
+  Query<Map<String, dynamic>> listCollectionReference();
+
+  /// Gets a collection reference with type conversion.
+  ///
+  /// Declared here so that operation-family mixins can call it.
+  /// Concrete implementation lives in [TurboFirestoreListApi].
+  Query<T> listCollectionReferenceWithConverter();
+}
+
+/// A powerful, type-safe wrapper around Cloud Firestore operations.
+///
+/// The [TFirestoreApi] provides a high-level interface for interacting with Firestore,
+/// offering automatic type conversion, validation, and enhanced error handling.
+///
+/// Type parameter [T] represents the model type this API instance will work with.
+///
+/// Features:
+/// - Automatic type conversion between Firestore documents and Dart objects
+/// - Built-in validation through [TWriteable]
+/// - Automatic timestamp management for createdAt/updatedAt fields
+/// - Local ID management for easier document tracking
+/// - Sensitive data handling
+/// - Comprehensive logging
+/// - Collection group support
+/// - Batch operation capabilities
+///
+/// Example usage with a custom model:
+/// ```dart
+/// class User {
+///   User({required this.name, this.age});
+///
+///   final String name;
+///   final int? age;
+///
+///   factory User.fromJson(Map<String, dynamic> json) => User(
+///     name: json['name'] as String,
+///     age: json['age'] as int?,
+///   );
+///
+///   Map<String, dynamic> toJson() => {
+///     'name': name,
+///     'age': age,
+///   };
+/// }
+///
+/// final api = TurboFirestoreApi<User>(
+///   firebaseFirestore: FirebaseFirestore.instance,
+///   collectionPath: () => 'users',
+///   fromJson: User.fromJson,
+///   toJson: (user) => user.toJson(),
+/// );
+///
+/// // Create a new user
+/// final user = User(name: 'John', age: 30);
+/// await api.set(data: user);
+///
+/// // Query users
+/// final adults = await api.query(
+///   where: (ref) => ref.where('age', isGreaterThanOrEqualTo: 18),
+/// );
+/// ```
+class TFirestoreApi<T> extends _TFirestoreApiBase<T>
+    with
+        TurboFirestoreGetApi<T>,
+        TurboFirestoreListApi<T>,
+        TFirestoreCreateApi<T>,
+        TFirestoreDeleteApi<T>,
+        TurboFirestoreSearchApi<T>,
+        TurboFirestoreStreamApi<T>,
+        TFirestoreUpdateApi<T> {
+  /// Creates a new instance of [TFirestoreApi].
+  ///
+  /// Required parameters:
+  /// - [firebaseFirestore] The Firestore instance to use for operations
+  /// - [collectionPath] Function that returns the path to the Firestore collection
+  ///
+  /// Optional parameters for type conversion:
+  /// - [toJson] Converts instances of [T] to Firestore-compatible maps
+  /// - [fromJson] Creates instances of [T] from Firestore documents
+  /// - [fromJsonError] Alternative conversion for error cases
+  ///
+  /// Document ID management:
+  /// - [tryAddLocalId] When true, adds document ID to local objects
+  /// - [idFieldName] Field name for document ID (default: 'id')
+  ///
+  /// Timestamp fields:
+  /// - [createdAtFieldName] Field for creation timestamp (default: 'createdAt')
+  /// - [updatedAtFieldName] Field for update timestamp (default: 'updatedAt')
+  ///
+  /// Advanced features:
+  /// - [logger] Custom logger for operation tracking
+  /// - [isCollectionGroup] Enable collection group queries
+  /// - [tryAddLocalDocumentReference] Add document reference to local objects
+  /// - [documentReferenceFieldName] Field for document reference
+  /// - [getOptions] Custom options for get operations
+  /// - [TFirestoreLogger.showSensitiveData] Control sensitive data visibility in logs
+  ///
+  /// Example:
+  /// ```dart
+  /// final api = TurboFirestoreApi<User>(
+  ///   firebaseFirestore: FirebaseFirestore.instance,
+  ///   collectionPath: () => 'users',
+  ///   fromJson: User.fromJson,
+  ///   toJson: (user) => user.toJson(),
+  ///   tryAddLocalId: true,
+  ///   logger: CustomLogger(),
+  /// );
+  /// ```
+  TFirestoreApi({
+    required super.firebaseFirestore,
+    required super.collectionPath,
+    super.toJson,
+    super.fromJson,
+    super.fromJsonError,
+    super.tryAddLocalId,
+    super.logger,
+    super.createdAtFieldName,
+    super.updatedAtFieldName,
+    super.idFieldName,
+    super.documentReferenceFieldName,
+    super.isCollectionGroup,
+    super.tryAddLocalDocumentReference,
+    super.getOptions,
+  });
 }

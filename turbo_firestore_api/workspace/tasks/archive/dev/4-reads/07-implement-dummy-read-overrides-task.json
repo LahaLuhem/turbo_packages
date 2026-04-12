@@ -1,0 +1,125 @@
+{
+  "title": "Implement TDummyFirestoreApi read overrides (get, list, search, docExists)",
+  "status": "done",
+  "type": "feature",
+  "phase": "4-reads",
+  "order": 7,
+  "package": "turbo_firestore_api",
+  "spec": "workspace/specs/dummy-data/firestore/dummy-api-and-services-spec.json",
+  "mockup": "workspace/mockups/dummy-data/firestore/dummy-api-and-services-mockup.md",
+  "blocks": [
+    "Streams task — stream overrides reuse the same seed-on-first-access rule the read overrides establish."
+  ],
+  "depends_on": [
+    "workspace/tasks/dev/3-probing-and-skeleton/06-create-dummy-firestore-api-skeleton-task.json"
+  ],
+  "status_instructions": {
+    "on_start": "Flip `status` to `in-progress`.",
+    "on_done": "Flip `status` to `done`, fill `worklog`, then `mv` to workspace/tasks/archive/dev/4-reads/07-implement-dummy-read-overrides-task.json.",
+    "on_followup": "If the seed-on-first-access rule has a subtlety the streams task needs to know, append to that task's `side_context`."
+  },
+  "description": "Override every read method on TDummyFirestoreApi<T>: `getByIdWithConverter`, `getById`, `listAllWithConverter`, `listAll`, `listByQueryWithConverter`, `listByQuery`, `listBySearchTermWithConverter`, `listBySearchTerm`, `docExists`. Each override awaits the latency gate, rolls the failure gate, serves from the in-memory json store (seeding it on first access for list methods), and returns results via `TurboResponse`. The converter variants re-materialise typed `T` by piping stored json through the caller's `fromJson`.",
+  "context_for_junior": "Read overrides do three things: wait the latency, maybe fail, otherwise serve from `_store`. On `getById*` the store lazily generates a single document when the id is not already present, stores it, and returns it. On `listAll*` the store is seeded with `defaultCollectionSize` documents on the very first call — subsequent list calls return whatever the store currently holds (possibly mutated by later writes). The converter (`*WithConverter`) variants return typed `T`; the raw variants return `Map<String, dynamic>`. For `listByQueryWithConverter` and `listBySearchTermWithConverter`, pass the whereDescription-keyed filter/sort through — but the filter/sort application itself is a later task; in this task, accept the parameters and emit the full store (unfiltered) for now, leaving a clearly-marked extension point for the query task to plug into.",
+  "why_it_matters": "Reads are the first end-to-end proof the dummy api works. Once reads emit realistic data through a real service, the feature is demonstrably useful even before writes ship.",
+  "instructions": [
+    "Override every read method listed in the spec under `dummy_api_class.overrides.reads`. Use `@override` and preserve parameter names exactly.",
+    "At the top of every override, `await _applyLatency(); final failure = _rollFailureException(operationType: TOperationType.read, path: _pathSnapshot, id: id); if (failure != null) return TurboResponse.fail(error: failure);`.",
+    "`getByIdWithConverter`: check `_store[id]`. If present, materialise and return success. If absent, generate a json map via `_generateDocJson(id: id)`, store it in `_store`, materialise via `fromJson`, return success. Note that create/update semantics are for the write task — reads never write timestamps.",
+    "`getById` (raw): same as above but returns `Map<String, dynamic>` directly without calling fromJson.",
+    "`listAllWithConverter`: if `_store.isEmpty`, call a new private helper `_seedStoreIfNeeded()` that generates `defaultCollectionSize` documents via `_generateDocJson(id: _genDummyId())`, spreads their createdAt timestamps across the trailing `defaultCollectionSize` days (newest first), and writes them to `_store`. After seeding, return `TurboResponse.success(_store.values.map(_materialise).toList(growable: false))`.",
+    "`listAll` (raw): return the store's values as `List<Map<String, dynamic>>`.",
+    "`listByQueryWithConverter`: accept every parameter the real api exposes (whereDescription, limit, etc.). For now, ignore the filter/sort and return the full materialised store after seeding-if-empty. Wrap the return path through a new private method `_applyQueryFilterAndSort({required String? whereDescription, required List<Map<String, dynamic>> input})` that currently returns `input` unchanged — this is the seam the query task will modify.",
+    "`listByQuery` (raw): equivalent raw variant returning maps.",
+    "`listBySearchTermWithConverter` / `listBySearchTerm`: same approach — delegate through `_applyQueryFilterAndSort`, return full store for now.",
+    "`docExists`: await latency + failure gate, then return whether `_store[id]` is non-null (without generating anything). Rationale: docExists is not a materialisation path, so it must not seed the store.",
+    "Add the createdAt spread helper to `_seedStoreIfNeeded` — for seeded entity i in [0, defaultCollectionSize), its createdAt is `DateTime.now().subtract(Duration(days: i))` and updatedAt matches createdAt unless an override produces something else.",
+    "Run `make analyze package=turbo_firestore_api` and the new unit tests."
+  ],
+  "goals": [
+    "Every read override returns realistic typed or raw results via TurboResponse.",
+    "Seeding happens exactly once on the first list/stream access.",
+    "Determinism preserved — a given seed produces the same ids, data, and order across runs.",
+    "`_applyQueryFilterAndSort` seam exists and is called from every query-capable read."
+  ],
+  "non_goals": [
+    "No query filter logic — the seam is in place but returns input unchanged.",
+    "No query sort logic — same seam.",
+    "No stream overrides — next task.",
+    "No write overrides — separate task.",
+    "No search semantics beyond the seam."
+  ],
+  "acceptance_criteria": [
+    "All read overrides listed in the spec are present with `@override` and correct signatures.",
+    "`make analyze package=turbo_firestore_api` passes.",
+    "Unit test: getByIdWithConverter twice in a row with the same id returns the same entity (first call seeds the single doc, second serves cached).",
+    "Unit test: listAllWithConverter returns exactly `defaultCollectionSize` entities on first call, and the same list on a second call.",
+    "Unit test: two instances with the same seed produce identical first-entity values (field-by-field equality).",
+    "Unit test: docExists returns false for an unseeded id and true after that id has been written via getByIdWithConverter.",
+    "Unit test: latency gate is observed — a call takes at least `dummyDelayDuration` to return.",
+    "Unit test: with `randomFailurePercentage = 100`, every read returns `TurboResponse.fail` with a real `TFirestoreException` subtype.",
+    "Unit test: seeded createdAt values are spread across distinct days — no two entities share a createdAt."
+  ],
+  "constraints": [
+    "No direct Firestore calls — the real `_firebaseFirestore` field is never read.",
+    "Helper `_applyQueryFilterAndSort` is a real method that exists from this task onwards; the query task will swap its body.",
+    "No workaround for the timestamp spread — use the same TTimestampType enum the real api uses where applicable.",
+    "Trailing commas, single quotes, const."
+  ],
+  "skills_to_read": [
+    "dev-conventions/conventions/apis.md",
+    "dev-conventions/conventions/results.md",
+    "dev-conventions/conventions/firestore-services.md",
+    "dev-conventions/conventions/unit-tests.md"
+  ],
+  "tools": [
+    "RepoPrompt MCP for reading the real TFirestoreApi read methods and their parameters",
+    "Edit",
+    "Bash for analyze + test"
+  ],
+  "verification": [
+    "make analyze package=turbo_firestore_api",
+    "cd turbo_firestore_api && dart test test/apis/t_dummy_firestore_api_reads_test.dart"
+  ],
+  "testing": {
+    "rules": "No mocks. Use a small synthetic DTO fixture defined inline in the test file. Inject `Random(42)` via the `seed` param for determinism. Avoid literal string comparisons on generated data — assert on structural properties (list length, uniqueness of ids, ordering by createdAt).",
+    "scenarios": [
+      "Given an empty store, When getByIdWithConverter is called with 'doc-1', Then a new entity is generated, stored, and returned; a second call returns the same instance.",
+      "Given an empty store, When listAllWithConverter is called, Then the store seeds with defaultCollectionSize entities and returns them; a second call returns the same list (same identities).",
+      "Given `randomFailurePercentage = 100`, When any read is called, Then the result is `TurboResponse.fail` with a TFirestoreException subtype.",
+      "Given `randomFailurePercentage = 0`, When any read is called on a seeded store, Then the call returns `TurboResponse.success`.",
+      "Given two api instances with the same seed + path, When listAllWithConverter is called on both, Then the entity lists are field-by-field equal.",
+      "Given a seeded store, When docExists is called for a known id, Then it returns true; for an unknown id, false.",
+      "Given the seam method `_applyQueryFilterAndSort`, When called from any list method, Then it is reachable via `@visibleForTesting` and currently returns its input untouched."
+    ],
+    "refactor_for_testability": "If the latency gate makes tests slow, set `dummyDelayDuration` to `Duration.zero` in test fixtures. Extract `_seedStoreIfNeeded` to `@visibleForTesting` if you need to call it directly."
+  },
+  "quality_bar": {
+    "maintainability": "Every override body is short — shared preamble (latency + failure roll) is a private helper.",
+    "dry": "Seeding logic lives in one place.",
+    "single_responsibility": "Reads do not mutate the store beyond first-access seeding or on-demand generation for getById.",
+    "performance": "Store lookups are O(1); list calls materialise via one pass; no unnecessary allocations.",
+    "abuse_resistance": "A failure roll of 100% short-circuits before any generation work, so runaway seeds cannot happen under failure."
+  },
+  "side_context": [
+    "Task 06 skeleton: TDummyFirestoreApi<T> uses factory + private constructor pattern. Factory validates args, captures _pathSnapshot, seeds Random, probes schema, builds registry. Private constructor assigns all fields via initializer list + explicit super() call.",
+    "Dummy-local copies exist for _fromJsonRequired, _createdAtFieldName, _updatedAtFieldName, _idFieldName because base class fields are library-private. Use these, not super's private fields.",
+    "Store is Map<String, Map<String, dynamic>> _store — raw JSON. Helpers available: _generateDocJson(id:) returns raw JSON map, _materialise(json) pipes through fromJson, _applyTimestamps(json:, type:) delegates to TTimestampType.add, _genDummyId() returns deterministic 'dummy_<path>_<counter>', _applyLatency() awaits configured delay, _rollFailureException(operationType:, id:, documentData:) returns TFirestoreException? or null.",
+    "_emitCollections() materialises all store values and fans out to _collectionControllers. _emitDoc(id, entity) fans out to _docControllers[id]. Both skip closed controllers.",
+    "Section headers in class body: constructor → DEPENDENCIES → STATE → UTIL → FETCHERS → HELPERS → MUTATORS → DISPOSE. Read overrides go in FETCHERS section.",
+    "dispose() added to _TFirestoreApiBase as no-op async method; dummy overrides it to close controllers.",
+    "16 @visibleForTesting top-level wrappers available for test access. Test runner: ~/Flutter/bin/flutter test (3.41.5).",
+    "_defaultCollectionSize, _queryFilters, _querySort are stored as dummy-local fields, ready for use by read/stream overrides.",
+    "_generateDocJson does NOT emit unresolved placeholder fields — current TDummySchema.fields only contains resolved fields. Unresolved field names are in schema.unresolved but have no type info for generation. Validate this is acceptable before generating documents for reads."
+  ],
+  "worklog": [
+    "Implemented 9 @override read methods on TDummyFirestoreApi<T> in the FETCHERS section: getByIdWithConverter, getById, listAllWithConverter, listAll, listByQueryWithConverter, listByQuery, listBySearchTermWithConverter, listBySearchTerm, docExists.",
+    "Every override follows the preamble: await _applyLatency() → _rollFailureException(operationType: TOperationType.read) → if non-null return TurboResponse.fail (or throw for docExists which returns bool). On success, serves from in-memory _store.",
+    "Added 6 private helpers: _getOrCreateStoredDoc (lazy single-doc generation without timestamps), _seedStoreIfNeeded (one-time collection seeding with createdAt spread across trailing days), _applyQueryFilterAndSort (identity seam for Task 12), _copyRawDoc (deep copy for raw variants), _rawStoreSnapshot (bulk deep copy), _cloneJsonValue (recursive value cloner).",
+    "Added _isCollectionGroupSnapshot field + constructor plumbing for collection-group assert parity with real API.",
+    "Added 2 @visibleForTesting wrappers: applyDummyQueryFilterAndSortForTesting, dummyStoreForTesting.",
+    "Added 3 new imports: turbo_response, t_search_term_type, collection_reference_def.",
+    "Seeded timestamps use explicit Timestamp.fromDate(now.subtract(Duration(days: i))) — cannot use TTimestampType.add because it always uses Timestamp.now().",
+    "Created test/apis/t_dummy_firestore_api_reads_test.dart with 12 BDD tests: single-doc caching, raw copy isolation, listAll seeding + stability, determinism across instances, docExists non-materializing, latency gate, 100% failure on TurboResponse reads, 100% failure throw on docExists, createdAt day spread, query seam identity, query closure non-invocation, empty collection size.",
+    "dart analyze --fatal-infos: 0 issues. flutter test: 62 tests passed (12 new + 50 existing)."
+  ]
+}

@@ -90,6 +90,14 @@
     "performance": "Single snapshot emission per commit avoids quadratic fan-out cost under big batches.",
     "abuse_resistance": "UnimplementedError on unstubbed methods makes missing coverage loud and fixable."
   },
-  "side_context": [],
+  "side_context": [
+    "Task 09 write overrides: createDoc, updateDoc, deleteDoc are now fully implemented on TDummyFirestoreApi<T>. createDocInBatch, updateDocInBatch, deleteDocInBatch throw UnimplementedError('Batch/transaction writes are not yet supported by TDummyFirestoreApi. This will be wired by the batch/transaction task.'). Replace these stub bodies with actual implementations.",
+    "_TDummyDocumentReference is a minimal placeholder implementing DocumentReference<Map<String, dynamic>> with id, path, firestore working. Everything else throws UnimplementedError. Task 11 will expand this.",
+    "Write preamble pattern: await _applyLatency() -> _rollFailureException(operationType: TOperationType.write/create/update/delete, id:, documentData:) -> validate() -> mutate _store -> _emitCollections() + _emitDoc() (instant, no latency). Follow this pattern for batch writes.",
+    "Shallow merge semantics for update: Map.of(existing)..addAll(updateJson). The id field is re-forced after merge via merged[_idFieldName] = id.",
+    "_firebaseFirestoreSnapshot field added to TDummyFirestoreApi<T> — holds the caller's FirebaseFirestore instance for _TDummyDocumentReference. Available for batch/transaction implementations.",
+    "ignore_for_file: subtype_of_sealed_class is already set at the top of t_dummy_firestore_api.dart for the _TDummyDocumentReference class.",
+    "Test runner: flutter test works. 82 tests passing. Write test file at test/apis/t_dummy_firestore_api_writes_test.dart."
+  ],
   "worklog": []
 }
