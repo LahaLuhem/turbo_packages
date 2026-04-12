@@ -1,6 +1,6 @@
 {
   "title": "Implement _TDummyWriteBatch and dummy runTransaction against the in-memory store",
-  "status": "todo",
+  "status": "done",
   "type": "feature",
   "phase": "7-batch-transaction-docref",
   "order": 10,
@@ -99,5 +99,19 @@
     "ignore_for_file: subtype_of_sealed_class is already set at the top of t_dummy_firestore_api.dart for the _TDummyDocumentReference class.",
     "Test runner: flutter test works. 82 tests passing. Write test file at test/apis/t_dummy_firestore_api_writes_test.dart."
   ],
-  "worklog": []
+  "worklog": [
+    "Implemented _TDummyWriteBatch<T> implements WriteBatch: queues mutation closures tagged with affected ids, commit() applies all in order then emits exactly one _emitCollections() + per-id _emitDoc(). Supported methods: set, update, delete, commit. Double-commit throws StateError with dummy-mode message.",
+    "Implemented _TDummyTransaction<T> implements Transaction: reads/writes _store directly inline within the handler. get() returns _TDummyDocumentSnapshot with id, reference, exists, data(). set/update/delete return this for chaining and track touched ids. runTransaction override emits once after handler completes.",
+    "Implemented _TDummyDocumentSnapshot<T> implements DocumentSnapshot<T>: minimal stub with id, reference, exists, data(). metadata and get() throw UnimplementedError with dummy-mode message.",
+    "Overrode writeBatch getter to return fresh _TDummyWriteBatch<T> bound to the api.",
+    "Overrode runTransaction<E>() to construct _TDummyTransaction, invoke handler, emit once for all touched ids, return handler result unchanged.",
+    "Replaced createDocInBatch/updateDocInBatch/deleteDocInBatch UnimplementedError stubs with real implementations that validate, resolve batch, enqueue closures, and return TWriteBatchWithReference.",
+    "Updated createDoc/updateDoc/deleteDoc to handle writeBatch and transaction parameters: writeBatch delegates to *InBatch + _commitDummyBatch; transaction mutates inline without emission; direct path preserves Task 09 latency+failure gate.",
+    "Added _commitDummyBatch helper (equivalent to base class _handleBatchOperation but accessible from dummy library).",
+    "Added _notFoundExceptionFor helper to DRY up not-found exception creation across direct/batch/transaction paths.",
+    "WriteBatch.update and Transaction.update accept Map<Object, Object?> per cloud_firestore 6.2.0 interface, cast to Map<String, dynamic> internally.",
+    "Created test/apis/t_dummy_firestore_api_batch_test.dart with 7 BDD tests covering: batch 3-create single emission, mixed batch create/update/delete, transaction update + return value passthrough, transaction single emission, double-commit StateError with dummy-mode, transaction return value unchanged, transaction get reads stored data.",
+    "Verification: dart analyze --fatal-infos 0 issues, flutter test 89 tests passed (7 new + 82 existing).",
+    "Test runner note: flutter test requires --no-pub flag and /Users/codaveto/Flutter/bin/flutter (3.41.5) due to workspace dependency resolution conflict with turbo_promptable."
+  ]
 }

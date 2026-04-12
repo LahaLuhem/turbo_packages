@@ -20,7 +20,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  get_it: ^9.2.1
   turbo_mvvm: ^1.2.0
+  turbo_notifiers: ^1.1.0
+  turbolytics: ^1.1.0
   shadcn_ui: ^0.53.5
 
   turbo_forms: ^1.0.2

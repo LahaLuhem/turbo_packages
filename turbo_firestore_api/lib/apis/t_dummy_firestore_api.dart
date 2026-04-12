@@ -1140,11 +1140,52 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
 
   // 🪄 MUTATORS ------------------------------------------------------------------------------ \\
 
-  /// Guidance message for batch/transaction write methods that are not yet
-  /// implemented in dummy mode.
-  static const _dummyBatchTransactionGuidance =
-      'Batch/transaction writes are not yet supported by TDummyFirestoreApi. '
-      'This will be wired by the batch/transaction task.';
+  // _dummyModeGuidance is intentionally on the API class so the private
+  // batch/transaction classes can reference it via their owning api.
+  static const _dummyModeGuidance = // ignore: unused_field
+      'dummy-mode: this WriteBatch/Transaction method is not stubbed; '
+      'override in feature wiring or add it to the dummy api.';
+
+  /// Commits a dummy batch response and returns the document reference.
+  ///
+  /// Equivalent to the base class's `_handleBatchOperation` but accessible
+  /// from the dummy library.
+  Future<TurboResponse<DocumentReference>> _commitDummyBatch(
+    TurboResponse<TWriteBatchWithReference<Map<String, dynamic>>>
+        batchResponse,
+  ) async {
+    return batchResponse.when(
+      success: (success) async {
+        await success.result.writeBatch.commit();
+        return TurboResponse.success(
+          result: success.result.documentReference,
+        );
+      },
+      fail: (fail) => TurboResponse.fail(error: fail.error),
+    );
+  }
+
+  @override
+  WriteBatch get writeBatch => _TDummyWriteBatch<T>._(api: this);
+
+  @override
+  Future<E> runTransaction<E>(
+    TransactionHandler<E> transactionHandler, {
+    Duration timeout = const Duration(seconds: 30),
+    int maxAttempts = 5,
+  }) async {
+    final txn = _TDummyTransaction<T>._(api: this);
+    final result = await transactionHandler(txn);
+    // Emit once for all mutations the handler performed.
+    if (txn._touchedIds.isNotEmpty) {
+      _emitCollections();
+      for (final id in txn._touchedIds) {
+        final stored = _store[id];
+        _emitDoc(id, stored != null ? _materialise(stored) : null);
+      }
+    }
+    return result;
+  }
 
   @override
   Future<TurboResponse<DocumentReference>> createDoc({
@@ -1165,6 +1206,55 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
       'collectionPathOverride containing all parent collection and document '
       'ids in order to make this method work.',
     );
+
+    // Batch path — delegate to batch helper then commit immediately.
+    if (writeBatch != null) {
+      final batchResponse = await createDocInBatch(
+        writeable: writeable,
+        id: id,
+        writeBatch: writeBatch,
+        createTimeStampType: createTimeStampType,
+        updateTimeStampType: updateTimeStampType,
+        merge: merge,
+        mergeFields: mergeFields,
+        collectionPathOverride: collectionPathOverride,
+      );
+      return _commitDummyBatch(batchResponse);
+    }
+
+    // Transaction path — mutate store inline, no emission (transaction
+    // finalisation emits once).
+    if (transaction != null) {
+      try {
+        final TurboResponse<DocumentReference>? invalidResponse =
+            writeable.validate();
+        if (invalidResponse != null && invalidResponse.isFail) {
+          return invalidResponse;
+        }
+        final effectiveId = id ?? _genDummyId();
+        final documentData = writeable.toJson();
+        final json = _applyTimestamps(
+          json: documentData,
+          type: createTimeStampType,
+        );
+        json[_idFieldName] = effectiveId;
+        _store[effectiveId] = Map<String, dynamic>.of(json);
+        if (transaction is _TDummyTransaction<T>) {
+          transaction._touchedIds.add(effectiveId);
+        }
+        return TurboResponse.success(
+          result: _TDummyDocumentReference(
+            id: effectiveId,
+            collectionPath: _pathSnapshot,
+            firestore: _firebaseFirestoreSnapshot,
+          ),
+        );
+      } catch (error) {
+        return TurboResponse.fail(error: error);
+      }
+    }
+
+    // Direct path — latency + failure gate + immediate emission.
     try {
       await _applyLatency();
       final documentData = writeable.toJson();
@@ -1220,6 +1310,58 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
       'collectionPathOverride containing all parent collection and document '
       'ids in order to make this method work.',
     );
+
+    // Batch path.
+    if (writeBatch != null) {
+      final batchResponse = await updateDocInBatch(
+        writeable: writeable,
+        id: id,
+        writeBatch: writeBatch,
+        timestampType: timestampType,
+        collectionPathOverride: collectionPathOverride,
+      );
+      return _commitDummyBatch(batchResponse);
+    }
+
+    // Transaction path — mutate inline, no emission.
+    if (transaction != null) {
+      try {
+        final documentData = writeable.toJson();
+        final existing = _store[id];
+        if (existing == null) {
+          return TurboResponse.fail(
+            error: _notFoundExceptionFor(id: id, documentData: documentData),
+          );
+        }
+        final TurboResponse<DocumentReference>? invalidResponse =
+            writeable.validate();
+        if (invalidResponse != null && invalidResponse.isFail) {
+          return invalidResponse;
+        }
+        final updateJson = _applyTimestamps(
+          json: documentData,
+          type: timestampType,
+        );
+        final merged = Map<String, dynamic>.of(existing);
+        merged.addAll(updateJson);
+        merged[_idFieldName] = id;
+        _store[id] = merged;
+        if (transaction is _TDummyTransaction<T>) {
+          transaction._touchedIds.add(id);
+        }
+        return TurboResponse.success(
+          result: _TDummyDocumentReference(
+            id: id,
+            collectionPath: _pathSnapshot,
+            firestore: _firebaseFirestoreSnapshot,
+          ),
+        );
+      } catch (error) {
+        return TurboResponse.fail(error: error);
+      }
+    }
+
+    // Direct path.
     try {
       await _applyLatency();
       final documentData = writeable.toJson();
@@ -1233,19 +1375,7 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
       final existing = _store[id];
       if (existing == null) {
         return TurboResponse.fail(
-          error: TurboFirestoreNotFoundException(
-            message: '[Dummy] ${TErrorCodes.notFoundMessage}',
-            path: _pathSnapshot,
-            id: id,
-            operationType: TOperationType.update,
-            documentData: documentData,
-            stackTrace: StackTrace.current,
-            originalException: FirebaseException(
-              plugin: 'cloud_firestore',
-              code: TErrorCodes.notFound,
-              message: TErrorCodes.notFoundMessage,
-            ),
-          ),
+          error: _notFoundExceptionFor(id: id, documentData: documentData),
         );
       }
 
@@ -1282,6 +1412,25 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
     }
   }
 
+  /// Creates a [TurboFirestoreNotFoundException] for the given [id].
+  TurboFirestoreNotFoundException _notFoundExceptionFor({
+    required String id,
+    Map<String, dynamic>? documentData,
+  }) =>
+      TurboFirestoreNotFoundException(
+        message: '[Dummy] ${TErrorCodes.notFoundMessage}',
+        path: _pathSnapshot,
+        id: id,
+        operationType: TOperationType.update,
+        documentData: documentData,
+        stackTrace: StackTrace.current,
+        originalException: FirebaseException(
+          plugin: 'cloud_firestore',
+          code: TErrorCodes.notFound,
+          message: TErrorCodes.notFoundMessage,
+        ),
+      );
+
   @override
   Future<TurboResponse<void>> deleteDoc({
     required String id,
@@ -1296,6 +1445,29 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
       'collectionPathOverride containing all parent collection and document '
       'ids in order to make this method work.',
     );
+
+    // Batch path.
+    if (writeBatch != null) {
+      final batchResponse = await deleteDocInBatch(
+        id: id,
+        writeBatch: writeBatch,
+        collectionPathOverride: collectionPathOverride,
+      );
+      return _commitDummyBatch(batchResponse).then(
+        (_) => const TurboResponse<void>.success(result: null),
+      );
+    }
+
+    // Transaction path — mutate inline, no emission.
+    if (transaction != null) {
+      _store.remove(id);
+      if (transaction is _TDummyTransaction<T>) {
+        transaction._touchedIds.add(id);
+      }
+      return const TurboResponse.success(result: null);
+    }
+
+    // Direct path.
     try {
       await _applyLatency();
       final failure = _rollFailureException(
@@ -1325,8 +1497,55 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
     bool merge = false,
     List<FieldPath>? mergeFields,
     String? collectionPathOverride,
-  }) =>
-      throw UnimplementedError(_dummyBatchTransactionGuidance);
+  }) async {
+    assert(
+      _isCollectionGroupSnapshot == (collectionPathOverride != null),
+      'Firestore does not support finding a document by id when communicating '
+      'with a collection group, therefore, you must specify the '
+      'collectionPathOverride containing all parent collection and document '
+      'ids in order to make this method work.',
+    );
+    try {
+      final TurboResponse<TWriteBatchWithReference<Map<String, dynamic>>>?
+          invalidResponse = writeable.validate();
+      if (invalidResponse != null && invalidResponse.isFail) {
+        return invalidResponse;
+      }
+
+      final batch = writeBatch is _TDummyWriteBatch<T>
+          ? writeBatch
+          : (writeBatch ?? this.writeBatch) as _TDummyWriteBatch<T>;
+
+      final effectiveId = id ?? _genDummyId();
+      final docRef = _TDummyDocumentReference(
+        id: effectiveId,
+        collectionPath: _pathSnapshot,
+        firestore: _firebaseFirestoreSnapshot,
+      );
+
+      final documentData = writeable.toJson();
+      batch._enqueue(
+        id: effectiveId,
+        apply: () {
+          final json = _applyTimestamps(
+            json: documentData,
+            type: createTimeStampType,
+          );
+          json[_idFieldName] = effectiveId;
+          _store[effectiveId] = Map<String, dynamic>.of(json);
+        },
+      );
+
+      return TurboResponse.success(
+        result: TWriteBatchWithReference(
+          writeBatch: batch,
+          documentReference: docRef,
+        ),
+      );
+    } catch (error) {
+      return TurboResponse.fail(error: error);
+    }
+  }
 
   @override
   Future<TurboResponse<TWriteBatchWithReference<Map<String, dynamic>>>>
@@ -1336,8 +1555,60 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
     WriteBatch? writeBatch,
     TTimestampType timestampType = TTimestampType.updatedAt,
     String? collectionPathOverride,
-  }) =>
-      throw UnimplementedError(_dummyBatchTransactionGuidance);
+  }) async {
+    assert(
+      _isCollectionGroupSnapshot == (collectionPathOverride != null),
+      'Firestore does not support finding a document by id when communicating '
+      'with a collection group, therefore, you must specify the '
+      'collectionPathOverride containing all parent collection and document '
+      'ids in order to make this method work.',
+    );
+    try {
+      final TurboResponse<TWriteBatchWithReference<Map<String, dynamic>>>?
+          invalidResponse = writeable.validate();
+      if (invalidResponse != null && invalidResponse.isFail) {
+        return invalidResponse;
+      }
+
+      final batch = writeBatch is _TDummyWriteBatch<T>
+          ? writeBatch
+          : (writeBatch ?? this.writeBatch) as _TDummyWriteBatch<T>;
+
+      final docRef = _TDummyDocumentReference(
+        id: id,
+        collectionPath: _pathSnapshot,
+        firestore: _firebaseFirestoreSnapshot,
+      );
+
+      final documentData = writeable.toJson();
+      batch._enqueue(
+        id: id,
+        apply: () {
+          final existing = _store[id];
+          if (existing == null) {
+            throw _notFoundExceptionFor(id: id, documentData: documentData);
+          }
+          final updateJson = _applyTimestamps(
+            json: documentData,
+            type: timestampType,
+          );
+          final merged = Map<String, dynamic>.of(existing);
+          merged.addAll(updateJson);
+          merged[_idFieldName] = id;
+          _store[id] = merged;
+        },
+      );
+
+      return TurboResponse.success(
+        result: TWriteBatchWithReference(
+          writeBatch: batch,
+          documentReference: docRef,
+        ),
+      );
+    } catch (error) {
+      return TurboResponse.fail(error: error);
+    }
+  }
 
   @override
   Future<TurboResponse<TWriteBatchWithReference<Map<String, dynamic>>>>
@@ -1345,8 +1616,40 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
     required String id,
     WriteBatch? writeBatch,
     String? collectionPathOverride,
-  }) =>
-      throw UnimplementedError(_dummyBatchTransactionGuidance);
+  }) async {
+    assert(
+      _isCollectionGroupSnapshot == (collectionPathOverride != null),
+      'Firestore does not support finding a document by id when communicating '
+      'with a collection group, therefore, you must specify the '
+      'collectionPathOverride containing all parent collection and document '
+      'ids in order to make this method work.',
+    );
+    try {
+      final batch = writeBatch is _TDummyWriteBatch<T>
+          ? writeBatch
+          : (writeBatch ?? this.writeBatch) as _TDummyWriteBatch<T>;
+
+      final docRef = _TDummyDocumentReference(
+        id: id,
+        collectionPath: _pathSnapshot,
+        firestore: _firebaseFirestoreSnapshot,
+      );
+
+      batch._enqueue(
+        id: id,
+        apply: () => _store.remove(id),
+      );
+
+      return TurboResponse.success(
+        result: TWriteBatchWithReference(
+          writeBatch: batch,
+          documentReference: docRef,
+        ),
+      );
+    } catch (error) {
+      return TurboResponse.fail(error: error);
+    }
+  }
 
   // 🎬 DISPOSE ------------------------------------------------------------------------------- \\
 
@@ -1373,6 +1676,225 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
 
     await super.dispose();
   }
+}
+
+// ---------------------------------------------------------------------------
+// _TDummyWriteBatch
+// ---------------------------------------------------------------------------
+
+/// A library-private dummy [WriteBatch] that queues mutation closures and
+/// applies them in order on [commit], emitting exactly one collection
+/// snapshot for the entire batch.
+class _TDummyWriteBatch<T> implements WriteBatch {
+  _TDummyWriteBatch._({required TDummyFirestoreApi<T> api}) : _api = api;
+
+  final TDummyFirestoreApi<T> _api;
+  final List<({String id, void Function() apply})> _queue = [];
+  bool _committed = false;
+
+  /// Enqueues a mutation closure tagged with its affected [id].
+  void _enqueue({required String id, required void Function() apply}) {
+    if (_committed) {
+      throw StateError(
+        'dummy-mode: WriteBatch has already been committed; '
+        'create a new batch for further operations.',
+      );
+    }
+    _queue.add((id: id, apply: apply));
+  }
+
+  @override
+  Future<void> commit() async {
+    if (_committed) {
+      throw StateError(
+        'dummy-mode: WriteBatch has already been committed; '
+        'create a new batch for further operations.',
+      );
+    }
+    _committed = true;
+
+    final appliedIds = <String>{};
+    for (final op in _queue) {
+      op.apply();
+      appliedIds.add(op.id);
+    }
+
+    // Single collection emission for the entire batch.
+    _api._emitCollections();
+    for (final id in appliedIds) {
+      final stored = _api._store[id];
+      _api._emitDoc(
+        id,
+        stored != null ? _api._materialise(stored) : null,
+      );
+    }
+  }
+
+  @override
+  void delete(DocumentReference<Object?> document) {
+    _enqueue(
+      id: document.id,
+      apply: () => _api._store.remove(document.id),
+    );
+  }
+
+  @override
+  void set<R>(DocumentReference<R> document, R data, [SetOptions? options]) {
+    if (data is! Map<String, dynamic>) {
+      throw UnimplementedError(
+        'dummy-mode: WriteBatch.set only accepts Map<String, dynamic> data.',
+      );
+    }
+    _enqueue(
+      id: document.id,
+      apply: () {
+        _api._store[document.id] = Map<String, dynamic>.of(data);
+      },
+    );
+  }
+
+  @override
+  void update(
+    DocumentReference<Object?> document,
+    Map<Object, Object?> data,
+  ) {
+    final castData = Map<String, dynamic>.from(data);
+    _enqueue(
+      id: document.id,
+      apply: () {
+        final existing = _api._store[document.id];
+        if (existing == null) {
+          throw _api._notFoundExceptionFor(
+            id: document.id,
+            documentData: castData,
+          );
+        }
+        final merged = Map<String, dynamic>.of(existing);
+        merged.addAll(castData);
+        merged[_api._idFieldName] = document.id;
+        _api._store[document.id] = merged;
+      },
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// _TDummyTransaction
+// ---------------------------------------------------------------------------
+
+/// A library-private dummy [Transaction] that reads and writes [_store]
+/// directly inside a [runTransaction] handler.
+///
+/// Mutations are applied inline (immediately visible within the handler).
+/// The [runTransaction] override emits once after the handler returns.
+class _TDummyTransaction<T> implements Transaction {
+  _TDummyTransaction._({required TDummyFirestoreApi<T> api}) : _api = api;
+
+  final TDummyFirestoreApi<T> _api;
+
+  /// Ids mutated during the handler — used by [runTransaction] for
+  /// post-handler emission.
+  final Set<String> _touchedIds = {};
+
+  @override
+  Future<DocumentSnapshot<R>> get<R extends Object?>(
+    DocumentReference<R> documentReference,
+  ) async {
+    return _TDummyDocumentSnapshot<R>._(
+      id: documentReference.id,
+      reference: documentReference,
+      data: _api._store[documentReference.id] as R?,
+      exists: _api._store.containsKey(documentReference.id),
+    );
+  }
+
+  @override
+  Transaction delete(DocumentReference<Object?> documentReference) {
+    _api._store.remove(documentReference.id);
+    _touchedIds.add(documentReference.id);
+    return this;
+  }
+
+  @override
+  Transaction set<R>(
+    DocumentReference<R> documentReference,
+    R data, [
+    SetOptions? options,
+  ]) {
+    if (data is! Map<String, dynamic>) {
+      throw UnimplementedError(
+        'dummy-mode: Transaction.set only accepts Map<String, dynamic> data.',
+      );
+    }
+    _api._store[documentReference.id] = Map<String, dynamic>.of(data);
+    _touchedIds.add(documentReference.id);
+    return this;
+  }
+
+  @override
+  Transaction update(
+    DocumentReference<Object?> documentReference,
+    Map<Object, Object?> data,
+  ) {
+    final castData = Map<String, dynamic>.from(data);
+    final existing = _api._store[documentReference.id];
+    if (existing == null) {
+      throw _api._notFoundExceptionFor(
+        id: documentReference.id,
+        documentData: castData,
+      );
+    }
+    final merged = Map<String, dynamic>.of(existing);
+    merged.addAll(castData);
+    merged[_api._idFieldName] = documentReference.id;
+    _api._store[documentReference.id] = merged;
+    _touchedIds.add(documentReference.id);
+    return this;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// _TDummyDocumentSnapshot
+// ---------------------------------------------------------------------------
+
+/// Minimal document snapshot stub returned by [_TDummyTransaction.get].
+class _TDummyDocumentSnapshot<T extends Object?>
+    implements DocumentSnapshot<T> {
+  const _TDummyDocumentSnapshot._({
+    required this.id,
+    required this.reference,
+    required T? data,
+    required this.exists,
+  }) : _data = data;
+
+  @override
+  final String id;
+
+  @override
+  final DocumentReference<T> reference;
+
+  @override
+  final bool exists;
+
+  final T? _data;
+
+  @override
+  T? data() => _data;
+
+  @override
+  SnapshotMetadata get metadata => throw UnimplementedError(
+        'dummy-mode: SnapshotMetadata is not available in dummy document '
+        'snapshots.',
+      );
+
+  @override
+  dynamic get(Object field) => throw UnimplementedError(
+        'dummy-mode: DocumentSnapshot.get is not available in dummy document '
+        'snapshots. Use data() instead.',
+      );
+
+  @override
+  dynamic operator [](Object field) => get(field);
 }
 
 // ---------------------------------------------------------------------------

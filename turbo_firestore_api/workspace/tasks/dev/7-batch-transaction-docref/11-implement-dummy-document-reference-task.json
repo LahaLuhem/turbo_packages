@@ -94,8 +94,12 @@
   },
   "side_context": [
     "Task 09 created a minimal _TDummyDocumentReference placeholder in lib/apis/t_dummy_firestore_api.dart. It implements DocumentReference<Map<String, dynamic>> with id, path, firestore working; everything else throws UnimplementedError. Expand this class with full dummy implementations as needed.",
-    "_TDummyDocumentReference constructor: const _TDummyDocumentReference({required String id, required String collectionPath, required FirebaseFirestore firestore}). Created by createDoc and updateDoc success paths.",
-    "ignore_for_file: subtype_of_sealed_class is already set at the top of the file."
+    "_TDummyDocumentReference constructor: const _TDummyDocumentReference({required String id, required String collectionPath, required FirebaseFirestore firestore}). Created by createDoc, updateDoc, createDocInBatch, updateDocInBatch, and deleteDocInBatch success paths.",
+    "ignore_for_file: subtype_of_sealed_class is already set at the top of the file.",
+    "Task 10 added _TDummyWriteBatch<T>, _TDummyTransaction<T>, and _TDummyDocumentSnapshot<T> to the same file. WriteBatch and Transaction now work end-to-end against the in-memory store.",
+    "createDoc/updateDoc/deleteDoc now handle writeBatch and transaction parameters: writeBatch delegates to *InBatch + _commitDummyBatch; transaction mutates inline and tracks touched ids for post-handler emission.",
+    "_TDummyDocumentSnapshot<T> is a minimal stub: id, reference, exists, data() work; metadata and get() throw UnimplementedError with dummy-mode message.",
+    "Test runner: /Users/codaveto/Flutter/bin/flutter test --no-pub works. 89 tests passing."
   ],
   "worklog": []
 }
