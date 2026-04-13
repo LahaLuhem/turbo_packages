@@ -1,23 +1,23 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:turbo_promptable/core/models/t_config.dart';
-import 'package:turbo_promptable/workspace/models/meta/t_meta_data.dart';
-import 'package:turbo_promptable/workspace/models/root/activity.dart';
-import 'package:turbo_promptable/workspace/models/root/checklist.dart';
-import 'package:turbo_promptable/workspace/models/root/instruction.dart';
-import 'package:turbo_promptable/workspace/models/root/template.dart';
-import 'package:turbo_promptable/workspace/models/root/tool.dart';
-import 'package:turbo_promptable/workspace/models/root/workflow.dart';
+import 'package:meta/meta.dart';
+import 'package:turbo_promptable/core/helpers/t_dart_render_helper.dart';
+import 'package:turbo_promptable/spawn/abstracts/t_spawnable.dart';
+import 'package:turbo_promptable/spawn/enums/t_cli_tool.dart';
+import 'package:turbo_promptable/spawn/enums/t_prompt_delivery.dart';
+import 'package:turbo_promptable/turbo_promptable.dart';
 
 part 'role.g.dart';
 
-/// A named role with [expertise] and optional [activities], [instructions],
-/// [tools], [workflows], [templates], and [checklists].
+/// A role that can be assigned to a [Persona] or [Agent], with specific expertise and capabilities.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
-class Role extends TPromptable {
+class Role extends TSpawnable {
   const Role({
     required super.name,
     super.metaData,
     super.config,
+    super.cliTool,
+    super.command,
+    super.promptDelivery,
     required this.expertise,
     this.activities,
     this.checklists,
@@ -63,4 +63,119 @@ class Role extends TPromptable {
     tools: tools ?? this.tools,
     workflows: workflows ?? this.workflows,
   );
+
+  // ⚡️ OVERRIDES ----------------------------------------------------------------------------- \\
+
+  @override
+  String toDart() => wrapStandaloneDartFile(
+    variableName: jsonKey,
+    expression: toDartInline(includeConst: false),
+  );
+
+  // 🧲 FETCHERS ------------------------------------------------------------------------------ \\
+
+  /// The Dart type name used in rendered constructor calls.
+  @protected
+  String get dartTypeName => 'Role';
+
+  /// Builds the list of named-argument lines shared across the spawnable
+  /// hierarchy (Role → Persona → Agent).
+  @protected
+  List<String?> buildDartNamedArgs(int indentLevel) => [
+    renderStringArg('name', name, indent: indentLevel + 1),
+    renderEnumArg(
+      'cliTool',
+      cliTool,
+      enumTypeName: 'TCliTool',
+      indent: indentLevel + 1,
+    ),
+    renderStringArg('command', command, indent: indentLevel + 1),
+    renderEnumArg(
+      'promptDelivery',
+      promptDelivery,
+      enumTypeName: 'TPromptDelivery',
+      indent: indentLevel + 1,
+    ),
+    renderStringArg('expertise', expertise, indent: indentLevel + 1),
+    renderExpressionListArg(
+      'activities',
+      activities
+          ?.map(
+            (a) => a.toDartInline(
+              indentLevel: indentLevel + 2,
+              includeConst: false,
+            ),
+          )
+          .toList(),
+      indent: indentLevel + 1,
+    ),
+    renderExpressionListArg(
+      'checklists',
+      checklists
+          ?.map(
+            (c) => c.toDartInline(
+              indentLevel: indentLevel + 2,
+              includeConst: false,
+            ),
+          )
+          .toList(),
+      indent: indentLevel + 1,
+    ),
+    renderExpressionListArg(
+      'instructions',
+      instructions
+          ?.map(
+            (i) => i.toDartInline(
+              indentLevel: indentLevel + 2,
+              includeConst: false,
+            ),
+          )
+          .toList(),
+      indent: indentLevel + 1,
+    ),
+    renderExpressionListArg(
+      'templates',
+      templates
+          ?.map(
+            (t) => t.toDartInline(
+              indentLevel: indentLevel + 2,
+              includeConst: false,
+            ),
+          )
+          .toList(),
+      indent: indentLevel + 1,
+    ),
+    renderExpressionListArg(
+      'tools',
+      tools
+          ?.map(
+            (t) => t.toDartInline(
+              indentLevel: indentLevel + 2,
+              includeConst: false,
+            ),
+          )
+          .toList(),
+      indent: indentLevel + 1,
+    ),
+    renderExpressionListArg(
+      'workflows',
+      workflows
+          ?.map(
+            (w) => w.toDartInline(
+              indentLevel: indentLevel + 2,
+              includeConst: false,
+            ),
+          )
+          .toList(),
+      indent: indentLevel + 1,
+    ),
+  ];
+
+  String toDartInline({int indentLevel = 0, bool includeConst = true}) =>
+      renderConstructorCall(
+        dartTypeName,
+        buildDartNamedArgs(indentLevel),
+        indentLevel: indentLevel,
+        includeConst: includeConst,
+      );
 }

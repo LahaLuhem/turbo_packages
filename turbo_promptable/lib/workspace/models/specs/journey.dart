@@ -3,6 +3,7 @@ import 'package:turbo_promptable/workspace/models/root/spec.dart';
 
 part 'journey.g.dart';
 
+/// An end-to-end user journey through the system.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class TJourney extends Spec {
   const TJourney({

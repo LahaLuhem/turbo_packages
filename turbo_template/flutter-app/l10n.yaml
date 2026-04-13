@@ -1,6 +1,0 @@
-arb-dir: lib/core/l10n
-template-arb-file: intl_en.arb
-output-localization-file: l10n.dart
-output-class: Strings
-output-dir: lib/core/generated
-nullable-getter: false

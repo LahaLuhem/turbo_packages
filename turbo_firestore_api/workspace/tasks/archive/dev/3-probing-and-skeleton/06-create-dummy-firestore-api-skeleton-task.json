@@ -63,7 +63,7 @@
     "No fake Firestore layer — this class simply does not touch `_firebaseFirestore` except by forwarding it to super.",
     "No workaround for the `Random` — determinism is mandatory.",
     "Follow class-structure section ordering exactly.",
-    "Do not write to or import anything from turbo_template or sibling packages."
+    "Do not write to or import anything from sibling packages."
   ],
   "skills_to_read": [
     "dev-conventions/conventions/apis.md",

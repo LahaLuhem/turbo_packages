@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' hide Type;
 import 'package:turbo_firestore_api/enums/t_operation_type.dart';
 import 'package:turbo_firestore_api/enums/t_search_term_type.dart';
 import 'package:turbo_firestore_api/enums/t_timestamp_type.dart';

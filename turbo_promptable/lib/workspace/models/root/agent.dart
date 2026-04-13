@@ -1,5 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:turbo_promptable/core/models/t_config.dart';
+import 'package:turbo_promptable/spawn/enums/t_cli_tool.dart';
+import 'package:turbo_promptable/spawn/enums/t_prompt_delivery.dart';
 import 'package:turbo_promptable/workspace/models/meta/t_meta_data.dart';
 import 'package:turbo_promptable/workspace/models/root/activity.dart';
 import 'package:turbo_promptable/workspace/models/root/checklist.dart';
@@ -27,6 +29,9 @@ class Agent extends Persona {
     super.templates,
     super.tools,
     super.workflows,
+    super.cliTool,
+    super.command,
+    super.promptDelivery,
   });
 
   Agent.fromPersona(
@@ -113,4 +118,9 @@ class Agent extends Persona {
   factory Agent.fromJson(Map<String, dynamic> json) => _$AgentFromJson(json);
   @override
   Map<String, dynamic> toJson() => _$AgentToJson(this);
+
+  // ⚡️ OVERRIDES ----------------------------------------------------------------------------- \\
+
+  @override
+  String get dartTypeName => 'Agent';
 }

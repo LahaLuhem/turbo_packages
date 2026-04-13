@@ -1,5 +1,8 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:turbo_promptable/core/helpers/t_dart_render_helper.dart';
 import 'package:turbo_promptable/core/models/t_config.dart';
+import 'package:turbo_promptable/spawn/enums/t_cli_tool.dart';
+import 'package:turbo_promptable/spawn/enums/t_prompt_delivery.dart';
 import 'package:turbo_promptable/workspace/models/meta/t_meta_data.dart';
 import 'package:turbo_promptable/workspace/models/root/activity.dart';
 import 'package:turbo_promptable/workspace/models/root/checklist.dart';
@@ -28,6 +31,9 @@ class Persona extends Role {
     super.templates,
     super.tools,
     super.workflows,
+    super.cliTool,
+    super.command,
+    super.promptDelivery,
     required this.identity,
   });
 
@@ -91,4 +97,15 @@ class Persona extends Role {
       _$PersonaFromJson(json);
   @override
   Map<String, dynamic> toJson() => _$PersonaToJson(this);
+
+  // ⚡️ OVERRIDES ----------------------------------------------------------------------------- \\
+
+  @override
+  String get dartTypeName => 'Persona';
+
+  @override
+  List<String?> buildDartNamedArgs(int indentLevel) => [
+    ...super.buildDartNamedArgs(indentLevel),
+    renderStringArg('identity', identity, indent: indentLevel + 1),
+  ];
 }

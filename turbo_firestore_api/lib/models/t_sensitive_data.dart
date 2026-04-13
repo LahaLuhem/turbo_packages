@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' hide Type;
 import 'package:turbo_firestore_api/turbo_firestore_api.dart';
 
 /// A model for encapsulating sensitive operation data for logging purposes

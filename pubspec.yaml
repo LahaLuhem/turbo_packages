@@ -12,14 +12,10 @@ workspace:
   - turbo_mvvm/example
   - turbo_notifiers
   - turbo_notifiers/example
-  - turbo_plx_cli
   - turbo_promptable
   - turbo_response
   - turbo_response/example
   - turbo_serializable
-  - turbo_template/flutter-app
-  - turbo_widgets
-  - turbo_widgets/example
 
   - turbolytics
   - turbolytics/example
@@ -72,32 +68,18 @@ melos:
       run: bash "$MELOS_ROOT_PATH/tool/pub_check.sh"
       exec:
         concurrency: 1
-      packageFilters:
-        ignore:
-          - turbo_flutter_template
       description: Validate packages meet 160/160 pub.dev points using pana
 
     pub-publish:
       run: bash "$MELOS_ROOT_PATH/tool/pub_publish.sh" --confirmed
       exec:
         concurrency: 1
-      packageFilters:
-        ignore:
-          - turbo_flutter_template
       description: Validate and publish packages to pub.dev (requires confirmation)
 
     pub-publish-dry-run:
       run: bash "$MELOS_ROOT_PATH/tool/pub_publish.sh" --dry-run
       exec:
         concurrency: 1
-      packageFilters:
-        ignore:
-          - turbo_flutter_template
       description: Validate packages for publishing without actually publishing (dry-run)
-dependencies:
-  cached_network_image: ^3.4.1
-  flutter_hooks: ^0.21.3+1
-  soft_edge_blur: ^0.1.3
-
 dependency_overrides:
   json_annotation: ^4.11.0

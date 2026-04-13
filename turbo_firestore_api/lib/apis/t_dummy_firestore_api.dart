@@ -1,11 +1,11 @@
-// ignore_for_file: subtype_of_sealed_class
+// ignore_for_file: subtype_of_sealed_class, undefined_hidden_name
 
 import 'dart:async';
 import 'dart:collection';
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' hide Type;
 import 'package:meta/meta.dart';
 import 'package:turbo_firestore_api/apis/t_firestore_api.dart';
 import 'package:turbo_firestore_api/constants/t_error_codes.dart';
@@ -2206,7 +2206,7 @@ class _TDummyDocumentSnapshot<T extends Object?>
 /// Supported members: [id], [path], [firestore], [get], [update], [delete],
 /// [set], [snapshots]. Unsupported members throw [UnimplementedError] with
 /// a dummy-mode guidance message.
-class _TDummyDocumentReference<R, T> implements DocumentReference<R> {
+class _TDummyDocumentReference<D, T> implements DocumentReference<D> {
   /// Creates a raw-mode reference returning `Map<String, dynamic>` data.
   _TDummyDocumentReference.raw({
     required TDummyFirestoreApi<T> api,
@@ -2237,7 +2237,7 @@ class _TDummyDocumentReference<R, T> implements DocumentReference<R> {
   FirebaseFirestore get firestore => _api._firebaseFirestoreSnapshot;
 
   @override
-  Future<DocumentSnapshot<R>> get([GetOptions? options]) async {
+  Future<DocumentSnapshot<D>> get([GetOptions? options]) async {
     await _api._applyLatency();
     final failure = _api._rollFailureException(
       operationType: TOperationType.read,
@@ -2247,7 +2247,7 @@ class _TDummyDocumentReference<R, T> implements DocumentReference<R> {
 
     final stored = _api._store[_id];
     if (stored == null) {
-      return _TDummyDocumentSnapshot<R>._(
+      return _TDummyDocumentSnapshot<D>._(
         id: _id,
         reference: this,
         data: null,
@@ -2255,9 +2255,9 @@ class _TDummyDocumentReference<R, T> implements DocumentReference<R> {
       );
     }
 
-    final R data =
-        (_isRaw ? _api._copyRawDoc(stored) : _api._materialise(stored)) as R;
-    return _TDummyDocumentSnapshot<R>._(
+    final D data =
+        (_isRaw ? _api._copyRawDoc(stored) : _api._materialise(stored)) as D;
+    return _TDummyDocumentSnapshot<D>._(
       id: _id,
       reference: this,
       data: data,
@@ -2292,7 +2292,7 @@ class _TDummyDocumentReference<R, T> implements DocumentReference<R> {
   }
 
   @override
-  Future<void> set(R data, [SetOptions? options]) {
+  Future<void> set(D data, [SetOptions? options]) {
     if (data is Map<String, dynamic>) {
       return _api._rawSetById(id: _id, data: data);
     }
@@ -2307,7 +2307,7 @@ class _TDummyDocumentReference<R, T> implements DocumentReference<R> {
   }
 
   @override
-  Stream<DocumentSnapshot<R>> snapshots({
+  Stream<DocumentSnapshot<D>> snapshots({
     bool includeMetadataChanges = false,
     ListenSource source = ListenSource.defaultSource,
   }) {
@@ -2315,21 +2315,21 @@ class _TDummyDocumentReference<R, T> implements DocumentReference<R> {
     // of being silently generated.
     return _api._createDocStream(_id, autoCreate: false).map((entity) {
       if (entity == null) {
-        return _TDummyDocumentSnapshot<R>._(
+        return _TDummyDocumentSnapshot<D>._(
           id: _id,
           reference: this,
           data: null,
           exists: false,
         );
       }
-      final R data =
+      final D data =
           (_isRaw
                   ? (_api._store[_id] != null
                         ? _api._copyRawDoc(_api._store[_id]!)
                         : null)
                   : entity)
-              as R;
-      return _TDummyDocumentSnapshot<R>._(
+              as D;
+      return _TDummyDocumentSnapshot<D>._(
         id: _id,
         reference: this,
         data: data,
@@ -2339,7 +2339,7 @@ class _TDummyDocumentReference<R, T> implements DocumentReference<R> {
   }
 
   @override
-  CollectionReference<R> get parent => throw UnimplementedError(
+  CollectionReference<D> get parent => throw UnimplementedError(
     'dummy-mode: DocumentReference.parent is not stubbed; '
     'if your feature needs it, extend _TDummyDocumentReference.',
   );
@@ -2363,7 +2363,7 @@ class _TDummyDocumentReference<R, T> implements DocumentReference<R> {
 
   @override
   bool operator ==(Object other) =>
-      other is _TDummyDocumentReference<R, T> &&
+      other is _TDummyDocumentReference<D, T> &&
       identical(_api, other._api) &&
       other._id == _id;
 

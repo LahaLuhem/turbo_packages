@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' hide Type;
 import 'package:turbo_firestore_api/constants/t_error_codes.dart';
 import 'package:turbo_firestore_api/enums/t_operation_type.dart';
 

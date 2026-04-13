@@ -27,11 +27,19 @@ Persona _$PersonaFromJson(Map<String, dynamic> json) => Persona(
   workflows: (json['workflows'] as List<dynamic>?)
       ?.map((e) => Workflow.fromJson(e as Map<String, dynamic>))
       .toList(),
+  cliTool: $enumDecodeNullable(_$TCliToolEnumMap, json['cliTool']),
+  command: json['command'] as String?,
+  promptDelivery:
+      $enumDecodeNullable(_$TPromptDeliveryEnumMap, json['promptDelivery']) ??
+      TPromptDelivery.system,
   identity: json['identity'] as String,
 );
 
 Map<String, dynamic> _$PersonaToJson(Persona instance) => <String, dynamic>{
   'name': instance.name,
+  'command': ?instance.command,
+  'cliTool': ?_$TCliToolEnumMap[instance.cliTool],
+  'promptDelivery': _$TPromptDeliveryEnumMap[instance.promptDelivery]!,
   'activities': ?instance.activities?.map((e) => e.toJson()).toList(),
   'checklists': ?instance.checklists?.map((e) => e.toJson()).toList(),
   'instructions': ?instance.instructions?.map((e) => e.toJson()).toList(),
@@ -40,4 +48,16 @@ Map<String, dynamic> _$PersonaToJson(Persona instance) => <String, dynamic>{
   'workflows': ?instance.workflows?.map((e) => e.toJson()).toList(),
   'expertise': instance.expertise,
   'identity': instance.identity,
+};
+
+const _$TCliToolEnumMap = {
+  TCliTool.claude: 'claude',
+  TCliTool.codex: 'codex',
+  TCliTool.cursor: 'cursor',
+};
+
+const _$TPromptDeliveryEnumMap = {
+  TPromptDelivery.system: 'system',
+  TPromptDelivery.file: 'file',
+  TPromptDelivery.chat: 'chat',
 };

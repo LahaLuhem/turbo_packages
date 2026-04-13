@@ -4,6 +4,7 @@ analyzer:
     implicit-casts: true
 
   errors:
+    undefined_hidden_name: ignore
     avoid_dynamic_calls: error
     missing_required_param: error
     missing_return: error

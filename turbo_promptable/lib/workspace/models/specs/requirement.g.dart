@@ -6,8 +6,23 @@ part of 'requirement.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-TRequirement _$TRequirementFromJson(Map<String, dynamic> json) =>
-    TRequirement(name: json['name'] as String);
+Requirement _$RequirementFromJson(Map<String, dynamic> json) => Requirement(
+  name: json['name'] as String,
+  abilityIds: (json['abilityIds'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
+  journeyIds: (json['journeyIds'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
+  scenarioIds: (json['scenarioIds'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
+);
 
-Map<String, dynamic> _$TRequirementToJson(TRequirement instance) =>
-    <String, dynamic>{'name': instance.name};
+Map<String, dynamic> _$RequirementToJson(Requirement instance) =>
+    <String, dynamic>{
+      'name': instance.name,
+      'abilityIds': ?instance.abilityIds,
+      'journeyIds': ?instance.journeyIds,
+      'scenarioIds': ?instance.scenarioIds,
+    };

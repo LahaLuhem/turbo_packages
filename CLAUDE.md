@@ -9,7 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Dart/Flutter monorepo managed by Melos containing 11 published packages and 1 production Flutter template app (`turbo_template`). All packages are published to pub.dev except `turbo_template`.
+Dart/Flutter monorepo managed by Melos containing 8 published packages. All packages are published to pub.dev.
 
 ## Commands
 
@@ -54,10 +54,7 @@ turbolytics             (standalone, GetIt service locator + logging)
 turbo_mvvm              (standalone, Provider-based MVVM)
 turbo_firestore_api     (turbo_response + turbo_serializable + turbo_notifiers + turbolytics)
 turbo_forms             (turbo_notifiers + turbolytics + shadcn_ui)
-turbo_widgets           (turbo_mvvm + turbo_forms + shadcn_ui)
 turbo_promptable        (turbo_serializable + turbo_response)
-turbo_plx_cli             (turbo_response)
-turbo_template          (all turbo packages + Firebase)
 ```
 
 ## Architecture Patterns
@@ -82,4 +79,4 @@ turbo_template          (all turbo packages + Firebase)
 - **Generated files excluded**: `*.g.dart`, `*.freezed.dart`, `*.mocks.dart` excluded from analysis, formatting, and coverage.
 - **Test frameworks**: `test` for pure Dart, `flutter_test` for Flutter, `gherkin_unit_test` for BDD (turbo_mvvm), `mockito` for mocking.
 - **Publishing**: Must pass `make pub-check` (160/160 pana score) before publishing. Scripts in `tool/`.
-- **UI framework**: ShadCN UI (`shadcn_ui`) for forms and widgets packages.
+- **UI framework**: ShadCN UI (`shadcn_ui`) for forms package.

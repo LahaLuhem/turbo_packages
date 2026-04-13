@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' hide Type;
 import 'package:meta/meta.dart';
 
 import 'package:turbo_firestore_api/generators/t_dummy_schema.dart';

@@ -38,7 +38,7 @@
   "non_goals": [
     "No new features.",
     "No public api changes to the real TFirestoreApi.",
-    "No changes to turbo_template or sibling packages.",
+    "No changes to sibling packages.",
     "No README rewrite."
   ],
   "acceptance_criteria": [

@@ -27,7 +27,7 @@
     "Keep class-level section header comments in sync with `dev-conventions/conventions/class-structure.md` ordering: constructor → DEPENDENCIES → STATE → UTIL → FETCHERS → HELPERS → MUTATORS → dispose.",
     "Update t_firestore_api.dart's `part` declarations if any part file name or boundary changes.",
     "Run `make analyze package=turbo_firestore_api` and `make test package=turbo_firestore_api` from the monorepo root. Both must pass with zero warnings and zero test failures.",
-    "Do not delete any existing test, do not add new tests, do not touch services/, do not touch turbo_template or any sibling package."
+    "Do not delete any existing test, do not add new tests, do not touch services/, do not touch any sibling package."
   ],
   "goals": [
     "Every method the dummy api will later need to override is a virtual instance method on class TFirestoreApi<T>.",

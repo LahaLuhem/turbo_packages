@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:turbo_promptable/core/helpers/t_dart_render_helper.dart';
 import 'package:turbo_promptable/workspace/models/meta/t_promptable.dart';
 import 'package:turbo_promptable/workspace/models/root/input.dart';
 import 'package:turbo_promptable/workspace/models/root/output.dart';
@@ -26,4 +27,48 @@ class Activity extends TPromptable {
       _$ActivityFromJson(json);
   @override
   Map<String, dynamic> toJson() => _$ActivityToJson(this);
+
+  // ⚡️ OVERRIDES ----------------------------------------------------------------------------- \\
+
+  @override
+  String toDart() => wrapStandaloneDartFile(
+    variableName: jsonKey,
+    expression: toDartInline(includeConst: false),
+  );
+
+  // 🧲 FETCHERS ------------------------------------------------------------------------------ \\
+
+  String toDartInline({int indentLevel = 0, bool includeConst = true}) =>
+      renderConstructorCall(
+        'Activity',
+        [
+          renderStringArg('name', name, indent: indentLevel + 1),
+          renderExpressionArg(
+            'input',
+            input.toDartInline(
+              indentLevel: indentLevel + 1,
+              includeConst: false,
+            ),
+            indent: indentLevel + 1,
+          ),
+          renderExpressionArg(
+            'output',
+            output.toDartInline(
+              indentLevel: indentLevel + 1,
+              includeConst: false,
+            ),
+            indent: indentLevel + 1,
+          ),
+          renderExpressionArg(
+            'workflow',
+            workflow.toDartInline(
+              indentLevel: indentLevel + 1,
+              includeConst: false,
+            ),
+            indent: indentLevel + 1,
+          ),
+        ],
+        indentLevel: indentLevel,
+        includeConst: includeConst,
+      );
 }

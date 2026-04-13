@@ -10,12 +10,9 @@ import 'package:turbo_serializable/turbo_serializable.dart';
 export 'package:turbo_promptable/core/models/t_render_type.dart';
 export 'package:turbo_promptable/workspace/enums/t_body_type.dart';
 
-part 't_promptable.g.dart';
-
 @JsonSerializable(
-  explicitToJson: true,
-  includeIfNull: false,
   createFactory: false,
+  createToJson: false,
 )
 /// Base class for all promptable models in the workspace.
 ///

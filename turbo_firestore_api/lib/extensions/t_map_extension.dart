@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' hide Type;
 
 /// Extension on [Map] that provides utility methods for working with Firestore documents.
 ///

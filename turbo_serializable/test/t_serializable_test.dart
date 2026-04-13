@@ -18,9 +18,9 @@ class _TestSerializable extends TSerializable {
 
   @override
   Map<String, dynamic> toJson() => {
-        'name': 'TestEntity',
-        'value': 42,
-      };
+    'name': 'TestEntity',
+    'value': 42,
+  };
 }
 
 void main() {

@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-04-13
+
+### Added
+* `TSpawnable` base class for promptable models that can be spawned as CLI processes
+* `TCliTool` enum for supported CLI tools (Claude Code, Cursor, Windsurf, etc.)
+* `TPromptDelivery` enum for prompt delivery methods (system, user, stdin, file)
+* Spawn module with `TFile`, `TFolder`, and `TSpawnConfig` models
+* New root models: `Activity`, `Agent`, `Checklist`, `Context`, `Goal`, `Input`, `Instruction`, `Issue`, `Output`, `Persona`, `PromptField`, `Role`, `Spec`, `Template`, `Tool`, `Workflow`
+* New spec models: `Mockup`, `Module`, `Prototype`, `Task` with cross-referencing via `Of*` interfaces
+* `TDartRenderHelper` mixin for rendering models as Dart constructor calls
+* `TDartStringHelper` for Dart-safe string escaping
+* Workspace abstracts: `OfAbilities`, `OfFeatures`, `OfIssues`, `OfJourneys`, `OfMockups`, `OfModules`, `OfPrds`, `OfProjects`, `OfPrototypes`, `OfScenarios`
+* `Project` context model
+* `Step` workflow model with ordering and substep support
+
+### Changed
+* **BREAKING**: Removed `TTask` root model — replaced by the richer `Task` spec model
+* **BREAKING**: Expanded `Role` from a simple model to a full spawnable with activities, checklists, instructions, templates, tools, and workflows
+* **BREAKING**: `Persona` and `Agent` now extend `TSpawnable` with CLI tool and command support
+* Enriched `Activity` with `persona`, `goal`, `input`, `output`, `context`, and `workflow` fields
+* Enriched `Input` with `format`, `constraints`, and `validations` fields
+* Enriched `Output` with `format`, `constraints`, `validations`, and `deliverables` fields
+* Enriched `Instruction` with `scope`, `priority`, `applicability`, and `examples` fields
+* Enriched spec models (`Ability`, `Feature`, `Requirement`, `Scenario`) with cross-referencing IDs
+
 ## [0.1.0] - 2026-04-10
 
 ### Added
