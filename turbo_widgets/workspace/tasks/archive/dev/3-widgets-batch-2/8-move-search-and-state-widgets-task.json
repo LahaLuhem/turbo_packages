@@ -1,0 +1,75 @@
+{
+  "title": "Move search and empty/error state widgets from pew_pew_plaza to turbo_widgets",
+  "status": "done",
+  "phase": 3,
+  "order": 8,
+  "category": "dev",
+  "description": "Move the search bar components, empty placeholder variants, and not-found placeholder. These are the search UI and empty/error state showcase widgets.",
+  "context": "**Search widgets** — pew_pew_plaza `lib/search/widgets/` → turbo_widgets `lib/src/widgets/search/`:\n- t_search_bar.dart — Search input with TCardShell wrapper, CMD+K shortcut, loading spinner. Imports: context_extension, TDurations, TCardShell, TProvider, t_search_loading_spinner.\n- t_search_filter_button.dart — Filter toggle with animated state. Imports: context_extension, TDurations, TCardShell, TProvider, shadcn_ui.\n- t_search_sort_button.dart — Sort toggle with animated state. Imports: context_extension, TDurations, TCardShell, TProvider, shadcn_ui.\n- t_search_loading_spinner.dart (supporting) — Animated loading dots. Imports: TProvider (TColors).\n\n**Empty Placeholder** — pew_pew_plaza `lib/core/ui/widgets/t_empty_placeholder/` → turbo_widgets `lib/src/widgets/states/t_empty_placeholder/`:\n\nThere are TWO versions in the directory:\n1. **t_empty_placeholder.dart** (old version) — imports l10n, t_image_seal, t_add_button, t_column, t_gap, t_image, t_margin. These are DEEPLY pew_pew_plaza-specific widgets.\n2. **t_empty_placeholder_big_cta.dart** (new version described in subject) — imports beam_button, dashed_border_painter, icon_glow_painter, subtitle/title/icon sections, TDurations, TThemeMode, TProvider, context_extension.\n\nThe new version (big_cta) and its sub-components have clean dependency chains. The old version has heavy app-specific deps.\n\nSub-components (all have clean deps):\n- dashed_border_painter.dart — Pure CustomPainter, Flutter only.\n- icon_glow_painter.dart — Pure CustomPainter, Flutter only.\n- t_empty_placeholder_icon_section.dart — Imports: context_extension, icon_glow_painter, TProvider.\n- t_empty_placeholder_subtitle_section.dart — Imports: FontFamily, context_extension, TThemeMode, TProvider.\n- t_empty_placeholder_title_section.dart — Imports: FontFamily, context_extension.\n\n**Decision for the old t_empty_placeholder.dart:** It depends on l10n, seals, and many app-specific widgets (t_add_button, t_column, t_gap, t_image, t_margin) that are NOT in the subject table and NOT being moved. Move it anyway but replace its heavy pew_pew_plaza imports: make those widgets constructor parameters or builder callbacks instead. OR — skip it and only move the big_cta version since that's what the subject describes.\n\n**Not Found Placeholder** — pew_pew_plaza `lib/core/ui/widgets/t_not_found_placeholder/` → turbo_widgets `lib/src/widgets/states/t_not_found_placeholder/`:\n- t_not_found_placeholder.dart — Wraps the old t_empty_placeholder and centers it. Imports: t_empty_placeholder, TProvider.",
+  "instructions": [
+    "Read the dev-conventions skill file: `~/.claude/skills/dev-conventions/conventions/components.md`",
+    "Update this task status to 'in-progress' immediately.",
+    "Read ALL source files from pew_pew_plaza listed above.",
+    "Read the OLD t_empty_placeholder.dart to understand its full dependency chain.",
+    "For the OLD t_empty_placeholder.dart: DO move it, but refactor its constructor to accept the app-specific widgets as parameters instead of importing them from pew_pew_plaza. Specifically: replace the hard-coded pew_pew_plaza widget imports (t_add_button, t_column, t_gap, t_image, t_margin, l10n, t_image_seal) with constructor parameters (Widget builders or direct Widget params) so pew_pew_plaza can pass them in at the call site. This is the ONE case where a minor API adjustment is necessary because the alternative (moving 7+ unrelated widgets) would be absurd.",
+    "For TNotFoundPlaceholder: it wraps the old t_empty_placeholder — adjust accordingly.",
+    "Move the big_cta version and all sub-components as-is with import fixes.",
+    "Move search widgets with import fixes. TCardShell comes from task 4's target paths.",
+    "Replace FontFamily.xxx with TFontFamilies.xxx via apply_edits (not by rewriting the file).",
+    "Do NOT add exports to the barrel file — task 9.",
+    "Do NOT modify pew_pew_plaza — task 10."
+  ],
+  "acceptance_criteria": [
+    "Search widgets (4 files) exist in lib/src/widgets/search/",
+    "Empty placeholder big_cta and all sub-components (6 files) exist in lib/src/widgets/states/t_empty_placeholder/",
+    "Old t_empty_placeholder.dart exists with parameterized constructor (no pew_pew_plaza widget imports)",
+    "TNotFoundPlaceholder exists in lib/src/widgets/states/t_not_found_placeholder/",
+    "No file imports anything from pew_pew_plaza",
+    "Search widgets reference TCardShell from turbo_widgets cards path",
+    "Big CTA references BeamButton from turbo_widgets buttons/beam_button path"
+  ],
+  "constraints": [
+    "CRITICAL: Use `cp` to copy source files from pew_pew_plaza to target paths, then use apply_edits to fix imports. NEVER rewrite files from scratch — agents hallucinate content when rewriting. Copy first, patch imports second.",
+    "Only the OLD t_empty_placeholder.dart gets an API change (parameterization) — everything else is a straight move",
+    "Do NOT move the 7+ unrelated pew_pew_plaza widgets (t_add_button, t_column, etc.)",
+    "Do NOT add barrel exports",
+    "Do NOT modify pew_pew_plaza"
+  ],
+  "goals": [
+    "Search and state widgets are self-contained in turbo_widgets",
+    "The old empty placeholder works via constructor injection instead of hard imports"
+  ],
+  "non_goals": [
+    "Refactoring search widgets",
+    "Moving t_add_button, t_column, t_gap, t_image, t_margin to turbo_widgets",
+    "Adding tests"
+  ],
+  "skills": [
+    "~/.claude/skills/dev-conventions/conventions/components.md"
+  ],
+  "source_files": {
+    "pew_pew_plaza": [
+      "lib/search/widgets/t_search_bar.dart",
+      "lib/search/widgets/t_search_filter_button.dart",
+      "lib/search/widgets/t_search_sort_button.dart",
+      "lib/search/widgets/t_search_loading_spinner.dart",
+      "lib/core/ui/widgets/t_empty_placeholder/t_empty_placeholder.dart",
+      "lib/core/ui/widgets/t_empty_placeholder/t_empty_placeholder_big_cta.dart",
+      "lib/core/ui/widgets/t_empty_placeholder/dashed_border_painter.dart",
+      "lib/core/ui/widgets/t_empty_placeholder/icon_glow_painter.dart",
+      "lib/core/ui/widgets/t_empty_placeholder/t_empty_placeholder_icon_section.dart",
+      "lib/core/ui/widgets/t_empty_placeholder/t_empty_placeholder_subtitle_section.dart",
+      "lib/core/ui/widgets/t_empty_placeholder/t_empty_placeholder_title_section.dart",
+      "lib/core/ui/widgets/t_not_found_placeholder/t_not_found_placeholder.dart"
+    ]
+  },
+  "depends_on": [1, 2, 3, 4, 5],
+  "blocks": [9],
+  "worklog": "Copied 12 files via cp, then patched imports with apply_edits. Files created: lib/src/widgets/search/t_search_bar.dart (5 import fixes), lib/src/widgets/search/t_search_filter_button.dart (4 import fixes), lib/src/widgets/search/t_search_sort_button.dart (4 import fixes), lib/src/widgets/search/t_search_loading_spinner.dart (1 import fix), lib/src/widgets/states/t_empty_placeholder/dashed_border_painter.dart (straight copy), lib/src/widgets/states/t_empty_placeholder/icon_glow_painter.dart (straight copy), lib/src/widgets/states/t_empty_placeholder/t_empty_placeholder_icon_section.dart (3 import fixes, t_provider split to t_colors+t_sizes), lib/src/widgets/states/t_empty_placeholder/t_empty_placeholder_subtitle_section.dart (4 import fixes + FontFamily→TFontFamilies), lib/src/widgets/states/t_empty_placeholder/t_empty_placeholder_title_section.dart (2 import fixes + FontFamily→TFontFamilies), lib/src/widgets/states/t_empty_placeholder/t_empty_placeholder_big_cta.dart (9 import fixes), lib/src/widgets/states/t_empty_placeholder/t_empty_placeholder.dart (PARAMETERIZED: removed 7 app-specific imports, replaced TMargin→padding param, TColumn→Column, TGap→SizedBox, TImage/TImageSvg/TImageSeal→imageWidget param, TAddButton→actionButtonBuilder param, removed inboxItems factory), lib/src/widgets/states/t_not_found_placeholder/t_not_found_placeholder.dart (2 import fixes). All diffs verified import-only except old t_empty_placeholder which was parameterized. Zero pew_pew_plaza imports.",
+  "on_complete": {
+    "update_status": "done",
+    "include_worklog": true,
+    "move_to": "workspace/tasks/archive/dev/3-widgets-batch-2/8-move-search-and-state-widgets-task.json",
+    "update_downstream_tasks": "Document the old t_empty_placeholder API changes so task 10 knows how to update pew_pew_plaza call sites."
+  }
+}

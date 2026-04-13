@@ -32,7 +32,7 @@ dependencies:
   rxdart: ^0.28.0
   shadcn_ui: ^0.53.5
   shake_gesture: ^2.0.0
-  smooth_sheets: ^0.16.0
+  smooth_sheets: ^1.0.0
   top_snackbar_flutter: ^3.3.0
   turbo_notifiers: ^1.1.0
   turbo_response: ^1.1.0
@@ -57,7 +57,7 @@ dev_dependencies:
   build_runner: ^2.4.14
   flutter_gen_runner: ^5.4.0
   flutter_lints: ^6.0.0
-  hive_ce_generator: ">=1.10.0 <1.11.0"
+  hive_ce_generator: ^1.11.1
   json_serializable: ^6.9.3
   mockito: ^5.4.5
   yaml: ^3.1.2

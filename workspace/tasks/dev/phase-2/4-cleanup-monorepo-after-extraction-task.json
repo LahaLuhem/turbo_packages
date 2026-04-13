@@ -1,0 +1,79 @@
+{
+  "title": "Clean up turbo_packages monorepo after package extraction",
+  "status": "todo",
+  "spec": "workspace/specs/monorepo-extraction/package-extraction/extraction-spec.json",
+  "phase": 2,
+  "order": 4,
+  "parallel_with": [],
+  "depends_on": [1, 2, 3],
+  "description": "Remove all workspace references, melos filter entries, and orphaned root dependencies related to turbo_widgets, turbo_template, and turbo_plx_cli from the turbo_packages monorepo. Update CLAUDE.md to reflect the reduced package set. The actual package directories are NOT deleted — the user will remove them manually after verifying the new repos work. This task ensures the monorepo builds and analyzes cleanly without the extracted packages.",
+  "context": "The turbo_packages monorepo's root pubspec.yaml has a 'workspace:' list that includes turbo_plx_cli, turbo_template/flutter-app, turbo_widgets, and turbo_widgets/example. These entries must be removed. The melos configuration in the same pubspec.yaml has packageFilters that ignore 'turbo_flutter_template' in pub-check, pub-publish, and pub-publish-dry-run scripts — these filter entries must be removed. The root pubspec.yaml also has three dependencies that are ONLY used by the extracted packages: cached_network_image (^3.4.1), flutter_hooks (^0.21.3+1), and soft_edge_blur (^0.1.3). These must be removed. The json_annotation dependency_override STAYS because turbo_promptable and turbo_serializable still use it. CLAUDE.md contains a project overview mentioning '11 published packages and 1 production Flutter template app' and a dependency hierarchy listing turbo_widgets, turbo_plx_cli, and turbo_template — these must be updated.",
+  "instructions": {
+    "before_starting": [
+      "Update this task's status to 'in-progress' immediately after reading it to prevent other agents from picking it up.",
+      "Read the spec file at workspace/specs/monorepo-extraction/package-extraction/extraction-spec.json for full context.",
+      "Verify that tasks 1, 2, and 3 (the three extraction tasks) are marked as 'done' in workspace/tasks/archive/dev/. If any are still in progress or todo, STOP and wait — this task depends on all three extractions being complete."
+    ],
+    "goals": [
+      "Root pubspec.yaml workspace list no longer references turbo_plx_cli, turbo_template/flutter-app, turbo_widgets, or turbo_widgets/example",
+      "Melos script packageFilters no longer reference turbo_flutter_template",
+      "Root dependencies section no longer includes cached_network_image, flutter_hooks, or soft_edge_blur",
+      "json_annotation dependency_override is preserved",
+      "CLAUDE.md project overview and dependency hierarchy are updated to reflect the reduced package set",
+      "make analyze passes on the monorepo",
+      "Changes are committed and pushed"
+    ],
+    "non_goals": [
+      "Do not delete the turbo_widgets/, turbo_template/, or turbo_plx_cli/ directories — they stay until the user manually removes them",
+      "Do not modify any other package's pubspec.yaml or source code",
+      "Do not touch the openspec/ directory or any archived change documents",
+      "Do not modify any Makefile or tool/ scripts unless they specifically reference the removed packages"
+    ],
+    "steps_overview": [
+      "Read the root pubspec.yaml thoroughly to understand the current state",
+      "Remove these entries from the workspace list: turbo_plx_cli, turbo_template/flutter-app, turbo_widgets, turbo_widgets/example",
+      "In the melos scripts section, find all packageFilters.ignore lists that contain 'turbo_flutter_template' and remove that entry from each list (pub-check, pub-publish, pub-publish-dry-run)",
+      "Remove from the dependencies section: cached_network_image, flutter_hooks, soft_edge_blur",
+      "KEEP the dependency_overrides section with json_annotation (^4.11.0) — it is still needed",
+      "Read CLAUDE.md and update: change '11 published packages and 1 production Flutter template app' to reflect the new count (8 published packages remaining: turbo_response, turbo_serializable, turbo_notifiers, turbolytics, turbo_mvvm, turbo_firestore_api, turbo_forms, turbo_promptable). Remove turbo_widgets, turbo_plx_cli, and turbo_template from the dependency hierarchy section.",
+      "Run 'dart pub get' at root to verify resolution",
+      "Run 'make analyze' to verify the monorepo analyzes cleanly",
+      "Commit with message 'chore: remove extracted packages from workspace (turbo_widgets, turbo_template, turbo_plx_cli)' and push"
+    ],
+    "acceptance_criteria": [
+      "Root pubspec.yaml workspace list has exactly these entries: turbo_firestore_api, turbo_firestore_api/example, turbo_forms, turbo_mvvm, turbo_mvvm/example, turbo_notifiers, turbo_notifiers/example, turbo_promptable, turbo_response, turbo_response/example, turbo_serializable, turbolytics, turbolytics/example",
+      "No melos packageFilters.ignore list contains 'turbo_flutter_template'",
+      "Root dependencies section does not contain cached_network_image, flutter_hooks, or soft_edge_blur",
+      "Root dependency_overrides section still contains json_annotation",
+      "CLAUDE.md project overview reflects 8 published packages, no template app",
+      "CLAUDE.md dependency hierarchy does not list turbo_widgets, turbo_plx_cli, or turbo_template",
+      "dart pub get at root succeeds",
+      "make analyze passes with zero issues",
+      "Changes are committed and pushed to main"
+    ],
+    "constraints": [
+      "Do not delete any directories — only modify configuration files and documentation",
+      "Do not change any version numbers or dependency constraints on remaining packages",
+      "Do not modify any package-level pubspec.yaml files — only the root pubspec.yaml",
+      "Preserve the exact formatting style of pubspec.yaml (indentation, spacing)"
+    ],
+    "verification": {
+      "commands": [
+        "cd /Users/codaveto/Repos/turbo_packages && dart pub get",
+        "cd /Users/codaveto/Repos/turbo_packages && make analyze",
+        "cd /Users/codaveto/Repos/turbo_packages && grep -c 'turbo_plx_cli\\|turbo_template\\|turbo_widgets\\|turbo_flutter_template' pubspec.yaml",
+        "cd /Users/codaveto/Repos/turbo_packages && grep 'cached_network_image\\|flutter_hooks\\|soft_edge_blur' pubspec.yaml"
+      ],
+      "expected_outcomes": [
+        "dart pub get and make analyze exit with code 0",
+        "grep for extracted package names in pubspec.yaml returns 0 matches",
+        "grep for removed dependencies returns 0 matches"
+      ]
+    },
+    "after_completion": [
+      "Update this task's status to 'done' and add a worklog entry describing what was done.",
+      "Move this task file to workspace/tasks/archive/dev/ using 'mv'.",
+      "Check if any remaining open tasks exist. If all tasks are archived, the extraction is complete."
+    ]
+  }
+}

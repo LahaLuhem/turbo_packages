@@ -1,0 +1,49 @@
+{
+  "title": "Verify both projects compile and analyze cleanly",
+  "status": "done",
+  "phase": 6,
+  "order": 11,
+  "category": "dev",
+  "description": "Final verification that turbo_widgets and pew_pew_plaza both compile, analyze cleanly, and that no moved widget is still owned locally by pew_pew_plaza. This is the gate before the work is considered done.",
+  "context": "After tasks 1-10, the full migration should be complete. This task runs verification across both projects to catch any remaining issues.\n\nturbo_widgets lives at: /Users/codaveto/Repos/turbo_packages/turbo_widgets\npew_pew_plaza lives at: /Users/codaveto/Repos/pew_pew_mono/pew_pew_plaza\n\nThe monorepo uses Melos for bootstrapping. turbo_widgets is part of the turbo_packages workspace.",
+  "instructions": [
+    "Update this task status to 'in-progress' immediately.",
+    "Read completed task worklogs from tasks 1-10 for context on what was done.",
+    "In turbo_widgets directory: run `flutter pub get` then `dart analyze --fatal-infos`.",
+    "In pew_pew_plaza directory: run `flutter pub get` then `dart analyze --fatal-infos`.",
+    "If either fails, investigate and fix the issues. Import path errors are the most likely problem — fix them in the appropriate project.",
+    "Verify no moved widget source files remain in pew_pew_plaza: grep for the original file paths and confirm they no longer exist.",
+    "Verify the barrel file (turbo_widgets.dart) exports all new files: count exports before vs after, confirm all new widget classes are accessible.",
+    "Run `make pub-check package=turbo_widgets` from the turbo_packages root if the Makefile supports it, to verify pana scoring.",
+    "Document the final state in the worklog."
+  ],
+  "acceptance_criteria": [
+    "`dart analyze --fatal-infos` passes in turbo_widgets with zero issues",
+    "`dart analyze --fatal-infos` passes in pew_pew_plaza with zero issues",
+    "No moved widget files exist in pew_pew_plaza (spot check at least 5 files)",
+    "All new widget classes are importable from `package:turbo_widgets/turbo_widgets.dart`"
+  ],
+  "constraints": [
+    "Only fix analysis errors — do not refactor or improve code",
+    "If pana check fails due to new dependencies, document it but do not block on it"
+  ],
+  "goals": [
+    "Both projects compile and analyze cleanly",
+    "Migration is verifiably complete"
+  ],
+  "non_goals": [
+    "Running the app to verify visual output",
+    "Writing tests",
+    "Publishing"
+  ],
+  "skills": [],
+  "handoff_from_task_10": "pew_pew_plaza rewire complete. All 50+ moved files deleted. ~200+ imports rewritten. dart analyze --fatal-infos passes with ZERO issues in pew_pew_plaza. turbo_widgets has pre-existing 60 emoji-related cascade issues from turbo_promptable test_api conflict (documented in task 9). Key structural changes: t_provider.dart is now a pure re-export barrel, t_theme_mode.dart uses turbo enum + local PewThemeDataExtension, context_extension.dart exports turbo TContextExtension + keeps only pew-specific helpers (strings/shell/popNavigator/tryPop), t_provider_builder.dart passes theme to TColors, t_empty_placeholder.dart is a local wrapper over turbo version with TAddButton default + inboxItems factory.",
+  "depends_on": [10],
+  "blocks": [],
+  "worklog": "Verification complete. (1) Fixed workspace-level pub get failure: turbo_promptable had test ^1.30.0 requiring test_api 0.7.10+ which conflicted with flutter_test's pinned test_api 0.7.7. Fixed by pinning test to 1.26.3 (uses test_api 0.7.7) and lowering json_serializable to >=6.9.0 <6.13.0 (compatible analyzer range). Same fix applied to turbo_serializable. (2) Fixed 2 directives_ordering info issues in t_emoji_picker_popover.dart. (3) Final results: dart analyze --fatal-infos passes with ZERO issues in both turbo_widgets and pew_pew_plaza. (4) Spot-checked 10 moved files — all confirmed deleted from pew_pew_plaza. (5) Barrel file exports 126 symbols from turbo_widgets.dart.",
+  "on_complete": {
+    "update_status": "done",
+    "include_worklog": true,
+    "move_to": "workspace/tasks/archive/dev/6-verification/11-verify-both-projects-compile-task.json"
+  }
+}

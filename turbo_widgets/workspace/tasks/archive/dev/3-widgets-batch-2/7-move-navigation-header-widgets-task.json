@@ -1,0 +1,73 @@
+{
+  "title": "Move navigation and header widgets from pew_pew_plaza to turbo_widgets",
+  "status": "done",
+  "phase": 3,
+  "order": 7,
+  "category": "dev",
+  "description": "Move the breadcrumbs, side nav bar, hero header, and view header widget families. These are navigation-oriented and page-header showcase widgets.",
+  "context": "Files to move:\n\n**Breadcrumbs** — pew_pew_plaza `lib/core/ui/widgets/t_breadcrumbs/` → turbo_widgets `lib/src/widgets/navigation/t_breadcrumbs/`:\n- t_breadcrumbs.dart — Animated breadcrumb path with enter/exit animations per segment. Imports: FontFamily, context_extension, TDurations, HoverBuilder. Contains _SegmentEntry, _BreadcrumbGhostButton, _BreadcrumbBackButton, _BreadcrumbRootButton, _BreadcrumbSegment, _NoScrollbarBehavior.\n- t_breadcrumbs_bar.dart — Blurred bar container for breadcrumbs. Imports: context_extension, TProvider (TSizes).\n\n**Side Nav Bar** — pew_pew_plaza `lib/core/ui/widgets/t_side_nav_bar/` → turbo_widgets `lib/src/widgets/navigation/t_side_nav_bar/`:\n- t_side_nav_bar.dart — Main sidebar with blur, corner brackets, beam divider. Imports: FontFamily, context_extension, TDurations, TBeamDivider, TProvider, t_side_nav_panel_corner_bracket.\n- NOTE: turbo_widgets already has `lib/src/widgets/navigation/t_side_nav_bar.dart` (single file). Read it to understand the difference. The pew_pew_plaza version is a directory with a single file. Decide whether to replace the existing file or place the new one alongside. If the existing one is a different widget, keep both. If it's the same widget, replace with the pew_pew_plaza version.\n\n**Hero Header** — pew_pew_plaza `lib/core/ui/widgets/t_hero_header.dart` → turbo_widgets `lib/src/widgets/headers/t_hero_header.dart`:\n- Dashboard hero section. Imports: FontFamily, context_extension, TMetricTile, TStatusIndicator. Contains _StatusBar, _Separator, _VersionSection, _VersionNumber, _VersionNumberPainter, _MetricsRow.\n\n**View Header** — pew_pew_plaza `lib/core/ui/widgets/t_view_header/` (8 files) → turbo_widgets `lib/src/widgets/headers/t_view_header/`:\n- t_view_header.dart — Main header. Imports: FontFamily, context_extension, TCardShell, TProvider, TViewHeaderEditButton, TViewHeaderGlowPainter, TViewHeaderMetaRow, TViewHeaderThumbnail, TViewHeaderTypeLabel, turbo_widgets (TDeviceType).\n- t_view_header_glow_painter.dart — CustomPainter. Pure Flutter imports only.\n- t_view_header_thumbnail_frame_painter.dart — CustomPainter. Pure Flutter imports only.\n- t_view_header_thumbnail.dart — Imports: t_emoji_picker_popover, TProvider, TViewHeaderThumbnailFramePainter.\n- t_view_header_type_label.dart — Imports: FontFamily, TProvider (TColors).\n- t_view_header_edit_button.dart — Imports: hover_icon_button.\n- t_view_header_location_button.dart — Imports: FontFamily.\n- t_view_header_meta_row.dart — Imports: FontFamily, TProvider, TViewHeaderLocationButton.",
+  "instructions": [
+    "Read the dev-conventions skill file: `~/.claude/skills/dev-conventions/conventions/components.md`",
+    "Update this task status to 'in-progress' immediately.",
+    "Read ALL source files from pew_pew_plaza listed above.",
+    "Read the EXISTING turbo_widgets `lib/src/widgets/navigation/t_side_nav_bar.dart` to understand if it conflicts with the pew_pew_plaza version.",
+    "Read turbo_widgets files from tasks 1-6 for correct import paths.",
+    "Use `cp` (Bash) to copy each source file to its target path, then use apply_edits to fix imports. NEVER rewrite files from scratch. Replace FontFamily.xxx with TFontFamilies.xxx via apply_edits.",
+    "THeroHeader imports TMetricTile and TStatusIndicator — those come from task 6 (content widgets). Use the turbo_widgets paths from task 6.",
+    "TViewHeaderThumbnail imports t_emoji_picker_popover — that comes from task 5 (interactive widgets). Use the turbo_widgets path from task 5.",
+    "For the side nav bar conflict: if the existing turbo_widgets file is a DIFFERENT widget, rename the pew_pew_plaza version (e.g., t_side_nav_bar_showcase.dart). If it's the SAME widget, replace it.",
+    "Do NOT add exports to the barrel file — task 9.",
+    "Do NOT modify pew_pew_plaza — task 10."
+  ],
+  "acceptance_criteria": [
+    "Breadcrumbs (2 files) exist in lib/src/widgets/navigation/t_breadcrumbs/",
+    "Side nav bar exists in lib/src/widgets/navigation/t_side_nav_bar/ (or resolved location)",
+    "THeroHeader exists in lib/src/widgets/headers/t_hero_header.dart",
+    "TViewHeader (8 files) exist in lib/src/widgets/headers/t_view_header/",
+    "No file imports anything from pew_pew_plaza",
+    "Cross-widget references (TMetricTile, TStatusIndicator, t_emoji_picker_popover, TCardShell, TBeamDivider, HoverBuilder, hover_icon_button) all point to turbo_widgets paths"
+  ],
+  "constraints": [
+    "CRITICAL: Use `cp` to copy source files from pew_pew_plaza to target paths, then use apply_edits to fix imports. NEVER rewrite files from scratch — agents hallucinate content when rewriting. Copy first, patch imports second.",
+    "Do NOT change widget APIs",
+    "Do NOT add barrel exports",
+    "Do NOT modify pew_pew_plaza",
+    "Handle the existing t_side_nav_bar.dart gracefully — do not destroy existing work"
+  ],
+  "goals": [
+    "All navigation and header showcase widgets are self-contained in turbo_widgets"
+  ],
+  "non_goals": [
+    "Refactoring header or navigation widgets",
+    "Merging the two side nav bar implementations",
+    "Adding tests"
+  ],
+  "skills": [
+    "~/.claude/skills/dev-conventions/conventions/components.md"
+  ],
+  "source_files": {
+    "pew_pew_plaza": [
+      "lib/core/ui/widgets/t_breadcrumbs/t_breadcrumbs.dart",
+      "lib/core/ui/widgets/t_breadcrumbs/t_breadcrumbs_bar.dart",
+      "lib/core/ui/widgets/t_side_nav_bar/t_side_nav_bar.dart",
+      "lib/core/ui/widgets/t_hero_header.dart",
+      "lib/core/ui/widgets/t_view_header/t_view_header.dart",
+      "lib/core/ui/widgets/t_view_header/t_view_header_glow_painter.dart",
+      "lib/core/ui/widgets/t_view_header/t_view_header_thumbnail_frame_painter.dart",
+      "lib/core/ui/widgets/t_view_header/t_view_header_thumbnail.dart",
+      "lib/core/ui/widgets/t_view_header/t_view_header_type_label.dart",
+      "lib/core/ui/widgets/t_view_header/t_view_header_edit_button.dart",
+      "lib/core/ui/widgets/t_view_header/t_view_header_location_button.dart",
+      "lib/core/ui/widgets/t_view_header/t_view_header_meta_row.dart"
+    ]
+  },
+  "depends_on": [1, 2, 3, 4, 5, 6],
+  "blocks": [9],
+  "worklog": "Copied 12 files via cp, then patched imports with apply_edits. Files created: lib/src/widgets/navigation/t_breadcrumbs/t_breadcrumbs.dart (4 import fixes + 3 FontFamily→TFontFamilies), lib/src/widgets/navigation/t_breadcrumbs/t_breadcrumbs_bar.dart (2 import fixes), lib/src/widgets/navigation/t_side_nav_bar/t_side_nav_bar.dart (6→7 import fixes + 3 FontFamily→TFontFamilies), lib/src/widgets/headers/t_hero_header.dart (4 import fixes + 6 FontFamily→TFontFamilies), lib/src/widgets/headers/t_view_header/t_view_header.dart (10 import fixes + 2 FontFamily→TFontFamilies), lib/src/widgets/headers/t_view_header/t_view_header_glow_painter.dart (straight copy), lib/src/widgets/headers/t_view_header/t_view_header_thumbnail_frame_painter.dart (straight copy), lib/src/widgets/headers/t_view_header/t_view_header_thumbnail.dart (3 import fixes), lib/src/widgets/headers/t_view_header/t_view_header_type_label.dart (3 import fixes), lib/src/widgets/headers/t_view_header/t_view_header_edit_button.dart (1 import fix), lib/src/widgets/headers/t_view_header/t_view_header_location_button.dart (2 import fixes), lib/src/widgets/headers/t_view_header/t_view_header_meta_row.dart (4 import fixes). Side nav bar conflict resolved: existing t_side_nav_bar.dart is a DIFFERENT widget (layout-agnostic with TButtonConfig map). Pew_pew version placed in subdirectory t_side_nav_bar/ — both coexist. All diffs verified import-only. Zero pew_pew_plaza imports.",
+  "on_complete": {
+    "update_status": "done",
+    "include_worklog": true,
+    "move_to": "workspace/tasks/archive/dev/3-widgets-batch-2/7-move-navigation-header-widgets-task.json",
+    "update_downstream_tasks": "Document how the side nav bar conflict was resolved. Add all file paths to task 9."
+  }
+}

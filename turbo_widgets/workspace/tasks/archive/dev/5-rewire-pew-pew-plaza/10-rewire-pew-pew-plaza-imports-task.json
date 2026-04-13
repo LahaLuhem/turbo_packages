@@ -1,0 +1,67 @@
+{
+  "title": "Rewire pew_pew_plaza to import moved widgets from turbo_widgets",
+  "status": "done",
+  "phase": 5,
+  "order": 10,
+  "category": "dev",
+  "description": "Update pew_pew_plaza to consume all moved widgets through turbo_widgets instead of its local copies. Delete the moved source files from pew_pew_plaza. Adjust the TProvider, context extension, and TThemeMode to work with the turbo_widgets versions. Ensure pew_pew_plaza compiles and runs identically to before the migration.",
+  "context": "pew_pew_plaza already depends on turbo_widgets in its pubspec.yaml. After tasks 1-9, all the moved widgets and infrastructure live in turbo_widgets.\n\nWhat needs to happen in pew_pew_plaza:\n\n1. **Delete moved widget files** — all files that were copied to turbo_widgets (tasks 3-8) should be deleted from pew_pew_plaza. The originals are no longer needed.\n\n2. **Delete moved infrastructure files** — the theme models (t_colors.dart, t_sizes.dart, t_texts.dart), t_decorations.dart, t_gradient.dart, t_durations.dart, color_extension.dart, text_style_extension.dart are now in turbo_widgets.\n\n3. **Restructure t_provider.dart** — The pew_pew_plaza TProvider currently uses `part` to include TColors, TSizes, TTexts, TDecorations. After the move:\n   - Remove the `part` directives\n   - Import the types from turbo_widgets instead\n   - OR replace the local TProvider entirely with `export 'package:turbo_widgets/turbo_widgets.dart' show TProvider, TColors, TSizes, ...`\n   - The pew_pew_plaza TProvider should become a thin re-export or extension of the turbo_widgets TProvider\n\n4. **Restructure TThemeMode** — The `themeData` getter (which builds ShadThemeData with app-specific fonts) stays in pew_pew_plaza as an extension on the turbo_widgets TThemeMode. Move the themeData getter and CustomColorScheme usage to an extension file.\n\n5. **Restructure context_extension.dart** — Keep only the pew_pew_plaza-specific parts (context.strings, GoRouter extensions). Import and re-export the turbo_widgets context extension for theme access.\n\n6. **Update ALL import statements** — Every file in pew_pew_plaza that imported a moved widget/type from local paths must now import from turbo_widgets. This is a mass find-and-replace operation.\n\n7. **Handle the old t_empty_placeholder API change** — Task 8 parameterized the old t_empty_placeholder constructor. Update call sites in pew_pew_plaza to pass the required widget parameters.\n\n8. **Verify** — Run `dart analyze --fatal-infos` and `flutter test` (if tests exist) on pew_pew_plaza.\n\nKey import rewrites:\n- `package:pew_pew_plaza/core/ui/widgets/t_card_shell.dart` → `package:turbo_widgets/turbo_widgets.dart` (or specific export)\n- `package:pew_pew_plaza/core/ui/widgets/t_provider.dart` → `package:turbo_widgets/turbo_widgets.dart` (for TColors, TSizes, etc.)\n- `package:pew_pew_plaza/core/ui/constants/t_durations.dart` → `package:turbo_widgets/turbo_widgets.dart`\n- `package:pew_pew_plaza/core/ui/widgets/color_extension.dart` → `package:turbo_widgets/turbo_widgets.dart`\n- etc. for all moved files\n\nDo NOT change what pew_pew_plaza exports to its own consumers — it should re-export the turbo_widgets types transparently.",
+  "instructions": [
+    "Read the dev-conventions skill files: `~/.claude/skills/dev-conventions/conventions/dependency-injection.md`, `~/.claude/skills/dev-conventions/conventions/extensions.md`",
+    "Update this task status to 'in-progress' immediately.",
+    "Read the completed task worklogs from tasks 1-9 to know exactly what was moved and any API changes made.",
+    "Read pew_pew_plaza's current file structure to identify ALL files that import moved types.",
+    "Start with infrastructure: restructure t_provider.dart to import from turbo_widgets instead of using part files. Remove part directives. Import TColors, TSizes, TTexts, TDecorations from turbo_widgets.",
+    "Create a pew_pew_plaza extension file for TThemeMode.themeData that lives locally (since it has app-specific font and ShadCN configuration). The TThemeMode enum itself comes from turbo_widgets.",
+    "Split context_extension.dart: keep GoRouter, l10n, and app-specific extensions locally. Import turbo_widgets context extension for theme access.",
+    "Do a mass import rewrite across all pew_pew_plaza files. Use grep to find all occurrences of moved import paths and replace them with turbo_widgets imports.",
+    "Delete the original source files that were moved (the pew_pew_plaza copies).",
+    "Update any t_empty_placeholder call sites to pass the now-required widget parameters.",
+    "Run `flutter pub get` then `dart analyze --fatal-infos` on pew_pew_plaza.",
+    "Fix ALL analysis errors iteratively until clean.",
+    "Run `flutter test` if test files exist in pew_pew_plaza."
+  ],
+  "acceptance_criteria": [
+    "No local copies of moved widgets remain in pew_pew_plaza",
+    "All imports of moved types now point to turbo_widgets",
+    "pew_pew_plaza's TProvider works by importing turbo_widgets types (no more part files for moved types)",
+    "TThemeMode.themeData getter lives as a local extension in pew_pew_plaza",
+    "context_extension.dart still provides context.strings, GoRouter extensions, etc. locally",
+    "context.colors, context.sizes, etc. work via turbo_widgets import",
+    "`flutter pub get` succeeds",
+    "`dart analyze --fatal-infos` passes with zero issues in pew_pew_plaza",
+    "App behavior is identical — zero visual or functional changes"
+  ],
+  "constraints": [
+    "CRITICAL: When moving or restructuring files, use `cp`/`mv` (Bash) to copy/move source files, then use apply_edits to fix imports. NEVER rewrite files from scratch — agents hallucinate content when rewriting. Copy first, patch second.",
+    "Do NOT change turbo_widgets files (those are done)",
+    "Do NOT change app behavior or visual output",
+    "Do NOT remove any pew_pew_plaza files that were NOT moved to turbo_widgets",
+    "Re-export turbo_widgets types from pew_pew_plaza where other pew_pew_plaza files expect them at old paths"
+  ],
+  "goals": [
+    "pew_pew_plaza is the consumer of turbo_widgets showcase widgets, not the owner",
+    "Zero behavioral regression"
+  ],
+  "non_goals": [
+    "Optimizing pew_pew_plaza imports beyond what's needed",
+    "Removing unused imports in files not affected by the migration",
+    "Adding tests to pew_pew_plaza"
+  ],
+  "skills": [
+    "~/.claude/skills/dev-conventions/conventions/dependency-injection.md",
+    "~/.claude/skills/dev-conventions/conventions/extensions.md"
+  ],
+  "source_project": "/Users/codaveto/Repos/pew_pew_mono/pew_pew_plaza",
+  "handoff_from_task_8": "The old TEmptyPlaceholder API was parameterized. Changes: (1) imageAsset:String? replaced by imageWidget:Widget? — callers must wrap their TImage/TImageSvg in a Widget and pass it. (2) TAddButton replaced by actionButtonBuilder:Widget Function(VoidCallback, String)? — callers pass a builder that creates their TAddButton. (3) TMargin replaced by padding:EdgeInsetsGeometry param (defaults to EdgeInsets.symmetric(horizontal:24)). (4) TColumn/TGap replaced by Column/SizedBox internally — no caller change needed. (5) inboxItems factory removed — must be recreated as an extension or factory in pew_pew_plaza.",
+  "handoff_from_task_9": "Barrel file (lib/turbo_widgets.dart) now has 115 exports covering all tasks 1-8 files. Three new pubspec deps added: mesh_gradient ^1.3.8, auto_size_text ^3.0.0, emoji_picker_flutter ^4.4.0. TSideNavBar name conflict resolved: original layout nav exported normally, showcase sidebar exported with `hide TSideNavBar` — consumers use `import 'package:turbo_widgets/src/widgets/navigation/t_side_nav_bar/t_side_nav_bar.dart'` for the showcase version directly. BLOCKER: workspace pub get fails due to turbo_promptable test_api conflict — emoji_picker_flutter cannot resolve. Fix turbo_promptable's `test: ^1.30.0` dep or exclude it from workspace resolution before running pub get. All non-emoji analysis passes cleanly.",
+  "depends_on": [1, 2, 3, 4, 5, 6, 7, 8, 9],
+  "blocks": [11],
+  "worklog": "Rewired pew_pew_plaza to consume all moved widgets/infrastructure from turbo_widgets. Changes: (1) t_provider.dart converted from class+part-file hub to pure re-export barrel (exports TProvider, TColors, TSizes, TTexts, TDecorations, TGradient, TData, TTools, TDeviceType, TBreakpointConfig, TFontFamilies + local t_theme.dart and t_theme_mode.dart). (2) t_theme.dart replaced with single re-export of turbo TTheme. (3) t_theme_mode.dart replaced local enum+CustomColorScheme with turbo re-exports + local PewThemeDataExtension keeping app-specific themeData getter with FontFamily.manrope/inter/jetBrainsMono ShadCN config. (4) context_extension.dart slimmed to pew-only helpers (strings, shell, popNavigator, tryPop, unfocus) + re-export of turbo TContextExtension. Removed all duplicated shared accessors. (5) t_provider_builder.dart updated to pass theme to turbo TColors constructor. (6) t_empty_placeholder.dart rewritten as local wrapper over turbo TEmptyPlaceholder — preserves TAddButton default styling via actionButtonBuilder, recreated inboxItems factory locally. (7) Deleted 50+ moved source files (infrastructure, widgets, search, placeholders). (8) Mass-rewrote ~200+ import statements from local paths to turbo_widgets. (9) Deduped turbo_widgets imports in 22 files. (10) Auto-fixed 62 unnecessary_import and directives_ordering issues via dart fix --apply. (11) Fixed 4 residual errors: t_welcome_message.dart relative color_extension import → turbo_widgets, slidable_management.dart context.vsync → Navigator.of(context). Final result: dart analyze --fatal-infos passes with ZERO issues in pew_pew_plaza.",
+  "on_complete": {
+    "update_status": "done",
+    "include_worklog": true,
+    "move_to": "workspace/tasks/archive/dev/5-rewire-pew-pew-plaza/10-rewire-pew-pew-plaza-imports-task.json",
+    "update_downstream_tasks": "Document all import changes and any remaining issues for task 11 verification."
+  }
+}

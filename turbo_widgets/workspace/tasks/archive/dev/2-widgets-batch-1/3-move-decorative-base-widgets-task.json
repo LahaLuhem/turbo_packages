@@ -1,0 +1,77 @@
+{
+  "title": "Move decorative base widgets from pew_pew_plaza to turbo_widgets",
+  "status": "done",
+  "phase": 2,
+  "order": 3,
+  "category": "dev",
+  "description": "Move the foundational decorative and utility widgets that other showcase widgets build upon. These are small, focused widgets with minimal internal cross-dependencies. They depend on the theme infrastructure from tasks 1-2 but not on other showcase widgets.",
+  "context": "These widgets are the building blocks that the card, header, and composite widgets import. They must be moved first so higher-level widgets can reference them.\n\nFiles to move from pew_pew_plaza `lib/core/ui/widgets/` to turbo_widgets `lib/src/widgets/decorative/`:\n- t_corner_brackets.dart — CustomPainter drawing L-shaped brackets. Imports: context_extension (context.colors.primary)\n- t_grid_background.dart — Full-screen grid + scanlines + glow + vignette via CustomPainter. Imports: context_extension (context.colors.primary)\n- t_staggered_entrance.dart — Fade + slide-up with stagger delay. Imports: TDurations only\n- t_beam_divider.dart — Sweeping light beam on a 1px line. Imports: TDurations, TSizes, TColors, context.colors\n\nFiles to move to `lib/src/widgets/buttons/`:\n- hover_builder.dart — Simple MouseRegion hover state wrapper + HoverWidgetBuilder typedef. No pew_pew imports.\n- hover_icon_button.dart — Animated icon button with hover color transitions. No pew_pew imports.\n\nFiles to move to `lib/src/widgets/misc/`:\n- cursor_preview.dart — Floating preview card with header + content. Imports: FontFamily, context.colors, TColors.primaryDark. Also contains PulsingDot widget.\n- t_side_nav_panel_corner_bracket.dart — Corner bracket for side nav panel. Imports: TProvider (TSizes, TColors).\n\nImport patterns to transform:\n- `package:pew_pew_plaza/core/state/extensions/context_extension.dart` → `package:turbo_widgets/src/extensions/t_context_extension.dart`\n- `package:pew_pew_plaza/core/ui/constants/t_durations.dart` → `package:turbo_widgets/src/constants/t_durations.dart`\n- `package:pew_pew_plaza/core/ui/widgets/t_provider.dart` → `package:turbo_widgets/src/theme/t_provider.dart` (for TColors, TSizes static access)\n- `package:pew_pew_plaza/core/generated/fonts.gen.dart` → `package:turbo_widgets/src/theme/t_font_families.dart` (replace FontFamily.xxx with TFontFamilies.xxx)",
+  "instructions": [
+    "Read the dev-conventions skill file: `~/.claude/skills/dev-conventions/conventions/components.md`",
+    "Update this task status to 'in-progress' immediately.",
+    "Read each source file from pew_pew_plaza listed above to understand its complete content and imports.",
+    "Read the theme files created by task 1 and extension files created by task 2 in turbo_widgets to know the correct import paths.",
+    "For each file, create the turbo_widgets version by: (a) copying the full content, (b) replacing all pew_pew_plaza imports with the correct turbo_widgets paths, (c) replacing FontFamily.xxx with TFontFamilies.xxx and adjusting the import.",
+    "Place files in the target directories listed above.",
+    "Do NOT add exports to the barrel file — task 9 handles that.",
+    "Do NOT modify pew_pew_plaza — task 10 handles that."
+  ],
+  "acceptance_criteria": [
+    "All 8 files exist in their target locations within turbo_widgets",
+    "No file imports anything from pew_pew_plaza",
+    "All cross-references use package:turbo_widgets/src/ paths",
+    "FontFamily references replaced with TFontFamilies",
+    "File contents are identical to originals except for import lines and FontFamily references"
+  ],
+  "constraints": [
+    "Do NOT change widget behavior, API surface, or visual output",
+    "Do NOT add exports to turbo_widgets.dart",
+    "Do NOT modify pew_pew_plaza",
+    "Preserve all class names, method signatures, and constructor parameters exactly"
+  ],
+  "goals": [
+    "Decorative base widgets are available in turbo_widgets for higher-level widgets to import"
+  ],
+  "non_goals": [
+    "Refactoring widgets",
+    "Adding tests",
+    "Improving code quality"
+  ],
+  "skills": [
+    "~/.claude/skills/dev-conventions/conventions/components.md"
+  ],
+  "source_files": {
+    "pew_pew_plaza": [
+      "lib/core/ui/widgets/t_corner_brackets.dart",
+      "lib/core/ui/widgets/t_grid_background.dart",
+      "lib/core/ui/widgets/t_staggered_entrance.dart",
+      "lib/core/ui/widgets/t_beam_divider.dart",
+      "lib/core/ui/widgets/hover_builder.dart",
+      "lib/core/ui/widgets/hover_icon_button.dart",
+      "lib/core/ui/widgets/cursor_preview.dart",
+      "lib/core/ui/widgets/t_side_nav_panel_corner_bracket.dart"
+    ]
+  },
+  "target_files": {
+    "turbo_widgets": [
+      "lib/src/widgets/decorative/t_corner_brackets.dart",
+      "lib/src/widgets/decorative/t_grid_background.dart",
+      "lib/src/widgets/decorative/t_staggered_entrance.dart",
+      "lib/src/widgets/decorative/t_beam_divider.dart",
+      "lib/src/widgets/buttons/hover_builder.dart",
+      "lib/src/widgets/buttons/hover_icon_button.dart",
+      "lib/src/widgets/misc/cursor_preview.dart",
+      "lib/src/widgets/misc/t_side_nav_panel_corner_bracket.dart"
+    ]
+  },
+  "depends_on": [1, 2],
+  "handoff_from_task_2": "Task 2 created: (1) lib/src/constants/t_durations.dart - import via package:turbo_widgets/src/constants/t_durations.dart. (2) lib/src/extensions/t_color_extension.dart - import via package:turbo_widgets/src/extensions/t_color_extension.dart (provides .onHover, .darken, .lighten, .onColor etc on Color). (3) lib/src/extensions/t_text_style_extension.dart - import via package:turbo_widgets/src/extensions/t_text_style_extension.dart. (4) lib/src/extensions/t_context_extension.dart - extension is named TContextExtension (not ContextExtension). Import via package:turbo_widgets/src/extensions/t_context_extension.dart. Provides context.colors, context.sizes, context.turboProvider etc. Note: context.theme is available for creating TTheme instances.",
+  "worklog": "Created 8 files. (1) lib/src/widgets/decorative/t_corner_brackets.dart — context_extension import replaced with t_context_extension. (2) lib/src/widgets/decorative/t_grid_background.dart — context_extension import replaced with t_context_extension. (3) lib/src/widgets/decorative/t_staggered_entrance.dart — t_durations import replaced with turbo_widgets path. (4) lib/src/widgets/decorative/t_beam_divider.dart — replaced context_extension, t_durations, and t_provider imports with t_context_extension, t_durations, t_colors, t_sizes. (5) lib/src/widgets/buttons/hover_builder.dart — straight copy, no pew_pew imports. (6) lib/src/widgets/buttons/hover_icon_button.dart — straight copy, no pew_pew imports. (7) lib/src/widgets/misc/cursor_preview.dart — replaced fonts.gen (FontFamily.jetBrainsMono) with TFontFamilies.jetBrainsMono, replaced context_extension with t_context_extension, replaced t_provider with t_colors for TColors.primaryDark static. (8) lib/src/widgets/misc/t_side_nav_panel_corner_bracket.dart — replaced t_provider with direct t_colors and t_sizes imports. Zero pew_pew_plaza imports verified.",
+  "blocks": [5, 6, 7, 8, 9],
+  "on_complete": {
+    "update_status": "done",
+    "include_worklog": true,
+    "move_to": "workspace/tasks/archive/dev/2-widgets-batch-1/3-move-decorative-base-widgets-task.json",
+    "update_downstream_tasks": "Add discovered import paths and any corrections to tasks 5-8."
+  }
+}

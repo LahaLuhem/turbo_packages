@@ -1,0 +1,79 @@
+{
+  "title": "Extract turbo_widgets to standalone GitHub repository",
+  "status": "todo",
+  "spec": "workspace/specs/monorepo-extraction/package-extraction/extraction-spec.json",
+  "phase": 1,
+  "order": 2,
+  "parallel_with": [1, 3],
+  "depends_on": [],
+  "description": "Create a new public GitHub repository for turbo_widgets and populate it with the package's current committed state from the monorepo. This extraction is moderately complex because turbo_widgets includes an example Flutter app that also needs its pubspec adjusted — specifically, the example app's dependency on turbo_widgets must change from a workspace-resolved version constraint to a path dependency (path: ../), which is the standard convention for pub.dev package examples.",
+  "context": "turbo_widgets is a Flutter package (v1.3.0) published to pub.dev. It provides reusable UI widgets, extensions, and animation utilities. It depends on four turbo packages (turbo_mvvm, turbo_notifiers, turbolytics, turbo_forms) plus external deps (flutter, get_it, shadcn_ui). It has an example/ directory containing a full Flutter app that demonstrates the widgets. Both the main package and the example app currently use 'resolution: workspace' in their pubspec.yaml files. The example app's turbo_widgets dependency must become 'path: ../' in the new repo so the example always uses the local source, while all other turbo dependencies stay as pub.dev ^version constraints.",
+  "instructions": {
+    "before_starting": [
+      "Update this task's status to 'in-progress' immediately after reading it to prevent other agents from picking it up.",
+      "Read the spec file at workspace/specs/monorepo-extraction/package-extraction/extraction-spec.json for full context on decisions and constraints."
+    ],
+    "goals": [
+      "A public GitHub repository at appboypov/turbo_widgets exists and contains the package",
+      "A local clone exists at ~/Repos/turbo_widgets",
+      "The main package resolves all dependencies from pub.dev (no workspace resolution)",
+      "The example app uses path: ../ for turbo_widgets and pub.dev for everything else",
+      "flutter analyze passes with zero warnings on the main package",
+      "flutter test passes with zero failures on the main package",
+      "The repo has been pushed to GitHub with an initial commit"
+    ],
+    "non_goals": [
+      "Do not set up CI/CD pipelines or GitHub Actions",
+      "Do not publish to pub.dev",
+      "Do not modify any files in the turbo_packages monorepo",
+      "Do not carry over git history — this is a clean start",
+      "Do not verify the example app builds (it has platform-specific setup that may need manual attention)"
+    ],
+    "steps_overview": [
+      "Create the GitHub repo using 'gh repo create appboypov/turbo_widgets --public --clone' in ~/Repos/",
+      "Copy the contents of turbo_packages/turbo_widgets/ to the new repo root, excluding: .dart_tool/, build/, coverage/, .DS_Store, *.iml, workspace/, firebase-debug.log, .flutter-plugins, .flutter-plugins-dependencies, .playwright-cli/",
+      "Edit pubspec.yaml: remove the 'resolution: workspace' line, update repository to https://github.com/appboypov/turbo_widgets, update homepage to https://github.com/appboypov/turbo_widgets, update issue_tracker to https://github.com/appboypov/turbo_widgets/issues",
+      "Edit example/pubspec.yaml: remove the 'resolution: workspace' line, change the turbo_widgets dependency from '^1.1.0' to 'path: ../'",
+      "Create a .gitignore appropriate for a Flutter package (exclude .dart_tool/, build/, coverage/, .DS_Store, *.iml, .flutter-plugins, .flutter-plugins-dependencies, workspace/)",
+      "Run 'flutter pub get' in the repo root to verify dependency resolution from pub.dev",
+      "Run 'flutter analyze' to verify zero warnings",
+      "Run 'flutter test' to verify all tests pass",
+      "Stage all files, commit with message 'feat: initial extraction from turbo_packages monorepo', push to main"
+    ],
+    "acceptance_criteria": [
+      "GitHub repo appboypov/turbo_widgets exists and is public",
+      "Local repo at ~/Repos/turbo_widgets has all package source, tests, example, and config",
+      "Main pubspec.yaml has no 'resolution: workspace' line",
+      "Main pubspec.yaml repository/homepage/issue_tracker URLs point to the new repo",
+      "example/pubspec.yaml has no 'resolution: workspace' line",
+      "example/pubspec.yaml has turbo_widgets dependency as 'path: ../'",
+      "flutter pub get resolves successfully without workspace",
+      "flutter analyze returns zero issues",
+      "flutter test returns zero failures",
+      "Main branch is pushed to GitHub with at least one commit"
+    ],
+    "constraints": [
+      "Do not modify any dependency version constraints on the main pubspec — they stay exactly as they are in the monorepo",
+      "The only dependency change is turbo_widgets in example/pubspec.yaml: from version constraint to path: ../",
+      "Do not add any files that don't exist in the monorepo package directory",
+      "Do not restructure the package layout — lib/, test/, example/ stay as-is"
+    ],
+    "verification": {
+      "commands": [
+        "cd ~/Repos/turbo_widgets && flutter pub get",
+        "cd ~/Repos/turbo_widgets && flutter analyze",
+        "cd ~/Repos/turbo_widgets && flutter test",
+        "gh repo view appboypov/turbo_widgets --json name,visibility"
+      ],
+      "expected_outcomes": [
+        "All commands exit with code 0",
+        "gh repo view shows visibility: PUBLIC"
+      ]
+    },
+    "after_completion": [
+      "Update this task's status to 'done' and add a worklog entry describing what was done.",
+      "Move this task file to workspace/tasks/archive/dev/ using 'mv'.",
+      "Check if any open tasks in workspace/tasks/dev/ would benefit from additional context based on what you learned (e.g., issues with flutter pub get resolution, .gitignore patterns needed). If so, append context to those tasks without changing their existing content."
+    ]
+  }
+}

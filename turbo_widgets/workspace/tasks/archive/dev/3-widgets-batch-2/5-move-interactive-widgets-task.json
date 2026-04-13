@@ -1,0 +1,69 @@
+{
+  "title": "Move interactive widgets from pew_pew_plaza to turbo_widgets",
+  "status": "done",
+  "phase": 3,
+  "order": 5,
+  "category": "dev",
+  "description": "Move the beam button, entity card, create card, and emoji picker widgets. These are the interactive showcase widgets with animations and user interaction. They depend on foundation widgets from tasks 3-4.",
+  "context": "Files to move:\n\n**Beam Button** — 3 files in pew_pew_plaza `lib/core/ui/widgets/beam_button/` → turbo_widgets `lib/src/widgets/buttons/beam_button/`:\n- beam_button.dart — Animated button with sweeping light beams. Imports: context_extension (context.colors), BeamButtonBorderRevealPainter, BeamLinePainter\n- beam_line_painter.dart — CustomPainter for sweeping beam on a line. No pew_pew imports.\n- beam_button_border_reveal_painter.dart — CustomPainter for border reveal on hover. No pew_pew imports.\n\n**Entity Card** — pew_pew_plaza `lib/core/ui/widgets/t_entity_card.dart` → turbo_widgets `lib/src/widgets/cards/t_entity_card.dart`:\n- Imports: FontFamily, context_extension, TDurations, cursor_preview, hover_icon_button, t_emoji_picker_popover, TProvider (TColors, TSizes)\n- Complex widget with spotlight, animated hover, press feedback, optional floating preview\n\n**Create Card** — pew_pew_plaza `lib/core/ui/widgets/t_create_card.dart` → turbo_widgets `lib/src/widgets/cards/t_create_card.dart`:\n- Needs reading from pew_pew_plaza\n\n**Emoji Picker** — pew_pew_plaza `lib/core/ui/widgets/t_emoji_picker_popover.dart` → turbo_widgets `lib/src/widgets/misc/t_emoji_picker_popover.dart`:\n- Imports: emoji_picker_flutter, context_extension, ShadCN, TProvider\n- Also imports t_category_view_with_search_on_left.dart and t_emoji_search_view.dart — these supporting files MUST also be moved.\n\n**Supporting files that must also move:**\n- t_category_view_with_search_on_left.dart → read to discover its imports\n- t_emoji_search_view.dart → read to discover its imports\n\nThese supporting files may have their own dependencies — read them and move whatever chain is needed.",
+  "instructions": [
+    "Read the dev-conventions skill file: `~/.claude/skills/dev-conventions/conventions/components.md`",
+    "Update this task status to 'in-progress' immediately.",
+    "Read ALL source files from pew_pew_plaza: beam_button/*.dart, t_entity_card.dart, t_create_card.dart, t_emoji_picker_popover.dart, t_category_view_with_search_on_left.dart, t_emoji_search_view.dart.",
+    "Chase any further pew_pew_plaza widget imports that t_category_view_with_search_on_left or t_emoji_search_view depend on. Move those too.",
+    "Read the turbo_widgets files created by tasks 1-4 to know correct import paths.",
+    "Use `cp` (Bash) to copy each source file to its target path, then use apply_edits to fix imports. NEVER rewrite files from scratch. Replace FontFamily.xxx with TFontFamilies.xxx via apply_edits.",
+    "Place beam_button/* in `lib/src/widgets/buttons/beam_button/`.",
+    "Place t_entity_card.dart and t_create_card.dart in `lib/src/widgets/cards/`.",
+    "Place emoji picker and its supporting files in `lib/src/widgets/misc/`.",
+    "Do NOT add exports to the barrel file — task 9.",
+    "Do NOT modify pew_pew_plaza — task 10."
+  ],
+  "acceptance_criteria": [
+    "BeamButton and its 2 painter files exist in lib/src/widgets/buttons/beam_button/",
+    "TEntityCard exists in lib/src/widgets/cards/",
+    "TCreateCard exists in lib/src/widgets/cards/",
+    "Emoji picker and ALL its supporting widgets exist in lib/src/widgets/misc/",
+    "No file imports anything from pew_pew_plaza",
+    "Internal widget cross-references use turbo_widgets paths (e.g., TEntityCard imports cursor_preview from turbo_widgets)"
+  ],
+  "constraints": [
+    "CRITICAL: Use `cp` to copy source files from pew_pew_plaza to target paths, then use apply_edits to fix imports. NEVER rewrite files from scratch — agents hallucinate content when rewriting. Copy first, patch imports second.",
+    "Do NOT change widget APIs or behavior",
+    "Do NOT add barrel exports",
+    "Do NOT modify pew_pew_plaza",
+    "Move ALL transitive pew_pew_plaza widget dependencies that the emoji picker chain requires"
+  ],
+  "goals": [
+    "All interactive showcase widgets are self-contained within turbo_widgets"
+  ],
+  "non_goals": [
+    "Refactoring the emoji picker",
+    "Making the emoji picker more generic",
+    "Adding tests"
+  ],
+  "skills": [
+    "~/.claude/skills/dev-conventions/conventions/components.md"
+  ],
+  "source_files": {
+    "pew_pew_plaza": [
+      "lib/core/ui/widgets/beam_button/beam_button.dart",
+      "lib/core/ui/widgets/beam_button/beam_line_painter.dart",
+      "lib/core/ui/widgets/beam_button/beam_button_border_reveal_painter.dart",
+      "lib/core/ui/widgets/t_entity_card.dart",
+      "lib/core/ui/widgets/t_create_card.dart",
+      "lib/core/ui/widgets/t_emoji_picker_popover.dart",
+      "lib/core/ui/widgets/t_category_view_with_search_on_left.dart",
+      "lib/core/ui/widgets/t_emoji_search_view.dart"
+    ]
+  },
+  "depends_on": [1, 2, 3, 4],
+  "blocks": [9],
+  "worklog": "Copied 8 files via cp, then patched imports with apply_edits. Files created: lib/src/widgets/buttons/beam_button/beam_button.dart (3 import fixes), lib/src/widgets/buttons/beam_button/beam_line_painter.dart (straight copy), lib/src/widgets/buttons/beam_button/beam_button_border_reveal_painter.dart (straight copy), lib/src/widgets/cards/t_entity_card.dart (7 import fixes + 4 FontFamily→TFontFamilies), lib/src/widgets/cards/t_create_card.dart (3 import fixes + 2 FontFamily→TFontFamilies), lib/src/widgets/misc/t_emoji_picker_popover.dart (4 import fixes), lib/src/widgets/misc/t_category_view_with_search_on_left.dart (straight copy), lib/src/widgets/misc/t_emoji_search_view.dart (straight copy). All diffs verified — only import lines and FontFamily→TFontFamilies changes. Zero pew_pew_plaza imports remain. No supporting files needed beyond the 2 emoji files listed in the task.",
+  "on_complete": {
+    "update_status": "done",
+    "include_worklog": true,
+    "move_to": "workspace/tasks/archive/dev/3-widgets-batch-2/5-move-interactive-widgets-task.json",
+    "update_downstream_tasks": "Record all supporting files that were moved beyond the listed ones. Add their paths to task 9 so they get exported."
+  }
+}
