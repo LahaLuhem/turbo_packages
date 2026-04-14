@@ -39,6 +39,7 @@ coverage/
 
 # Generated Flutter plugin dependencies
 .flutter-plugins-dependencies
+.flutter-plugins
 
 # Compiled test artifacts
 *.dill
