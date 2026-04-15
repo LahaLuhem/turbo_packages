@@ -13,7 +13,6 @@ class _TestSerializable extends TSerializable {
     super.yamlBuilder,
     super.mdFactory,
     super.xmlBuilder,
-    super.dartBuilder,
   });
 
   @override
@@ -24,65 +23,6 @@ class _TestSerializable extends TSerializable {
 }
 
 void main() {
-  // =========================================================================
-  // toDart()
-  // =========================================================================
-  group('TSerializable.toDart', () {
-    test(
-      'Given no dartBuilder and no override '
-      'when toDart is called '
-      'then it throws UnimplementedError',
-      () {
-        // Given
-        const sut = _TestSerializable();
-
-        // When / Then
-        expect(() => sut.toDart(), throwsA(isA<UnimplementedError>()));
-      },
-    );
-
-    test(
-      'Given a dartBuilder is provided '
-      'when toDart is called '
-      'then it returns the builder output',
-      () {
-        // Given
-        const expectedOutput = "const Role(name: 'Admin');";
-        final sut = _TestSerializable(
-          dartBuilder: (TWriteable writeable) => expectedOutput,
-        );
-
-        // When
-        final result = sut.toDart();
-
-        // Then
-        expect(result, equals(expectedOutput));
-      },
-    );
-
-    test(
-      'Given a dartBuilder is provided '
-      'when toDart is called '
-      'then the builder receives the serializable instance',
-      () {
-        // Given
-        TWriteable? receivedWriteable;
-        final sut = _TestSerializable(
-          dartBuilder: (TWriteable writeable) {
-            receivedWriteable = writeable;
-            return 'output';
-          },
-        );
-
-        // When
-        sut.toDart();
-
-        // Then
-        expect(receivedWriteable, same(sut));
-      },
-    );
-  });
-
   // =========================================================================
   // Regression — existing serialization methods still work after constructor
   // change.

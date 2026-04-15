@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-04-15
+
+### Changed
+* **BREAKING**: Remove Dart source rendering from workspace entities (per-entity emission methods, helper mixins/classes under `lib/core/helpers/`, and the dedicated rendering test file). JSON, YAML, Markdown, and XML serialization remain.
+* Document public members on `Ability` so pub.dev documentation scoring stays at or above the 20% API threshold.
+
 ## [0.2.0] - 2026-04-13
 
 ### Added

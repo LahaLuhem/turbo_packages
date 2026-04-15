@@ -20,6 +20,7 @@ class Skill extends Instruction {
   });
 
   factory Skill.fromJson(Map<String, dynamic> json) => _$SkillFromJson(json);
+
   @override
   Map<String, dynamic> toJson() => _$SkillToJson(this);
 }

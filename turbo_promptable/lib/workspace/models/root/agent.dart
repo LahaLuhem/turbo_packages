@@ -118,9 +118,4 @@ class Agent extends Persona {
   factory Agent.fromJson(Map<String, dynamic> json) => _$AgentFromJson(json);
   @override
   Map<String, dynamic> toJson() => _$AgentToJson(this);
-
-  // ⚡️ OVERRIDES ----------------------------------------------------------------------------- \\
-
-  @override
-  String get dartTypeName => 'Agent';
 }

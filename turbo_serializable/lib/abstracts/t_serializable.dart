@@ -6,7 +6,7 @@ import 'package:turbo_serializable/markdown/factories/t_md_factory.dart';
 /// Abstract base class providing serialization to multiple data formats.
 ///
 /// Extends [TWriteable] and provides convenience methods for converting
-/// the object into YAML, Markdown, XML, and Dart source representations.
+/// the object into YAML, Markdown, and XML representations.
 /// Requires concrete implementations to provide builder functions for
 /// each format they wish to support.
 abstract class TSerializable extends TWriteable {
@@ -14,7 +14,6 @@ abstract class TSerializable extends TWriteable {
     this.yamlBuilder,
     this.mdFactory,
     this.xmlBuilder,
-    this.dartBuilder,
   });
 
   /// Converts this object to a YAML string.
@@ -76,25 +75,4 @@ abstract class TSerializable extends TWriteable {
   /// set it externally, if applicable. If not provided, [toXml()] will throw.
   @JsonKey(includeFromJson: false, includeToJson: false)
   final String Function(TWriteable writeable, bool includeMeta)? xmlBuilder;
-
-  /// Converts this object to a Dart source code string.
-  ///
-  /// Uses [dartBuilder] to render the object as valid Dart source code.
-  /// Unlike other format methods, there is no generic fallback — subclasses
-  /// must either provide a [dartBuilder] or override this method directly.
-  ///
-  /// Throws [UnimplementedError] if no [dartBuilder] is provided and the
-  /// subclass does not override this method.
-  String toDart() =>
-      dartBuilder?.call(this) ??
-      (throw UnimplementedError(
-        'toDart() requires a dartBuilder or a subclass override.',
-      ));
-
-  /// Returns a function that builds a Dart source code string.
-  ///
-  /// Subclasses should override this getter to supply their Dart builder, or
-  /// set it externally, if applicable. If not provided, [toDart()] will throw.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  final String Function(TWriteable writeable)? dartBuilder;
 }

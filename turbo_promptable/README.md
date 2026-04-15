@@ -1,25 +1,21 @@
 # turbo_promptable
 
-Object-Oriented Prompting framework for the turbo ecosystem. Define AI agent prompts, roles, workflows, and tools as type-safe Dart objects.
+Object-Oriented Prompting framework for the turbo ecosystem. Define AI agent prompts, roles, workflows, and tools as type-safe Dart objects that serialize to JSON, YAML, Markdown, and XML.
 
 ## Features
 
-- TurboPromptable base class extending TurboSerializable
-- FrontmatterDto for structured metadata with custom values
-- ExportResult for export output
-- export() for single promptable export
-- 18 DTOs for organizational hierarchy (Team, Area, Role)
-- Knowledge DTOs (Collection, Instruction, Workflow, Reference, Template, RawBox, Activity, SubAgent, Repo)
-- Tool DTOs (API, Script) with method and parameter definitions
-- PersonaDto for agent identity
-- YAML frontmatter generation
-- Config inheritance across tree levels
+- Type-safe workspace models: `Role`, `Persona`, `Agent`, `Workflow`, `Step`, `Activity`, `Instruction`, `Input`, `Output`, `Goal`, `Issue`, `Context`, `Template`, `Tool`, and more
+- Spec models: `Ability`, `Feature`, `Requirement`, `Scenario`, `Journey`, `Task`, `Module`, `Mockup`, `Prototype`
+- Spawnable abstraction (`TSpawnable`) with CLI tool and prompt-delivery enums for launching agents against Claude Code, Cursor, Windsurf, and others
+- Cross-referencing abstracts (`OfAbilities`, `OfFeatures`, `OfIssues`, `OfJourneys`, `OfMockups`, `OfModules`, `OfPrds`, `OfProjects`, `OfPrototypes`, `OfScenarios`) for composing specs
+- JSON serialization on every model via `json_serializable`; YAML, Markdown, and XML output inherited from [`turbo_serializable`](https://pub.dev/packages/turbo_serializable)
+- Structured metadata (`TMetaData`) and body/config control (`TConfig`) on every promptable
 
 ## Installation
 
 ```yaml
 dependencies:
-  turbo_promptable: ^0.0.1
+  turbo_promptable: ^0.3.0
 ```
 
 ## Usage
@@ -27,151 +23,69 @@ dependencies:
 ```dart
 import 'package:turbo_promptable/turbo_promptable.dart';
 
-// Create a team structure using convenience parameters
-final team = TeamDto(
-  name: 'Engineering',
-  description: 'Engineering team',
-  body: (_) => 'Engineering team content',
-  areas: [
-    AreaDto(
-      name: 'Backend',
-      description: 'Backend area',
-      body: (_) => 'Backend area content',
-      roles: [
-        RoleDto(
-          name: 'API Developer',
-          description: 'API Developer role',
-          body: (_) => 'API Developer role content',
-          expertise: ExpertiseDto(
-            name: 'Backend Expertise',
-            description: 'Backend development expertise',
-            field: 'Backend',
-            specialization: 'API Development',
-            experience: '5 years',
-            body: (_) => 'Expertise content',
-          ),
-        ),
-      ],
+const instruction = Instruction(
+  name: 'Code Quality',
+  rules: ['No unused imports', 'All public API must have dartdoc'],
+  principles: ['Clarity over cleverness'],
+);
+
+const workflow = Workflow(
+  name: 'Review Workflow',
+  steps: [
+    Step(
+      name: 'Analyse',
+      input: Input(
+        name: 'Source Code',
+        request: 'Analyse the provided source code for quality issues.',
+      ),
+      instructions: [instruction],
+      output: Output(name: 'Analysis Report'),
     ),
   ],
 );
 
-// Generate frontmatter
-final frontmatter = team.exportMetaData();
-// ---
-// name: Engineering
-// description: Engineering team
-// ---
+const role = Role(
+  name: 'Code Reviewer',
+  expertise: 'Static analysis and code quality',
+  instructions: [instruction],
+  workflows: [workflow],
+);
 
-// Export single promptable
-final result = team.export(null);
-print(result?.value);
+final agent = Agent.fromRole(
+  role,
+  identity: 'A meticulous reviewer focused on maintainability.',
+);
+
+print(agent.toJson());
 ```
 
-## FrontmatterDto
+## Core Concepts
 
-All DTOs accept `name` and `description` as convenience parameters. Use `metaData` for custom values or to override:
+### TPromptable
 
-```dart
-// Simple usage - name and description only
-final instruction = InstructionDto(
-  name: 'Code Review',
-  description: 'How to review code',
-  body: (_) => 'Review code thoroughly...',
-);
+Every workspace model extends `TPromptable`, which itself extends `TSerializable` from `turbo_serializable`. Models have:
 
-// With custom values via metaData
-final instruction = InstructionDto(
-  name: 'Code Review',
-  description: 'How to review code',
-  metaData: {'priority': 'high', 'category': 'process'},
-  body: (_) => 'Review code thoroughly...',
-);
-// Result: name='Code Review', description='How to review code', priority='high', category='process'
+- `name` — required identifier
+- `metaData` — optional `TMetaData` for frontmatter (description, tags, etc.)
+- `config` — optional `TConfig` for body rendering and inheritance
 
-// metaData overrides name/description when both are provided
-final instruction = InstructionDto(
-  name: 'Code Review',           // ignored
-  metaData: {
-    'name': 'PR Review',           // takes precedence
-    'description': 'How to review PRs',
-    'priority': 'high',
-  },
-  body: (_) => 'Review code thoroughly...',
-);
-// Result: name='PR Review', description='How to review PRs', priority='high'
+### Roles, Personas, and Agents
 
-// Generate frontmatter includes custom values
-final frontmatter = instruction.generateFrontmatter();
-// ---
-// name: PR Review
-// description: How to review PRs
-// priority: high
-// ---
-```
+- `Role` — a capability bundle with expertise, activities, checklists, instructions, templates, tools, and workflows
+- `Persona` — a `Role` augmented with an `identity` string
+- `Agent` — a spawnable `Persona` with CLI tool and command targeting, constructible via `Agent.fromRole(...)` or `Agent.fromPersona(...)`
 
-## Export Configuration
+### Workflows and Steps
 
-Control how promptables are exported with `ExportConfig`:
+A `Workflow` contains an ordered list of `Step`s. Each `Step` has an `Input`, optional `Instruction`s, and an `Output`.
 
-```dart
-final role = RoleDto(
-  name: 'Developer',
-  description: 'Developer role',
-  body: (_) => 'Developer role content',
-  expertise: ExpertiseDto(
-    name: 'Development Expertise',
-    description: 'Development expertise',
-    field: 'Software',
-    specialization: 'Full Stack',
-    experience: '3 years',
-    body: (_) => 'Expertise content',
-  ),
-  exportConfig: const ExportConfig(
-    shouldExport: true,
-    fileExtension: 'md',
-    bodyType: BodyType.markdown,
-    path: '.',
-    fileName: 'developer-role',
-  ),
-);
+### Specs
 
-// Export single promptable
-final result = role.export(null);
-print(result?.combined); // frontmatter + body
+Spec models (`Ability`, `Feature`, `Requirement`, `Scenario`, `Journey`, `Task`, `Module`, `Mockup`, `Prototype`) describe intended behaviour and deliverables. They cross-reference each other via the `Of*` abstracts exported from `workspace/abstracts/`.
 
-// Resolve config with parent inheritance
-final resolved = role.resolveConfig(parentConfig);
-```
+### Spawnable
 
-## DTOs
-
-### Hierarchy
-
-- `TeamDto` - Top-level organizational unit containing areas
-- `AreaDto` - Domain within a team containing roles
-- `RoleDto` - Specialist role within an area containing knowledge items
-
-### Knowledge
-
-- `CollectionDto` - Lists of items
-- `InstructionDto` - How-to guides and behavioral rules
-- `WorkflowDto` - Step-by-step processes
-- `ReferenceDto` - Static documentation with optional URL
-- `TemplateDto` - Reusable patterns with variables
-- `RawBoxDto` - Raw input materials
-- `ActivityDto` - AI commands with prompt and model
-- `SubAgentDto` - AI agents with role assignment
-- `RepoDto` - Repository references with path and URL
-
-### Tools
-
-- `ApiDto` - HTTP/REST API tools
-- `ScriptDto` - Executable script tools with input/output types
-
-### Identity
-
-- `PersonaDto` - Agent identity with traits, tone, and constraints
+`TSpawnable` (used by `Role`, `Persona`, `Agent`) carries `cliTool` (`TCliTool`), `command`, and `promptDelivery` (`TPromptDelivery`) for orchestrating agent launches across tools like Claude Code, Cursor, Windsurf, and custom CLIs.
 
 ## License
 

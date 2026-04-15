@@ -5,11 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.2] - 2026-04-15
+
+### Fixed
+- Exclude stray `pubspec.yaml.workspace` from the published tarball (via `.pubignore`) so consumers do not receive backup artifacts.
+
+## [0.4.1] - 2026-04-15
+
+### Fixed
+- Remove `resolution: workspace` from the published pubspec so pub.dev clients and `pana` downgrade tests can resolve this package (workspace-only metadata must not appear in published artifacts).
+
+## [0.4.0] - 2026-04-15
+
+### Changed
+- **BREAKING**: Remove Dart source rendering from `TSerializable` (optional emitter hook and related constructor wiring). JSON, YAML, Markdown, and XML output are unchanged.
+
 ## [0.3.2] - 2026-04-13
 
-### Added
-* `toDart()` method on `TSerializable` for rendering objects as Dart source code
-* `dartBuilder` constructor parameter on `TSerializable` for supplying a custom Dart code builder
+### Changed
+- Release notes corrected: Dart source emission hooks shipped in this tag were removed in 0.4.0; see 0.4.0 for the breaking cleanup.
 
 ## [0.3.1] - 2026-04-10
 

@@ -55,7 +55,6 @@ export 'workspace/models/root/issue.dart';
 export 'workspace/models/root/memory.dart';
 export 'workspace/models/root/output.dart';
 export 'workspace/models/root/persona.dart';
-export 'workspace/models/root/prompt_field.dart';
 export 'workspace/models/root/role.dart';
 export 'workspace/models/root/spec.dart';
 export 'workspace/models/root/template.dart';
