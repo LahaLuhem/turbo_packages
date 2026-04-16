@@ -19,7 +19,7 @@ analyze:
 	@if [ -n "$(package)" ]; then \
 		cd $(package) && dart analyze --fatal-infos .; \
 	else \
-		melos analyze; \
+		dart run melos exec --fail-fast --concurrency=1 -- "dart analyze --fatal-infos"; \
 	fi
 
 ## format: Format all packages
@@ -27,7 +27,7 @@ format:
 	@if [ -n "$(package)" ]; then \
 		cd $(package) && dart format .; \
 	else \
-		melos format; \
+		dart run melos exec --fail-fast --concurrency=1 -- "dart format ."; \
 	fi
 
 ## fix: Apply Dart fixes across packages
@@ -35,7 +35,7 @@ fix:
 	@if [ -n "$(package)" ]; then \
 		cd $(package) && dart fix --apply; \
 	else \
-		melos fix; \
+		dart run melos exec --fail-fast --concurrency=1 -- "dart fix --apply"; \
 	fi
 
 ## test: Run tests with coverage across all packages
@@ -43,7 +43,7 @@ test:
 	@if [ -n "$(package)" ]; then \
 		cd $(package) && make test; \
 	else \
-		melos exec --fail-fast --concurrency=1 --dir-exists="test" -- "bash \"$(CURDIR)/tool/test_with_coverage.sh\""; \
+		dart run melos exec --fail-fast --concurrency=1 --dir-exists="test" -- "bash \"$(CURDIR)/tool/test_with_coverage.sh\""; \
 	fi
 
 ## build: Run build_runner to generate code
@@ -51,7 +51,7 @@ build:
 	@if [ -n "$(package)" ]; then \
 		cd $(package) && make build; \
 	else \
-		melos run build_runner --no-select; \
+		dart run melos exec --fail-fast --concurrency=1 --depends-on="build_runner" -- "dart run build_runner build --delete-conflicting-outputs"; \
 	fi
 
 ## watch: Run build_runner in watch mode
@@ -59,7 +59,7 @@ watch:
 	@if [ -n "$(package)" ]; then \
 		cd $(package) && make watch; \
 	else \
-		melos exec --fail-fast --concurrency=1 --depends-on="build_runner" -- "\
+		dart run melos exec --fail-fast --concurrency=1 --depends-on="build_runner" -- "\
 			if [ -f pubspec.yaml ]; then \
 				if grep -q '^flutter:' pubspec.yaml; then \
 					flutter pub run build_runner watch --delete-conflicting-outputs; \
@@ -74,7 +74,7 @@ clean:
 	@if [ -n "$(package)" ]; then \
 		cd $(package) && flutter clean && flutter pub get && dart run build_runner clean; \
 	else \
-		melos exec --fail-fast --concurrency=1 -- "\
+		dart run melos exec --fail-fast --concurrency=1 -- "\
 			if [ -f pubspec.yaml ]; then \
 				if grep -q '^flutter:' pubspec.yaml; then \
 					flutter clean && flutter pub get; \
@@ -92,7 +92,7 @@ get:
 	@if [ -n "$(package)" ]; then \
 		cd $(package) && flutter pub get; \
 	else \
-		melos bootstrap; \
+		dart run melos bootstrap; \
 	fi
 
 ## pub-check: Validate all packages meet 160/160 pub.dev points
@@ -100,16 +100,16 @@ pub-check:
 	@if [ -n "$(package)" ]; then \
 		MELOS_PACKAGE_PATH="$(package)" bash "$(CURDIR)/tool/pub_check.sh"; \
 	else \
-		melos exec --fail-fast --concurrency=1 -- "bash \"$(CURDIR)/tool/pub_check.sh\""; \
+		dart run melos exec --fail-fast --concurrency=1 -- "bash \"$(CURDIR)/tool/pub_check.sh\""; \
 	fi
 
 ## pub-publish-dry-run: Validate packages for publishing without actually publishing
 pub-publish-dry-run:
-	@melos pub-publish-dry-run
+	@dart run melos pub-publish-dry-run
 
 ## pub-publish: Publish packages to pub.dev (requires confirmation)
 pub-publish:
-	@melos pub-publish
+	@dart run melos pub-publish
 
 ## all: Run full CI pipeline (format, analyze, test)
 all: clean get build fix format analyze test pub-check pub-publish-dry-run

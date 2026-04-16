@@ -18,8 +18,16 @@ if ! source "$SCRIPT_DIR/_common.sh"; then
     exit 1
 fi
 
-# Get package directory and name
-PACKAGE_DIR=$(get_package_dir)
+# Resolve package directory to an absolute path so repeated `cd "$PACKAGE_DIR"` works
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+raw_dir="${MELOS_PACKAGE_PATH:-.}"
+if [ "$raw_dir" = '.' ]; then
+	PACKAGE_DIR="$(pwd)"
+elif [ "${raw_dir#/}" = "$raw_dir" ]; then
+	PACKAGE_DIR="$REPO_ROOT/$raw_dir"
+else
+	PACKAGE_DIR="$raw_dir"
+fi
 PACKAGE_NAME=$(get_package_name "$PACKAGE_DIR")
 
 # Validate package directory
@@ -91,14 +99,38 @@ if ! ensure_pana; then
     exit 1
 fi
 
+# Pana analyzes the package outside the monorepo workspace; `resolution: workspace` then
+# prevents any pub get. Strip it temporarily (restore on exit).
+PANA_PUBSPEC_BAK="$PACKAGE_DIR/pubspec.yaml.beforepana"
+pana_pubspec_strip_workspace=false
+if grep -q '^resolution: workspace$' "$PACKAGE_DIR/pubspec.yaml" 2>/dev/null; then
+    cp "$PACKAGE_DIR/pubspec.yaml" "$PANA_PUBSPEC_BAK"
+    grep -v '^resolution: workspace$' "$PANA_PUBSPEC_BAK" > "$PACKAGE_DIR/pubspec.yaml"
+    pana_pubspec_strip_workspace=true
+    (cd "$PACKAGE_DIR" && dart pub get >/dev/null) || true
+fi
+
+restore_pana_pubspec() {
+    if [ "$pana_pubspec_strip_workspace" = true ] && [ -f "$PANA_PUBSPEC_BAK" ]; then
+        mv "$PANA_PUBSPEC_BAK" "$PACKAGE_DIR/pubspec.yaml"
+        (cd "$PACKAGE_DIR" && dart pub get >/dev/null) || true
+    fi
+}
+trap restore_pana_pubspec EXIT
+
 # Run pana and capture output
 PANA_OUTPUT=""
 if ! PANA_OUTPUT=$(cd "$PACKAGE_DIR" && dart pub global run pana --no-warning 2>&1); then
+    trap - EXIT
+    restore_pana_pubspec
     log_error "Pana validation failed for $PACKAGE_NAME"
     echo "$PANA_OUTPUT" >&2
     echo "PUB_CHECK_RESULT:FAIL:$PACKAGE_NAME:pana_error" >&2
     exit 1
 fi
+
+trap - EXIT
+restore_pana_pubspec
 
 # Extract pub points
 PUB_POINTS=$(extract_pub_points "$PANA_OUTPUT")

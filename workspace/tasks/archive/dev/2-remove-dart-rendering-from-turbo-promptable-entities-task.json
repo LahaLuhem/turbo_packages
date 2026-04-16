@@ -1,0 +1,191 @@
+{
+  "title": "Remove Dart source rendering from every turbo_promptable entity, delete its two helper files, and delete the Dart-rendering test",
+  "status": "done",
+  "status_instructions": "Immediately update status to 'in-progress' after reading this task to prevent other agents from claiming it. Update to 'done' only after all acceptance criteria pass, then append a worklog entry and move the file with `mv` into `workspace/tasks/archive/dev/`.",
+
+  "spec": "workspace/specs/serialization/dart-rendering/remove-dart-rendering-spec.json",
+
+  "phase": 1,
+  "order": 2,
+  "layer": "dev",
+  "estimated_context_tokens": "~70k",
+
+  "description": "Delete every piece of Dart source rendering inside `turbo_promptable`: the two helper files that implement the rendering primitives, the test file that exercises them, and the per-entity `toDart()` / `toDartInline(...)` methods across seventeen entity files. After this task, `turbo_promptable` still produces JSON, YAML, Markdown, and XML for its entities — it just no longer emits Dart source code for them.",
+
+  "context": {
+    "audience": "Junior developer with zero prior knowledge of this monorepo.",
+    "repo_overview": "`turbo_promptable` holds workspace-domain entities (agents, activities, checklists, goals, personas, prompts, tools, workflows, and similar). Each entity implements the `TSerializable` contract from `turbo_serializable`. Some of those entities had extra methods (`toDart`, `toDartInline`) that emitted the entity back out as Dart source code via two helper files. That entire concept is being removed from the repo.",
+    "why_this_change_exists": "Dart source rendering is a code-emission concern, not a data-serialization concern. It leaked into entities that should only represent domain data. The user explicitly instructed removing the feature rather than relocating it. A sibling task in the same phase (phase 1, order 1) strips the matching slot (`dartBuilder`) and method (`toDart`) from the base contract in `turbo_serializable`. The two tasks must both land for the workspace to analyze cleanly.",
+    "files_to_delete": [
+      "turbo_promptable/lib/core/helpers/t_dart_render_helper.dart",
+      "turbo_promptable/lib/core/helpers/t_dart_string_helper.dart",
+      "turbo_promptable/test/to_dart_test.dart"
+    ],
+    "files_to_edit": [
+      "turbo_promptable/lib/workspace/models/root/activity.dart",
+      "turbo_promptable/lib/workspace/models/root/agent.dart",
+      "turbo_promptable/lib/workspace/models/root/checklist.dart",
+      "turbo_promptable/lib/workspace/models/root/context.dart",
+      "turbo_promptable/lib/workspace/models/root/goal.dart",
+      "turbo_promptable/lib/workspace/models/root/input.dart",
+      "turbo_promptable/lib/workspace/models/root/instruction.dart",
+      "turbo_promptable/lib/workspace/models/root/issue.dart",
+      "turbo_promptable/lib/workspace/models/root/output.dart",
+      "turbo_promptable/lib/workspace/models/root/persona.dart",
+      "turbo_promptable/lib/workspace/models/root/prompt_field.dart",
+      "turbo_promptable/lib/workspace/models/root/role.dart",
+      "turbo_promptable/lib/workspace/models/root/spec.dart",
+      "turbo_promptable/lib/workspace/models/root/template.dart",
+      "turbo_promptable/lib/workspace/models/root/tool.dart",
+      "turbo_promptable/lib/workspace/models/root/workflow.dart",
+      "turbo_promptable/lib/workspace/models/workflows/step.dart"
+    ],
+    "per_entity_what_to_remove": [
+      "The `@override String toDart() => ...` method.",
+      "The `String toDartInline({...}) => ...` method.",
+      "The `// ⚡️ OVERRIDES` section header comment — only if removing `toDart` leaves it empty.",
+      "The `// 🧲 FETCHERS` section header comment — only if removing `toDartInline` leaves it empty.",
+      "Any `import 'package:turbo_promptable/core/helpers/t_dart_render_helper.dart';` that is only used by the Dart methods."
+    ],
+    "per_entity_what_to_keep": [
+      "Constructor, `fromJson` factory, and the `toJson` override.",
+      "Every domain field and every non-Dart-rendering method.",
+      "Markdown, YAML, and XML overrides (these stay untouched).",
+      "Any imports still referenced by remaining code."
+    ],
+    "barrel_and_example_status": "Verified by the spec: the package barrel does not export the two helpers and the example entrypoint only uses `toJson()` and `toMd()`. No barrel or example edits are needed.",
+    "coupling_note": "The sibling task removes `toDart` from the base contract. Until both tasks land, `@override` markers on the entity `toDart` methods will error. That is expected; resolve it by completing this task, not by leaving shims."
+  },
+
+  "goal": "Zero references to `toDart`, `toDartInline`, `dartBuilder`, `renderConstructorCall`, `renderStringArg`, `renderBoolArg`, `renderEnumArg`, `renderExpressionArg`, `renderStringListArg`, `renderExpressionListArg`, `wrapStandaloneDartFile`, `escapeDartString`, or `renderDartStringLiteral` anywhere under `turbo_promptable/`. The helper files and the test file no longer exist. Entities retain every non-Dart-rendering member untouched.",
+
+  "non_goals": [
+    "Do not change any entity's domain fields, constructor shape, `fromJson`, or `toJson`.",
+    "Do not rename or reorganise files or folders.",
+    "Do not touch the package's markdown, YAML, XML, or JSON behavior.",
+    "Do not edit README, CHANGELOG, or pubspec — release wiring is phase 2.",
+    "Do not introduce replacement rendering logic, helpers, or extension points.",
+    "Do not add deprecation annotations or backwards-compatibility shims.",
+    "Do not opportunistically refactor untouched code in the same files."
+  ],
+
+  "acceptance_criteria": [
+    "The three files listed under `files_to_delete` no longer exist on disk.",
+    "Every file listed under `files_to_edit` has zero mentions of `toDart`, `toDartInline`, or imports of the deleted helpers.",
+    "`grep -rE 'toDart|toDartInline|dartBuilder|renderConstructorCall|renderStringArg|renderBoolArg|renderEnumArg|renderExpressionArg|renderStringListArg|renderExpressionListArg|wrapStandaloneDartFile|escapeDartString|renderDartStringLiteral' turbo_promptable/` returns zero matches.",
+    "Section-header comments (`// ⚡️ OVERRIDES`, `// 🧲 FETCHERS`) are removed when — and only when — removing the Dart-rendering members leaves them empty. If other members remain under them, leave the headers intact.",
+    "After this task plus the sibling base-contract task both land, `make analyze package=turbo_promptable` and `make test package=turbo_promptable` pass cleanly.",
+    "No unrelated edits appear in the diff: constructors, domain fields, `fromJson`, `toJson`, and markdown/YAML/XML overrides are byte-identical to before the task.",
+    "No leftover `@override` annotations, stranded dartdoc paragraphs, or orphan imports remain in any edited file."
+  ],
+
+  "constraints": [
+    "Pure removal — no rewrites, no stylistic changes, no new helpers.",
+    "Process files one at a time. After editing each entity, re-read the file top to bottom before moving to the next.",
+    "Single quotes, trailing commas, and const constructors remain in line with existing style.",
+    "Zero new dependencies. Zero changed dependencies."
+  ],
+
+  "how_to_plan": [
+    "Read the spec file in full first. Then read one representative entity (e.g. `activity.dart`) end to end to internalise the pattern: how the Dart method sits near other overrides, which imports feed it, where the section headers live.",
+    "Read the two helper files to understand what their deletion removes. You do not need to understand the rendering algorithms — only confirm that nothing else in the package imports them (barrel-export check is already done by the spec; still verify with a scoped search).",
+    "Read `turbo_promptable/test/to_dart_test.dart` to confirm it only targets Dart rendering. Delete it as a single file op.",
+    "For each of the seventeen entity files, perform the same removal pattern: drop the two methods, drop the helper import if unused, drop headers only when empty. Do not batch-regex across all files blindly — read each file first, then edit.",
+    "After editing all entities, run a full grep of the Dart-rendering symbol list under `turbo_promptable/` to verify zero hits. If any hit remains, investigate and remove it — do not ignore it."
+  ],
+
+  "required_reading_before_starting": [
+    "`workspace/specs/serialization/dart-rendering/remove-dart-rendering-spec.json` — authoritative source of truth.",
+    "`turbo_promptable/lib/workspace/models/root/activity.dart` — canonical example of the removal pattern.",
+    "`turbo_promptable/lib/core/helpers/t_dart_render_helper.dart` and `t_dart_string_helper.dart` — read once to confirm scope, then delete.",
+    "`turbo_promptable/test/to_dart_test.dart` — read once to confirm it only tests Dart rendering, then delete.",
+    "`turbo_promptable/lib/turbo_promptable.dart` — verify (do not edit) that the barrel does not re-export the two deleted helpers.",
+    "`CLAUDE.md` at repo root — analyze, test, pub-check expectations."
+  ],
+
+  "conventions_to_follow": {
+    "skill": "dev-conventions",
+    "files": [
+      "~/.claude/skills/dev-conventions/conventions/models.md — how domain models are shaped and what belongs on them.",
+      "~/.claude/skills/dev-conventions/conventions/class-structure.md — section headers and member ordering.",
+      "~/.claude/skills/dev-conventions/conventions/folders-and-file-types.md — one-type-per-file and concept folders.",
+      "~/.claude/skills/dev-conventions/conventions/abstracts.md — how contracts and overrides are shaped.",
+      "~/.claude/skills/dev-conventions/conventions/utils.md — helper placement expectations (informs why these helpers are leaving).",
+      "~/.claude/skills/dev-conventions/conventions/unit-tests.md — what the deleted test was doing and why no replacement is needed."
+    ],
+    "rule": "Read the referenced convention files in full before editing. Apply them rigorously. Where a convention and the existing file disagree, match the existing file's prevailing style for this edit — pure removal does not justify re-styling unrelated code."
+  },
+
+  "tools_to_use": [
+    "RepoPrompt MCP `file_search` for the per-package symbol sweep and verifying nothing else imports the helpers.",
+    "RepoPrompt MCP `read_file` for line-ranged reads of entities.",
+    "RepoPrompt MCP `apply_edits` (or the built-in Edit tool) for per-entity removals.",
+    "RepoPrompt MCP `file_actions` (or `rm`) for the three file deletions.",
+    "`make analyze package=turbo_promptable` and `make test package=turbo_promptable` for verification."
+  ],
+
+  "verification": {
+    "mandatory_checks": [
+      "`make analyze package=turbo_promptable` passes once the sibling base-contract task has also landed.",
+      "`make test package=turbo_promptable` passes once the deleted test file is gone and base-contract task has landed.",
+      "`grep -rE 'toDart|toDartInline|dartBuilder|renderConstructorCall|renderStringArg|renderBoolArg|renderEnumArg|renderExpressionArg|renderStringListArg|renderExpressionListArg|wrapStandaloneDartFile|escapeDartString|renderDartStringLiteral' turbo_promptable/` returns zero hits.",
+      "`ls turbo_promptable/lib/core/helpers/` confirms the two helper files are gone.",
+      "`ls turbo_promptable/test/` confirms `to_dart_test.dart` is gone.",
+      "Spot-check three edited entities by reading them end to end to confirm no orphan `@override`, stranded comment, or unused import remains."
+    ],
+    "unit_tests": "No new unit tests are required. The feature being removed is the only thing the deleted test covered. Remaining entity behavior (JSON, YAML, Markdown, XML, validation) is already covered by its own tests — do not duplicate or rewrite them. Do not add tests that merely assert the absence of a symbol."
+  },
+
+  "quality_bar": {
+    "maintainability": "After the change, a reader opening any edited file should see a clean domain entity with no trace of the removed feature — no residue comments, no orphan imports, no empty headers.",
+    "dry": "Deletion removes the only duplication that existed. Do not consolidate unrelated remaining members.",
+    "single_responsibility": "Entities narrow back to data + markdown/YAML/XML presentation. Do not re-broaden them.",
+    "performance": "Not applicable — pure deletion.",
+    "abuse_resistance": "Not applicable — no I/O or input surface.",
+    "no_workarounds": "If a section header ends up straddling both remaining and removed members, remove only the removed half and leave the remaining portion under the header. Never leave stubbed methods behind."
+  },
+
+  "completion_worklog_instructions": "Once the acceptance criteria pass, append a `worklog` array to this JSON with entries of the shape `{ \"timestamp\": \"<ISO 8601>\", \"summary\": \"<1–3 sentences of what you changed and why>\", \"files_touched\": [\"<path>\"], \"files_deleted\": [\"<path>\"] }`. Set `status` to `\"done\"`. Then run `mv workspace/tasks/dev/1/2-remove-dart-rendering-from-turbo-promptable-entities-task.json workspace/tasks/archive/dev/` to archive it.",
+
+  "worklog": [
+    {
+      "timestamp": "2026-04-15T12:00:00Z",
+      "summary": "Removed all Dart source emission from turbo_promptable: deleted t_dart_render_helper.dart, t_dart_string_helper.dart, and to_dart_test.dart; stripped toDart/toDartInline and Role/Persona/Agent dartTypeName and buildDartNamedArgs from seventeen entity files. Package pubspec is pure Dart (no Flutter); turbo_promptable/Makefile was updated to use dart analyze, dart pub get, and dart run build_runner so local targets match pubspec. Added test/turbo_promptable_smoke_test.dart (minimal Goal.toJson) so the test directory is non-empty and make test succeeds after removing the only previous suite.",
+      "files_touched": [
+        "turbo_promptable/lib/workspace/models/root/activity.dart",
+        "turbo_promptable/lib/workspace/models/root/agent.dart",
+        "turbo_promptable/lib/workspace/models/root/checklist.dart",
+        "turbo_promptable/lib/workspace/models/root/context.dart",
+        "turbo_promptable/lib/workspace/models/root/goal.dart",
+        "turbo_promptable/lib/workspace/models/root/input.dart",
+        "turbo_promptable/lib/workspace/models/root/instruction.dart",
+        "turbo_promptable/lib/workspace/models/root/issue.dart",
+        "turbo_promptable/lib/workspace/models/root/output.dart",
+        "turbo_promptable/lib/workspace/models/root/persona.dart",
+        "turbo_promptable/lib/workspace/models/root/prompt_field.dart",
+        "turbo_promptable/lib/workspace/models/root/role.dart",
+        "turbo_promptable/lib/workspace/models/root/spec.dart",
+        "turbo_promptable/lib/workspace/models/root/template.dart",
+        "turbo_promptable/lib/workspace/models/root/tool.dart",
+        "turbo_promptable/lib/workspace/models/root/workflow.dart",
+        "turbo_promptable/lib/workspace/models/workflows/step.dart",
+        "turbo_promptable/Makefile",
+        "turbo_promptable/test/turbo_promptable_smoke_test.dart"
+      ],
+      "files_deleted": [
+        "turbo_promptable/lib/core/helpers/t_dart_render_helper.dart",
+        "turbo_promptable/lib/core/helpers/t_dart_string_helper.dart",
+        "turbo_promptable/test/to_dart_test.dart"
+      ]
+    }
+  ],
+
+  "cross_task_awareness_instructions": "After archiving, scan the other open tasks in `workspace/tasks/dev/` and `workspace/tasks/ui/`. If any would benefit from additional context you learned (e.g. an unexpected coupling between entities, a convention you confirmed matters, a file the next agent should re-read), append — never modify or delete — an `addendum` array at the bottom of the relevant task's JSON with entries of the shape `{ \"from_task\": \"2-remove-dart-rendering-from-turbo-promptable-entities-task.json\", \"note\": \"<concise signal that improves the next agent's odds of success>\" }`. Add nothing unless it genuinely increases the next agent's clarity, correction rate, or efficiency.",
+
+  "addendum": [
+    {
+      "from_task": "1-remove-dart-rendering-from-turbo-serializable-base-task.json",
+      "note": "Phase 1 order 1 is done: TSerializable no longer has toDart, dartBuilder, or a dartBuilder constructor parameter. Remove any super.dartBuilder from entity constructors and all toDart/toDartInline overrides; turbo_serializable lib/ and test/ grep clean for Dart-rendering symbols."
+    }
+  ]
+}

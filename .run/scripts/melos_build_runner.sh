@@ -1,2 +1,2 @@
 #!/bin/bash
-cd "$(dirname "$0")/../.." && melos build_runner
+cd "$(dirname "$0")/../.." && make build

@@ -1,0 +1,141 @@
+{
+  "spec_title": "Delete Dart-rendering from the turbo monorepo",
+  "subject": "Strip all Dart-source-code rendering out of both turbo_serializable and turbo_promptable. No TSerializable.toDart / dartBuilder slot, no per-entity toDart / toDartInline, no render helpers, no Dart-rendering tests. The monorepo no longer generates Dart source.",
+
+  "end_goal": "Zero references to `toDart`, `toDartInline`, `dartBuilder`, `renderConstructorCall`, `renderStringArg`, `renderBoolArg`, `renderEnumArg`, `renderExpressionArg`, `renderStringListArg`, `renderExpressionListArg`, `wrapStandaloneDartFile`, `escapeDartString`, or `renderDartStringLiteral` anywhere under `turbo_serializable/` or `turbo_promptable/`. The Dart source output concept is removed as a feature.",
+
+  "scope": {
+    "turbo_serializable": {
+      "file_edits": [
+        {
+          "file": "turbo_serializable/lib/abstracts/t_serializable.dart",
+          "remove": [
+            "`String toDart()` method (lines ~82–87)",
+            "`final String Function(TWriteable writeable)? dartBuilder` field (lines ~88–94)",
+            "Constructor parameter `this.dartBuilder`",
+            "Associated dartdoc paragraphs about Dart source rendering"
+          ]
+        }
+      ]
+    },
+    "turbo_promptable": {
+      "file_deletions": [
+        "turbo_promptable/lib/core/helpers/t_dart_render_helper.dart",
+        "turbo_promptable/lib/core/helpers/t_dart_string_helper.dart",
+        "turbo_promptable/test/to_dart_test.dart"
+      ],
+      "file_edits_strip_toDart_and_toDartInline_blocks": [
+        "lib/workspace/models/root/activity.dart",
+        "lib/workspace/models/root/agent.dart",
+        "lib/workspace/models/root/checklist.dart",
+        "lib/workspace/models/root/context.dart",
+        "lib/workspace/models/root/goal.dart",
+        "lib/workspace/models/root/input.dart",
+        "lib/workspace/models/root/instruction.dart",
+        "lib/workspace/models/root/issue.dart",
+        "lib/workspace/models/root/output.dart",
+        "lib/workspace/models/root/persona.dart",
+        "lib/workspace/models/root/prompt_field.dart",
+        "lib/workspace/models/root/role.dart",
+        "lib/workspace/models/root/spec.dart",
+        "lib/workspace/models/root/template.dart",
+        "lib/workspace/models/root/tool.dart",
+        "lib/workspace/models/root/workflow.dart",
+        "lib/workspace/models/workflows/step.dart"
+      ],
+      "per_entity_removal_details": {
+        "remove_members": [
+          "`@override String toDart() => ...` method",
+          "`String toDartInline({...}) => ...` method",
+          "the `// ⚡️ OVERRIDES` section header if nothing else remains under it",
+          "the `// 🧲 FETCHERS` section header if toDartInline was the only fetcher",
+          "the import of `package:turbo_promptable/core/helpers/t_dart_render_helper.dart`"
+        ],
+        "keep_members": [
+          "Constructor, fromJson factory, toJson override",
+          "All domain fields and non-Dart-rendering methods",
+          "Markdown/YAML/XML-related overrides"
+        ]
+      }
+    },
+    "other_touch_points": {
+      "barrel_files": "Verified: `turbo_promptable/lib/turbo_promptable.dart` does NOT export the two helper files. No export edits needed.",
+      "example_folder": "Verified: `turbo_promptable/example/turbo_promptable_example.dart` uses only `toJson()` and `toMd()`. No toDart references. No edits needed.",
+      "readme_and_changelog": "Verified: neither package's README nor CHANGELOG currently mentions `toDart` / `toDartInline`. Only new additions are the CHANGELOG breaking-change entries listed under migration_and_compatibility.changelog_entries."
+    }
+  },
+
+  "architecture": {
+    "rationale": "Dart source rendering is a code-emission concern, not a data-serialization concern. It widened turbo_serializable's surface past what a format-neutral writeable abstraction should carry, and the helpers in turbo_promptable are the only real-world consumer. Deleting the feature outright removes conceptual drift without leaving dead or dual-owned code behind.",
+    "layering_after_delete": "turbo_serializable = JSON + YAML + Markdown + XML. turbo_promptable = workspace-domain entities that are `TSerializable`, consumed as Markdown/YAML/XML/JSON. No code-emission surface anywhere in this monorepo.",
+    "no_replacement": "No new package, class, or helper replaces the deleted Dart-rendering surface. Callers that depended on `toDart()` must migrate off the turbo_promptable API entirely."
+  },
+
+  "migration_and_compatibility": {
+    "breaking_nature": "BREAKING for both packages. Remove `dartBuilder` constructor param from TSerializable; remove `toDart` / `toDartInline` public methods from every turbo_promptable entity.",
+    "versioning": {
+      "turbo_serializable": "Minor bump under 1.0 (current style appears pre-1.0 per CHANGELOG conventions) or major bump if already 1.0+. Check current version in `turbo_serializable/pubspec.yaml` and bump accordingly per existing release conventions.",
+      "turbo_promptable": "Same rule; will be a simultaneous paired release.",
+      "workspace_dependency_rule": "Per root CLAUDE.md: turbo_promptable's `turbo_serializable: ^x.y.z` constraint must be updated to the new turbo_serializable version so pana's downgrade test still resolves."
+    },
+    "backward_compat_shims": "None. Traceless removal.",
+    "changelog_entries": [
+      "turbo_serializable: 'Remove Dart source rendering (`toDart`, `dartBuilder`) from `TSerializable`. Breaking.'",
+      "turbo_promptable: 'Remove Dart source rendering: deleted `toDart` / `toDartInline` on all entities, deleted `t_dart_render_helper.dart`, `t_dart_string_helper.dart`, and `to_dart_test.dart`. Breaking.'"
+    ]
+  },
+
+  "behavior_contracts": {
+    "tSerializable_after_change": "Exposes exactly: `toJson()`, `validate()`, `toYaml()`, `toMd()`, `toXml()` and their builder slots (`yamlBuilder`, `mdFactory`, `xmlBuilder`). Nothing Dart-related.",
+    "turbo_promptable_entities_after_change": "Retain all markdown-rendering overrides (via `mdFactory` on `TPromptable`), JSON serialization, domain fields, and validation. No Dart-rendering surface.",
+    "external_callers_effect": "Any code that calls `.toDart()` or `.toDartInline()` on a turbo_promptable entity fails to compile. No deprecation period."
+  },
+
+  "validation_plan": {
+    "automated_checks": [
+      "`make analyze` clean in both packages",
+      "`make test` clean in both packages (after to_dart_test.dart is deleted)",
+      "`grep -rE 'toDart|toDartInline|dartBuilder|renderConstructorCall|renderStringArg|renderBoolArg|renderEnumArg|renderExpressionArg|renderStringListArg|renderExpressionListArg|wrapStandaloneDartFile|escapeDartString|renderDartStringLiteral' turbo_serializable turbo_promptable` returns zero matches",
+      "`make pub-check` passes 160/160 on both packages"
+    ]
+  },
+
+  "non_goals": [
+    "No introduction of replacement Dart rendering anywhere.",
+    "No changes to YAML, Markdown, XML, or JSON infrastructure.",
+    "No refactor of unrelated helpers or folder structure.",
+    "No changes to turbo_promptable's domain model or entity fields."
+  ],
+
+  "acceptance_criteria": [
+    "Zero hits for any Dart-rendering symbol across turbo_serializable/ and turbo_promptable/ (search list in end_goal).",
+    "`turbo_promptable/test/to_dart_test.dart` no longer exists.",
+    "`turbo_promptable/lib/core/helpers/t_dart_render_helper.dart` no longer exists.",
+    "`turbo_promptable/lib/core/helpers/t_dart_string_helper.dart` no longer exists.",
+    "Both packages pass `make analyze`, `make test`, and `make pub-check`.",
+    "CHANGELOG entries added to both packages documenting the breaking removal.",
+    "Version numbers bumped per workspace conventions; `turbo_promptable` pubspec constraint for `turbo_serializable` updated.",
+    "No leftover `@override`, imports, helper files, section-header comments, or stale dartdoc referencing Dart rendering."
+  ],
+
+  "decisions": [
+    {
+      "id": 1,
+      "topic": "Context gathering mode",
+      "decision": "Explore turbo_promptable and turbo_serializable with RepoPrompt between questions.",
+      "source": "User answer to context-mode question."
+    },
+    {
+      "id": 2,
+      "topic": "Direction reversal — remove instead of relocate",
+      "decision": "Do not relocate Dart-rendering logic into turbo_serializable. Delete the feature.",
+      "source": "User: 'remove the entire toDart method it doesnt make sense - the logic for that should not live in this package i realise'."
+    },
+    {
+      "id": 3,
+      "topic": "Scope of removal",
+      "decision": "Delete Dart rendering from BOTH packages. Drop `toDart` / `dartBuilder` from TSerializable; delete all per-entity `toDart` / `toDartInline` methods in turbo_promptable; delete `t_dart_render_helper.dart`, `t_dart_string_helper.dart`, and `to_dart_test.dart`; strip related imports and section headers.",
+      "source": "User answer to scope question: 'Both packages — delete Dart rendering everywhere'."
+    }
+  ]
+}

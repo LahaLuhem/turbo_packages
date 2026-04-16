@@ -9,6 +9,12 @@ class Cli extends Tool {
     required super.name,
     super.metaData,
     super.config,
+    super.description,
+    super.setup,
+    super.rules,
+    super.commands,
+    super.examples,
+    super.notes,
   });
 
   factory Cli.fromJson(Map<String, dynamic> json) => _$CliFromJson(json);

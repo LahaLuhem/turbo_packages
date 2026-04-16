@@ -6,9 +6,26 @@ part of 'script.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Script _$ScriptFromJson(Map<String, dynamic> json) =>
-    Script(name: json['name'] as String);
+Script _$ScriptFromJson(Map<String, dynamic> json) => Script(
+  name: json['name'] as String,
+  description: json['description'] as String?,
+  setup: (json['setup'] as List<dynamic>?)?.map((e) => e as String).toList(),
+  rules: (json['rules'] as List<dynamic>?)?.map((e) => e as String).toList(),
+  commands: (json['commands'] as List<dynamic>?)
+      ?.map((e) => ToolCommand.fromJson(e as Map<String, dynamic>))
+      .toList(),
+  examples: (json['examples'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
+  notes: (json['notes'] as List<dynamic>?)?.map((e) => e as String).toList(),
+);
 
 Map<String, dynamic> _$ScriptToJson(Script instance) => <String, dynamic>{
   'name': instance.name,
+  'description': ?instance.description,
+  'setup': ?instance.setup,
+  'rules': ?instance.rules,
+  'commands': ?instance.commands?.map((e) => e.toJson()).toList(),
+  'examples': ?instance.examples,
+  'notes': ?instance.notes,
 };

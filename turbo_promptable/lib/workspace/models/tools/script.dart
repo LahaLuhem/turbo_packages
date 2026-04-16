@@ -9,6 +9,12 @@ class Script extends Tool {
     required super.name,
     super.metaData,
     super.config,
+    super.description,
+    super.setup,
+    super.rules,
+    super.commands,
+    super.examples,
+    super.notes,
   });
 
   factory Script.fromJson(Map<String, dynamic> json) => _$ScriptFromJson(json);

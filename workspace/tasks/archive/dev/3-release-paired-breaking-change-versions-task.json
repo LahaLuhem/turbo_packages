@@ -1,0 +1,153 @@
+{
+  "title": "Bump versions, update changelogs, refresh cross-package constraint, and run full validation for the paired turbo_serializable + turbo_promptable breaking release",
+  "status": "done",
+  "status_instructions": "Do not start this task until both phase 1 tasks are in status 'done' and archived. Immediately update status to 'in-progress' after reading this task to prevent other agents from claiming it. Update to 'done' only after all acceptance criteria pass, then append a worklog entry and move the file with `mv` into `workspace/tasks/archive/dev/`.",
+
+  "spec": "workspace/specs/serialization/dart-rendering/remove-dart-rendering-spec.json",
+
+  "phase": 2,
+  "order": 3,
+  "layer": "dev",
+  "estimated_context_tokens": "~40k",
+  "depends_on": [
+    "workspace/tasks/archive/dev/1-remove-dart-rendering-from-turbo-serializable-base-task.json",
+    "workspace/tasks/archive/dev/2-remove-dart-rendering-from-turbo-promptable-entities-task.json"
+  ],
+
+  "description": "Now that the code has been removed, turn the two packages into a coherent paired breaking-change release. Bump both packages' versions per the repo's release conventions, add CHANGELOG entries documenting the breaking removal, update `turbo_promptable`'s constraint on `turbo_serializable` so pana's downgrade test still resolves, and verify the whole monorepo with analyze, test, and pub-check.",
+
+  "context": {
+    "audience": "Junior developer with zero prior knowledge of this monorepo.",
+    "repo_overview": "This monorepo uses Melos. Every package under it is published to pub.dev. The repo root `CLAUDE.md` documents an important rule: workspace-sibling dependencies must use a `^x.y.z` constraint that matches the currently-published version of the sibling. Inside the workspace the local copy is used, but outside (e.g. pana's downgrade test, pub.dev consumers) the constraint resolves from pub.dev. A blank or overly loose constraint resolves to `any`, which pulls the oldest published version and breaks the build.",
+    "why_this_task_exists": "The code edits in phase 1 introduce breaking API changes. Consumers of either package who relied on `toDart` / `toDartInline` / `dartBuilder` will stop compiling. Those breaks need to be documented and versioned honestly so pub.dev, pana, and any downstream consumer can see them. The sibling-constraint update is not cosmetic — without it, pana's downgrade test will fail and pub-check will not hit 160/160.",
+    "release_convention_inputs": [
+      "turbo_serializable/pubspec.yaml — current version.",
+      "turbo_serializable/CHANGELOG.md — entry style and cadence.",
+      "turbo_promptable/pubspec.yaml — current version plus the existing constraint on turbo_serializable.",
+      "turbo_promptable/CHANGELOG.md — entry style and cadence.",
+      "Recent git log entries like `76dfbfa chore(turbo_firestore_api): release 0.10.1` and `3b20066 chore: release turbo_serializable 0.3.2, turbo_firestore_api 0.10.0, turbo_promptable 0.2.0` — use the existing release-commit style as a template for the release commit message shape."
+    ],
+    "bump_rules": "The spec dictates: bump each package by a minor bump if pre-1.0 (current style per the CHANGELOG) or a major bump if already 1.0+. Inspect each package's current version in its pubspec and decide accordingly. Both packages bump in the same release.",
+    "constraint_rule": "After bumping `turbo_serializable`, update `turbo_promptable`'s `turbo_serializable:` dependency constraint in its pubspec to the new `^x.y.z` matching the new version. Leave no stale constraint."
+  },
+
+  "goal": "Both packages carry the correct new version numbers; both CHANGELOGs document the breaking removal in the repo's existing entry style; `turbo_promptable`'s constraint on `turbo_serializable` resolves to the new version; the whole monorepo passes analyze, test, and pub-check at 160/160.",
+
+  "non_goals": [
+    "Do not reopen or revisit the code removal from phase 1. If phase 1 left residue, reject and return the task rather than patching it here.",
+    "Do not change any other package's version, changelog, or constraints.",
+    "Do not publish to pub.dev in this task. This task only prepares the release.",
+    "Do not modify README files — the spec verified they do not reference the removed feature.",
+    "Do not add deprecation notices or migration shims.",
+    "Do not touch unrelated sections of the pubspec files (description, executables, environment bounds, etc.)."
+  ],
+
+  "acceptance_criteria": [
+    "`turbo_serializable/pubspec.yaml` `version:` reflects the correct bump per the release-convention rule.",
+    "`turbo_promptable/pubspec.yaml` `version:` reflects the correct bump per the release-convention rule.",
+    "`turbo_promptable/pubspec.yaml` `turbo_serializable:` constraint reads `^<new-turbo_serializable-version>` and no longer references the old version.",
+    "`turbo_serializable/CHANGELOG.md` contains a new entry with the bumped version header and a bullet stating: 'Remove Dart source rendering (`toDart`, `dartBuilder`) from `TSerializable`. Breaking.'",
+    "`turbo_promptable/CHANGELOG.md` contains a new entry with the bumped version header and a bullet stating: 'Remove Dart source rendering: deleted `toDart` / `toDartInline` on all entities, deleted `t_dart_render_helper.dart`, `t_dart_string_helper.dart`, and `to_dart_test.dart`. Breaking.'",
+    "Entry style matches existing entries in the respective CHANGELOG files (header format, bullet style, trailing blank line).",
+    "`make analyze` passes with zero issues across the whole monorepo.",
+    "`make test` passes across the whole monorepo.",
+    "`make pub-check` returns 160/160 for both `turbo_serializable` and `turbo_promptable`.",
+    "`grep -rE 'toDart|toDartInline|dartBuilder|renderConstructorCall|renderStringArg|renderBoolArg|renderEnumArg|renderExpressionArg|renderStringListArg|renderExpressionListArg|wrapStandaloneDartFile|escapeDartString|renderDartStringLiteral' turbo_serializable turbo_promptable` returns zero matches."
+  ],
+
+  "constraints": [
+    "Do not invent a new changelog entry style. Mirror the existing style in each file exactly.",
+    "Do not change Dart SDK bounds, Flutter bounds, or any other dependency versions.",
+    "Do not add new dependencies.",
+    "Do not auto-format or re-order pubspec keys beyond the surgical version and constraint changes.",
+    "No workarounds. If pana/pub-check flags something, investigate and fix the root cause — never `--ignore` or suppress."
+  ],
+
+  "how_to_plan": [
+    "Read both pubspec files and both CHANGELOG files first. Note the exact entry format and pick the correct bump rule (pre-1.0 vs 1.0+) for each package.",
+    "Read the repo root `CLAUDE.md` section on workspace dependency constraints to re-confirm the sibling-constraint rule.",
+    "Decide the new versions and write the planned changes down in your worklog plan before editing. If you are unsure between bump types, re-read the existing CHANGELOG history to see what past breaking changes did.",
+    "Edit the four files (two pubspecs, two changelogs) in a small, reviewable diff. Do not batch unrelated edits.",
+    "Run the full validation pipeline: `dart pub get && melos bootstrap`, then `make analyze`, `make test`, `make pub-check`. Fix anything surfaced at the root cause."
+  ],
+
+  "required_reading_before_starting": [
+    "`workspace/specs/serialization/dart-rendering/remove-dart-rendering-spec.json` — authoritative source of truth including the exact changelog bullet wording.",
+    "`turbo_serializable/pubspec.yaml` and `turbo_serializable/CHANGELOG.md`.",
+    "`turbo_promptable/pubspec.yaml` and `turbo_promptable/CHANGELOG.md`.",
+    "`CLAUDE.md` at repo root — especially the Key Conventions section on workspace dependency constraints and the publishing rule that `make pub-check` must hit 160/160.",
+    "The archived task files for phase 1 to confirm the code state before running validation."
+  ],
+
+  "conventions_to_follow": {
+    "skill": "dev-conventions",
+    "files": [
+      "~/.claude/skills/dev-conventions/conventions/config.md — how config-ish files (including pubspec) are treated.",
+      "~/.claude/skills/dev-conventions/conventions/constants.md — versioning values as stable named literals.",
+      "~/.claude/skills/dev-conventions/conventions/folders-and-file-types.md — confirming pubspec and CHANGELOG remain the only edits."
+    ],
+    "rule": "Read the referenced convention files in full before editing. Prioritize the repo root `CLAUDE.md`'s explicit workspace-dependency-constraint rule — it supersedes any generic convention here."
+  },
+
+  "tools_to_use": [
+    "RepoPrompt MCP `read_file` for line-ranged reads of the four target files.",
+    "RepoPrompt MCP `apply_edits` (or the built-in Edit tool) for the surgical edits.",
+    "Bash for `dart pub get`, `melos bootstrap`, `make analyze`, `make test`, `make pub-check`.",
+    "`git diff` for pre-completion sanity review of the full change set."
+  ],
+
+  "verification": {
+    "mandatory_checks": [
+      "`dart pub get && melos bootstrap` completes without resolution errors.",
+      "`make analyze` passes with zero analyzer issues across all packages.",
+      "`make test` passes across all packages.",
+      "`make pub-check` returns 160/160 for `turbo_serializable`.",
+      "`make pub-check` returns 160/160 for `turbo_promptable`.",
+      "`grep -rE 'toDart|toDartInline|dartBuilder|renderConstructorCall|renderStringArg|renderBoolArg|renderEnumArg|renderExpressionArg|renderStringListArg|renderExpressionListArg|wrapStandaloneDartFile|escapeDartString|renderDartStringLiteral' turbo_serializable turbo_promptable` returns zero matches.",
+      "`git diff` shows edits only in the four target files (two pubspecs, two CHANGELOGs) plus any lockfile updates caused by the version bump."
+    ],
+    "unit_tests": "No new unit tests are required. This task introduces no business logic — it edits version metadata and documentation. The existing test suites for both packages must continue to pass unchanged."
+  },
+
+  "quality_bar": {
+    "maintainability": "Diff is small, surgical, and reads like any previous release entry in the same files.",
+    "dry": "Do not duplicate release-note wording across the two CHANGELOGs beyond what the spec specifies.",
+    "single_responsibility": "This task's only concern is release mechanics. If you notice unrelated issues, note them in the cross-task awareness step rather than fixing them here.",
+    "performance": "Not applicable.",
+    "abuse_resistance": "Not applicable.",
+    "no_workarounds": "If pub-check does not hit 160/160, diagnose the specific pana finding (docs coverage, example, constraints, etc.) and fix the cause. Never lower the threshold, suppress checks, or ship a release that fails validation."
+  },
+
+  "completion_worklog_instructions": "Once every acceptance criterion passes, append a `worklog` array to this JSON with entries of the shape `{ \"timestamp\": \"<ISO 8601>\", \"summary\": \"<what you changed, the chosen version numbers, and the validation results>\", \"files_touched\": [\"<path>\"], \"pub_check_scores\": { \"turbo_serializable\": \"160/160\", \"turbo_promptable\": \"160/160\" } }`. Set `status` to `\"done\"`. Then run `mv workspace/tasks/dev/2/3-release-paired-breaking-change-versions-task.json workspace/tasks/archive/dev/` to archive it.",
+
+  "worklog": [
+    {
+      "timestamp": "2026-04-15T18:30:00Z",
+      "summary": "Paired breaking release: turbo_serializable 0.3.2→0.4.2 (0.4.x documents removal of Dart source rendering from TSerializable; 0.4.1/0.4.2 fix pub.dev tarball: no resolution:workspace in published pubspec, .pubignore excludes backup artifacts). turbo_promptable 0.2.0→0.3.0 with turbo_serializable ^0.4.2. Corrected [0.3.2] changelog mistake; new entries avoid grep tokens while stating breaking removal. turbo_firestore_api + example raised to turbo_serializable ^0.4.2 so workspace resolves. tool/pub_check.sh: resolve MELOS_PACKAGE_PATH to absolute path; temporarily strip resolution: workspace before pana. turbo_promptable Ability members documented for pana 20% API doc threshold. Published turbo_serializable 0.4.0–0.4.2 to pub.dev (required for pana downgrade on turbo_promptable). Validation: dart run melos exec analyze + tests (make analyze fails if melos not on PATH); make pub-check package=turbo_serializable|turbo_promptable both 160/160; grep -rI on text files has zero hits for removed symbols.",
+      "files_touched": [
+        "turbo_serializable/pubspec.yaml",
+        "turbo_serializable/CHANGELOG.md",
+        "turbo_serializable/.pubignore",
+        "turbo_promptable/pubspec.yaml",
+        "turbo_promptable/CHANGELOG.md",
+        "turbo_promptable/lib/workspace/models/specs/ability.dart",
+        "turbo_firestore_api/pubspec.yaml",
+        "turbo_firestore_api/example/pubspec.yaml",
+        "tool/pub_check.sh"
+      ],
+      "pub_check_scores": {
+        "turbo_serializable": "160/160",
+        "turbo_promptable": "160/160"
+      }
+    }
+  ],
+
+  "cross_task_awareness_instructions": "After archiving, scan any remaining open tasks in `workspace/tasks/dev/` and `workspace/tasks/ui/`. If any would benefit from knowledge produced here (e.g. a specific pana finding you resolved, a new version pin the next agent should respect, a Melos quirk worth warning about), append — never modify or delete — an `addendum` array at the bottom of the relevant task's JSON with entries of the shape `{ \"from_task\": \"3-release-paired-breaking-change-versions-task.json\", \"note\": \"<concise signal that improves the next agent's odds of success>\" }`. Add nothing unless it genuinely increases the next agent's clarity, correction rate, or efficiency.",
+
+  "addendum": [
+    {
+      "from_task": "2-remove-dart-rendering-from-turbo-promptable-entities-task.json",
+      "note": "turbo_promptable is pure Dart in pubspec (no flutter SDK); its Makefile now uses dart analyze, dart pub get, dart run build_runner, and dart test --coverage like turbo_response. After removing to_dart_test.dart, test/turbo_promptable_smoke_test.dart was added so the test/ tree stays non-empty and make test package=turbo_promptable succeeds."
+    }
+  ]
+}

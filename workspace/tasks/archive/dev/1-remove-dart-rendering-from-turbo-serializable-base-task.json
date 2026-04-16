@@ -1,0 +1,116 @@
+{
+  "title": "Remove Dart source rendering from the TSerializable base contract",
+  "status": "done",
+  "status_instructions": "Immediately update status to 'in-progress' after reading this task to prevent other agents from claiming it. Update to 'done' only after all acceptance criteria pass, then append a worklog entry and move the file with `mv` into `workspace/tasks/archive/dev/`.",
+
+  "spec": "workspace/specs/serialization/dart-rendering/remove-dart-rendering-spec.json",
+
+  "phase": 1,
+  "order": 1,
+  "layer": "dev",
+  "estimated_context_tokens": "~30k",
+
+  "description": "Strip every trace of Dart source code rendering out of the `turbo_serializable` package's base contract. The contract currently exposes a `toDart()` method and an optional `dartBuilder` constructor slot that let subclasses emit Dart source code. These are being deleted outright — no replacement, no deprecation, no shim. After this task the base contract exposes only JSON, YAML, Markdown, and XML concerns.",
+
+  "context": {
+    "audience": "Junior developer with zero prior knowledge of this monorepo.",
+    "repo_overview": "This is a Dart/Flutter monorepo managed by Melos containing eight published packages. `turbo_serializable` is a foundation package that defines the `TSerializable` abstract class — a contract that says 'any object that implements me can be written out as JSON, YAML, Markdown, or XML'. It sits near the bottom of the dependency hierarchy and is consumed by `turbo_promptable` and other packages.",
+    "why_this_change_exists": "At some point `toDart()` and a `dartBuilder` slot were added so entities could also emit their own source code as a Dart string. That turned a data-serialization contract into a code-emission tool, which widened its responsibility past its intended purpose. The feature has exactly one real consumer in the whole monorepo (turbo_promptable), and the user decided the logic does not belong in this package. The entire concept is being removed rather than relocated.",
+    "what_stays": "The contract keeps `toJson()`, `validate()`, `toYaml()`, `toMd()`, `toXml()` and their builder slots (`yamlBuilder`, `mdFactory`, `xmlBuilder`). Nothing Dart-related remains.",
+    "what_goes": "The `toDart()` method, the `dartBuilder` field, the `this.dartBuilder` constructor parameter, and every dartdoc paragraph on the base class that exists only to describe Dart source rendering.",
+    "downstream_coupling": "Subclasses in `turbo_promptable` currently `@override` the removed method. Those subclasses are being cleaned up in the sibling task in the same phase (phase 1, order 2). After both tasks finish, analyze passes. During the intermediate state where only one of the two tasks has landed, the workspace will not analyze cleanly — that is expected and handled by phase 2's release task.",
+    "file_of_interest": "turbo_serializable/lib/abstracts/t_serializable.dart"
+  },
+
+  "goal": "The `TSerializable` abstract class no longer references Dart source rendering in any form — no method, no field, no constructor parameter, no dartdoc sentence, no import that exists purely for Dart rendering.",
+
+  "non_goals": [
+    "Do not introduce any replacement Dart-rendering surface anywhere.",
+    "Do not change the YAML, Markdown, XML, or JSON surface of the contract.",
+    "Do not rename, reorganise, or refactor any other part of `TSerializable`.",
+    "Do not modify any consumers in this task — entity cleanup is a sibling task.",
+    "Do not touch README, CHANGELOG, or pubspec in this task — release wiring is phase 2.",
+    "Do not add deprecation annotations or shims. This is a clean traceless removal."
+  ],
+
+  "acceptance_criteria": [
+    "`turbo_serializable/lib/abstracts/t_serializable.dart` contains zero mentions of `toDart`, `dartBuilder`, or any dartdoc referencing Dart source rendering.",
+    "The `TSerializable` constructor no longer accepts a `dartBuilder` parameter.",
+    "`grep -rE 'toDart|toDartInline|dartBuilder|renderConstructorCall|renderStringArg|renderBoolArg|renderEnumArg|renderExpressionArg|renderStringListArg|renderExpressionListArg|wrapStandaloneDartFile|escapeDartString|renderDartStringLiteral' turbo_serializable/` returns zero matches.",
+    "The file still compiles in isolation (standalone `dart analyze` on the file path passes barring the expected downstream failures in turbo_promptable).",
+    "No unrelated edits: the diff for this task touches only `turbo_serializable/lib/abstracts/t_serializable.dart`.",
+    "No leftover `@override`-anchored comments, section headers, or blank dartdoc paragraphs remain from the deleted block."
+  ],
+
+  "constraints": [
+    "Zero behavioral change to retained methods (`toJson`, `validate`, `toYaml`, `toMd`, `toXml`) and their builder slots.",
+    "Zero new dependencies.",
+    "No workarounds. No compatibility shims. No partial removal.",
+    "Single quotes, trailing commas, and const constructors remain in line with existing code style."
+  ],
+
+  "how_to_plan": [
+    "Open the target file and read it end to end before touching anything — understand how `dartBuilder` threads through the constructor and how the dartdoc references it.",
+    "Identify every symbol, parameter, import, and doc sentence that exists only because of Dart rendering. If a sentence is shared with other formats, rewrite it to drop only the Dart portion cleanly.",
+    "Confirm the file has no other callers of `dartBuilder` or `toDart` internal to this package via a package-scoped search before editing.",
+    "Delete in one coherent edit pass; re-read the file after to verify the remaining API reads naturally (no dangling references, no stranded comment blocks)."
+  ],
+
+  "required_reading_before_starting": [
+    "`workspace/specs/serialization/dart-rendering/remove-dart-rendering-spec.json` — authoritative source of truth for the removal.",
+    "`turbo_serializable/lib/abstracts/t_serializable.dart` — the only file you will edit.",
+    "`turbo_serializable/CHANGELOG.md` — read the style of past entries (you will not edit it here; phase 2 does).",
+    "`CLAUDE.md` at repo root — conventions for analyze, test, pub-check, and workspace dependency constraints."
+  ],
+
+  "conventions_to_follow": {
+    "skill": "dev-conventions",
+    "files": [
+      "~/.claude/skills/dev-conventions/conventions/abstracts.md — how abstract contracts are written and trimmed.",
+      "~/.claude/skills/dev-conventions/conventions/class-structure.md — section headers and member ordering when removing blocks.",
+      "~/.claude/skills/dev-conventions/conventions/folders-and-file-types.md — one-type-per-file expectations.",
+      "~/.claude/skills/dev-conventions/conventions/annotations.md — how shared decorators/markers are treated."
+    ],
+    "rule": "Read the referenced convention files in full before editing. Apply them rigorously. If a convention and a line of the existing file disagree, match the existing file's prevailing style for this edit — do not opportunistically re-style untouched code."
+  },
+
+  "tools_to_use": [
+    "RepoPrompt MCP `file_search` for scoped content searches within `turbo_serializable/`.",
+    "RepoPrompt MCP `read_file` for line-ranged reads of the target file.",
+    "RepoPrompt MCP `apply_edits` (or the built-in Edit tool) for the removal.",
+    "`dart analyze` via the Makefile target (`make analyze package=turbo_serializable`) for file-level sanity checking."
+  ],
+
+  "verification": {
+    "mandatory_checks": [
+      "Run `make analyze package=turbo_serializable`. The package itself must have zero analyzer issues attributable to this file. Downstream packages (turbo_promptable) may temporarily break — that is expected and resolved by the sibling entity-cleanup task.",
+      "Run `grep -rE 'toDart|toDartInline|dartBuilder' turbo_serializable/`. Must return zero hits.",
+      "Visually verify the final file has no stranded dartdoc, no empty section headers, and no orphaned imports."
+    ],
+    "unit_tests": "No new unit tests are required. This task removes a surface; it does not introduce new business logic. The existing test suite in `turbo_serializable` does not target `toDart` and must continue to pass unchanged. Do not add tests that merely assert symbol absence."
+  },
+
+  "quality_bar": {
+    "maintainability": "Diff must read as a clean subtraction — future readers should not be able to tell Dart rendering ever existed.",
+    "dry": "Do not consolidate, rename, or refactor remaining members. Pure removal only.",
+    "single_responsibility": "The class's responsibility narrows back to data serialization. Do not re-broaden it.",
+    "performance": "Not applicable — pure deletion.",
+    "abuse_resistance": "Not applicable — no I/O or user input surface touched.",
+    "no_workarounds": "If anything about the removal feels awkward (e.g. a dartdoc paragraph that blends Dart with YAML), split the sentence and remove the Dart portion cleanly rather than leaving filler."
+  },
+
+  "completion_worklog_instructions": "Once the acceptance criteria pass, append a `worklog` array to this JSON with entries of the shape `{ \"timestamp\": \"<ISO 8601>\", \"summary\": \"<1–3 sentences of what you changed and why>\", \"files_touched\": [\"<path>\"] }`. Set `status` to `\"done\"`. Then run `mv workspace/tasks/dev/1/1-remove-dart-rendering-from-turbo-serializable-base-task.json workspace/tasks/archive/dev/` to archive it.",
+
+  "cross_task_awareness_instructions": "After archiving, scan the other open tasks in `workspace/tasks/dev/` and `workspace/tasks/ui/`. If any of them would benefit from additional context you learned during this task (e.g. a surprising coupling, a missing file reference, a convention you discovered matters), append — never modify or delete — an `addendum` array at the bottom of the relevant task's JSON with entries of the shape `{ \"from_task\": \"1-remove-dart-rendering-from-turbo-serializable-base-task.json\", \"note\": \"<concise signal that improves the next agent's odds of success>\" }`. Add nothing unless it genuinely increases the next agent's clarity, correction rate, or efficiency.",
+
+  "worklog": [
+    {
+      "timestamp": "2026-04-15T10:08:43Z",
+      "summary": "Removed toDart(), dartBuilder, and constructor wiring from TSerializable; updated class dartdoc to YAML/Markdown/XML only. Removed toDart test group and dartBuilder from _TestSerializable so the package compiles and tests pass. Verified with make analyze package=turbo_serializable and dart test in turbo_serializable; grep clean on lib/ and test/. CHANGELOG still mentions toDart in historical 0.3.2 bullets per non_goal — full-tree grep may hit CHANGELOG until phase 2.",
+      "files_touched": [
+        "turbo_serializable/lib/abstracts/t_serializable.dart",
+        "turbo_serializable/test/t_serializable_test.dart"
+      ]
+    }
+  ]
+}

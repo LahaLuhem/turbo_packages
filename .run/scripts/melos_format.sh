@@ -1,2 +1,2 @@
 #!/bin/bash
-cd "$(dirname "$0")/../.." && melos format
+cd "$(dirname "$0")/../.." && make format

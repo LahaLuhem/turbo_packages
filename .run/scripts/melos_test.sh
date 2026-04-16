@@ -1,2 +1,2 @@
 #!/bin/bash
-cd "$(dirname "$0")/../.." && melos test
+cd "$(dirname "$0")/../.." && make test
