@@ -8,7 +8,6 @@ part of 'input.dart';
 
 Input _$InputFromJson(Map<String, dynamic> json) => Input(
   name: json['name'] as String,
-  request: json['request'] as String,
   context: (json['context'] as List<dynamic>?)
       ?.map((e) => Context.fromJson(e as Map<String, dynamic>))
       .toList(),
@@ -18,9 +17,6 @@ Input _$InputFromJson(Map<String, dynamic> json) => Input(
   issues: (json['issues'] as List<dynamic>?)
       ?.map((e) => Issue.fromJson(e as Map<String, dynamic>))
       .toList(),
-  checklists: (json['checklists'] as List<dynamic>?)
-      ?.map((e) => Checklist.fromJson(e as Map<String, dynamic>))
-      .toList(),
   specs: (json['specs'] as List<dynamic>?)
       ?.map((e) => Spec.fromJson(e as Map<String, dynamic>))
       .toList(),
@@ -28,10 +24,8 @@ Input _$InputFromJson(Map<String, dynamic> json) => Input(
 
 Map<String, dynamic> _$InputToJson(Input instance) => <String, dynamic>{
   'name': instance.name,
-  'checklists': ?instance.checklists?.map((e) => e.toJson()).toList(),
   'context': ?instance.context?.map((e) => e.toJson()).toList(),
   'goals': ?instance.goals?.map((e) => e.toJson()).toList(),
   'issues': ?instance.issues?.map((e) => e.toJson()).toList(),
   'specs': ?instance.specs?.map((e) => e.toJson()).toList(),
-  'request': instance.request,
 };

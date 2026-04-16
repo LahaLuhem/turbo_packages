@@ -9,11 +9,13 @@ class ToolParameterOption {
   const ToolParameterOption({
     required this.name,
     this.description,
+    this.isRequired,
     this.isDefault,
   });
 
   final String name;
   final String? description;
+  final bool? isRequired;
   final bool? isDefault;
 
   factory ToolParameterOption.fromJson(Map<String, dynamic> json) =>

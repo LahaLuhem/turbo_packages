@@ -7,27 +7,24 @@ import 'package:turbo_promptable/workspace/models/root/spec.dart';
 
 part 'input.g.dart';
 
-/// The input side of an [Activity]: a [request], [fields], and optional context.
+/// The request side of a [Step] or [Activity]: a prose [request] describing
+/// exactly what the step receives, plus optional structured context.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Input extends TPromptable {
   const Input({
     required super.name,
     super.metaData,
     super.config,
-    required this.request,
     this.context,
     this.goals,
     this.issues,
-    this.checklists,
     this.specs,
   });
 
-  final List<Checklist>? checklists;
   final List<Context>? context;
   final List<Goal>? goals;
   final List<Issue>? issues;
   final List<Spec>? specs;
-  final String request;
 
   factory Input.fromJson(Map<String, dynamic> json) => _$InputFromJson(json);
   @override

@@ -17,7 +17,7 @@ class Step extends TPromptable {
   });
 
   final Input input;
-  final List<Instruction>? instructions;
+  final String? instructions;
   final Output output;
 
   factory Step.fromJson(Map<String, dynamic> json) => _$StepFromJson(json);

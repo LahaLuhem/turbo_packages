@@ -9,7 +9,7 @@ part of 'activity.dart';
 Activity _$ActivityFromJson(Map<String, dynamic> json) => Activity(
   name: json['name'] as String,
   input: Input.fromJson(json['input'] as Map<String, dynamic>),
-  output: Output.fromJson(json['output'] as Map<String, dynamic>),
+  output: Output<Object>.fromJson(json['output'] as Map<String, dynamic>),
   workflow: Workflow.fromJson(json['workflow'] as Map<String, dynamic>),
 );
 

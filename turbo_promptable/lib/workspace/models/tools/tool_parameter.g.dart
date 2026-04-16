@@ -12,7 +12,6 @@ ToolParameter _$ToolParameterFromJson(Map<String, dynamic> json) =>
       description: json['description'] as String?,
       type: json['type'] as String?,
       required: json['required'] as bool?,
-      defaultValue: json['defaultValue'] as String?,
       options: (json['options'] as List<dynamic>?)
           ?.map((e) => ToolParameterOption.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -24,6 +23,5 @@ Map<String, dynamic> _$ToolParameterToJson(ToolParameter instance) =>
       'description': ?instance.description,
       'type': ?instance.type,
       'required': ?instance.required,
-      'defaultValue': ?instance.defaultValue,
       'options': ?instance.options?.map((e) => e.toJson()).toList(),
     };

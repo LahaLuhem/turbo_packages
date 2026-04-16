@@ -14,7 +14,6 @@ class ToolParameter {
     this.description,
     this.type,
     this.required,
-    this.defaultValue,
     this.options,
   });
 
@@ -22,7 +21,6 @@ class ToolParameter {
   final String? description;
   final String? type;
   final bool? required;
-  final String? defaultValue;
   final List<ToolParameterOption>? options;
 
   factory ToolParameter.fromJson(Map<String, dynamic> json) =>

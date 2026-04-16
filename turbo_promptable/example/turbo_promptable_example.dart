@@ -14,12 +14,14 @@ void main() {
     steps: [
       Step(
         name: 'Analyse',
+        instructions: 'Review the source code for quality issues based on the provided instructions.',
         input: Input(
           name: 'Source Code',
-          request: 'Analyse the provided source code for quality issues.',
         ),
-        instructions: [instruction],
-        output: Output(name: 'Analysis Report'),
+        output: Output(
+          name: 'Analysis Report',
+          schema: 'A detailed report of code quality issues and suggestions.',
+        ),
       ),
     ],
   );

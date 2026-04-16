@@ -124,4 +124,40 @@ enum TCliTool {
         return '--sources';
     }
   }
+
+  /// Non-interactive launch shape for `SpawnDeliveryMode.headless`.
+  ///
+  /// When populated (dev-13), the first element is the executable and
+  /// the remaining elements are fixed leading flags that go before any
+  /// per-spawn arguments (system prompt, request file). `null` means
+  /// this tool has not yet been wired for headless operation; the
+  /// spawn pipeline raises a dedicated domain exception in that case.
+  List<String>? get headlessCommand {
+    switch (this) {
+      case TCliTool.claude:
+        return null;
+      case TCliTool.codex:
+        return null;
+      case TCliTool.cursor:
+        return null;
+    }
+  }
+
+  /// Flag that precedes the per-spawn request-file path in the
+  /// headless argv.
+  ///
+  /// When populated (dev-13), the resulting argv is
+  /// `[...headlessCommand, systemPromptFlag, <systemPromptPath>,
+  /// requestFlag, <requestFilePath>]`. `null` means this tool has not
+  /// yet been wired for headless operation.
+  String? get requestFlag {
+    switch (this) {
+      case TCliTool.claude:
+        return null;
+      case TCliTool.codex:
+        return null;
+      case TCliTool.cursor:
+        return null;
+    }
+  }
 }
