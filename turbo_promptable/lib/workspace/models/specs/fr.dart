@@ -9,7 +9,6 @@ class TFR extends Requirement {
   TFR({
     required super.name,
     super.metaData,
-    super.config,
     super.abilityIds,
     super.journeyIds,
     super.scenarioIds,

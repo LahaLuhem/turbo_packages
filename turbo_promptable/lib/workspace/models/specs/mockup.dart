@@ -24,7 +24,6 @@ class Mockup extends Spec
   const Mockup({
     required super.name,
     super.metaData,
-    super.config,
     this.abilityIds,
     this.featureIds,
     this.moduleIds,

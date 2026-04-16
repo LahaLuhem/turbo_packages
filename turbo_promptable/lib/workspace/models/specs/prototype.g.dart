@@ -8,6 +8,9 @@ part of 'prototype.dart';
 
 Prototype _$PrototypeFromJson(Map<String, dynamic> json) => Prototype(
   name: json['name'] as String,
+  metaData: json['metaData'] == null
+      ? null
+      : TMetaData.fromJson(json['metaData'] as Map<String, dynamic>),
   featureIds: (json['featureIds'] as List<dynamic>?)
       ?.map((e) => e as String)
       .toList(),
@@ -34,6 +37,7 @@ Prototype _$PrototypeFromJson(Map<String, dynamic> json) => Prototype(
 
 Map<String, dynamic> _$PrototypeToJson(Prototype instance) => <String, dynamic>{
   'name': instance.name,
+  'metaData': ?instance.metaData?.toJson(),
   'featureIds': ?instance.featureIds,
   'moduleIds': ?instance.moduleIds,
   'abilityIds': ?instance.abilityIds,

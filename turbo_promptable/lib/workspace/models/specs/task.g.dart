@@ -8,6 +8,9 @@ part of 'task.dart';
 
 Task _$TaskFromJson(Map<String, dynamic> json) => Task(
   name: json['name'] as String,
+  metaData: json['metaData'] == null
+      ? null
+      : TMetaData.fromJson(json['metaData'] as Map<String, dynamic>),
   issueIds: (json['issueIds'] as List<dynamic>?)
       ?.map((e) => e as String)
       .toList(),
@@ -22,6 +25,7 @@ Task _$TaskFromJson(Map<String, dynamic> json) => Task(
 
 Map<String, dynamic> _$TaskToJson(Task instance) => <String, dynamic>{
   'name': instance.name,
+  'metaData': ?instance.metaData?.toJson(),
   'issueIds': ?instance.issueIds,
   'prdIds': ?instance.prdIds,
   'mockupIds': ?instance.mockupIds,

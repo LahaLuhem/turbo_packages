@@ -1,5 +1,4 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:turbo_promptable/workspace/models/root/checklist.dart';
 import 'package:turbo_promptable/workspace/models/root/context.dart';
 import 'package:turbo_promptable/workspace/models/root/goal.dart';
 import 'package:turbo_promptable/workspace/models/root/issue.dart';
@@ -14,7 +13,6 @@ class Input extends TPromptable {
   const Input({
     required super.name,
     super.metaData,
-    super.config,
     this.context,
     this.goals,
     this.issues,

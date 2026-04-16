@@ -5,16 +5,14 @@ class TMdFactory<T extends TWriteable> {
   final T writeable;
 
   final TMdFrontmatterBuilder<T>? mdFrontmatterBuilder;
-  final TMdSectionsBuilder<T>? mdSectionsBuilder;
   final TMdBodyBuilder<T>? mdBodyBuilder;
-  final TMdFileBuilder<T>? mdFileBuilder;
+  final TMdFileBuilder<T>? mdBuilder;
 
   TMdFactory({
     required this.writeable,
     this.mdFrontmatterBuilder,
-    this.mdSectionsBuilder,
     this.mdBodyBuilder,
-    this.mdFileBuilder,
+    this.mdBuilder,
   });
 
   TMdFrontmatter buildFrontmatter({
@@ -23,32 +21,21 @@ class TMdFactory<T extends TWriteable> {
       (mdFrontmatterBuilder ?? this.mdFrontmatterBuilder)?.call(writeable) ??
       {};
 
-  List<TMdSection> buildSections({
-    TMdSectionsBuilder? mdSectionsBuilder,
-  }) =>
-      (mdSectionsBuilder ?? this.mdSectionsBuilder)?.call(
-        writeable,
-        buildFrontmatter(),
-      ) ??
-      [];
-
   TMdBody buildBody({
     TMdBodyBuilder? mdBodyBuilder,
   }) =>
       (mdBodyBuilder ?? this.mdBodyBuilder)?.call(
         writeable,
         buildFrontmatter(),
-        buildSections(),
       ) ??
       '';
 
   TMdFile build({
     TMdFileBuilder? mdBuilder,
   }) =>
-      (mdBuilder ?? mdFileBuilder)?.call(
+      (mdBuilder ?? this.mdBuilder)?.call(
         writeable,
         buildFrontmatter(),
-        buildSections(),
         buildBody(),
       ) ??
       '';

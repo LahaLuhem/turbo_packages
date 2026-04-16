@@ -8,7 +8,6 @@ class Actor extends Context {
   const Actor({
     required super.name,
     super.metaData,
-    super.config,
   });
 
   factory Actor.fromJson(Map<String, dynamic> json) => _$ActorFromJson(json);

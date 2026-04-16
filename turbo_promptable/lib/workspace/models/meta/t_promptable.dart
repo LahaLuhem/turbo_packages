@@ -1,6 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:turbo_promptable/workspace/models/meta/t_meta_data.dart';
-import 'package:turbo_serializable/extensions/ts_map_extenion.dart';
 import 'package:turbo_serializable/extensions/ts_string_extension.dart';
 import 'package:turbo_serializable/markdown/factories/t_md_factory.dart';
 import 'package:turbo_serializable/turbo_serializable.dart';
@@ -37,11 +36,8 @@ abstract class TPromptable extends TSerializable {
   TMdFactory<TWriteable> get mdFactory => TMdFactory<TPromptable>(
     writeable: this,
     mdFrontmatterBuilder: (writeable) => writeable.mdFrontMatter(),
-    mdSectionsBuilder: (writeable, frontmatter) => [
-      mdBody() ?? ,
-    ],
-    mdBodyBuilder: (writeable, frontmatter, sections) => sections.join('\n\n'),
-    mdFileBuilder: (writeable, frontmatter, sections, body) =>
+    mdBodyBuilder: (writeable, frontmatter) => writeable.toMd(),
+    mdBuilder: (writeable, frontmatter, body) =>
         '$frontmatter\n\n'
         '$body',
   );

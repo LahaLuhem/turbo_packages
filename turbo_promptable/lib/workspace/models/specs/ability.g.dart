@@ -8,6 +8,9 @@ part of 'ability.dart';
 
 Ability _$AbilityFromJson(Map<String, dynamic> json) => Ability(
   name: json['name'] as String,
+  metaData: json['metaData'] == null
+      ? null
+      : TMetaData.fromJson(json['metaData'] as Map<String, dynamic>),
   featureIds: (json['featureIds'] as List<dynamic>)
       .map((e) => e as String)
       .toList(),
@@ -18,6 +21,7 @@ Ability _$AbilityFromJson(Map<String, dynamic> json) => Ability(
 
 Map<String, dynamic> _$AbilityToJson(Ability instance) => <String, dynamic>{
   'name': instance.name,
+  'metaData': ?instance.metaData?.toJson(),
   'featureIds': instance.featureIds,
   'moduleIds': instance.moduleIds,
 };

@@ -8,6 +8,9 @@ part of 'script.dart';
 
 Script _$ScriptFromJson(Map<String, dynamic> json) => Script(
   name: json['name'] as String,
+  metaData: json['metaData'] == null
+      ? null
+      : TMetaData.fromJson(json['metaData'] as Map<String, dynamic>),
   description: json['description'] as String?,
   setup: (json['setup'] as List<dynamic>?)?.map((e) => e as String).toList(),
   rules: (json['rules'] as List<dynamic>?)?.map((e) => e as String).toList(),
@@ -22,6 +25,7 @@ Script _$ScriptFromJson(Map<String, dynamic> json) => Script(
 
 Map<String, dynamic> _$ScriptToJson(Script instance) => <String, dynamic>{
   'name': instance.name,
+  'metaData': ?instance.metaData?.toJson(),
   'description': ?instance.description,
   'setup': ?instance.setup,
   'rules': ?instance.rules,

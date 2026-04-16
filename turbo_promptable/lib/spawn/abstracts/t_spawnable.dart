@@ -11,7 +11,6 @@ import 'package:turbo_promptable/turbo_promptable.dart';
 abstract class TSpawnable extends TPromptable {
   const TSpawnable({
     required super.name,
-    super.config,
     super.metaData,
     this.cliTool,
     this.command,

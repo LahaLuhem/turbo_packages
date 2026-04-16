@@ -8,7 +8,6 @@ class Stakeholder extends Context {
   const Stakeholder({
     required super.name,
     super.metaData,
-    super.config,
   });
 
   factory Stakeholder.fromJson(Map<String, dynamic> json) =>

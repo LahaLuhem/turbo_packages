@@ -10,7 +10,6 @@ class Spec extends TPromptable {
   const Spec({
     required super.name,
     super.metaData,
-    super.config,
   });
 
   factory Spec.fromJson(Map<String, dynamic> json) => _$SpecFromJson(json);

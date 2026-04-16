@@ -9,7 +9,6 @@ class TJourney extends Spec {
   const TJourney({
     required super.name,
     super.metaData,
-    super.config,
   });
 
   factory TJourney.fromJson(Map<String, dynamic> json) =>

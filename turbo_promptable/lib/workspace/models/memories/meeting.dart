@@ -8,7 +8,6 @@ class Meeting extends Memory {
   const Meeting({
     required super.name,
     super.metaData,
-    super.config,
   });
 
   factory Meeting.fromJson(Map<String, dynamic> json) =>

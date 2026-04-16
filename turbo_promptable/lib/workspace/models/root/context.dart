@@ -10,7 +10,6 @@ class Context extends TPromptable {
   const Context({
     required super.name,
     super.metaData,
-    super.config,
   });
 
   factory Context.fromJson(Map<String, dynamic> json) =>

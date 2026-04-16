@@ -10,7 +10,6 @@ class Step extends TPromptable {
   const Step({
     required super.name,
     super.metaData,
-    super.config,
     required this.input,
     required this.instructions,
     required this.output,

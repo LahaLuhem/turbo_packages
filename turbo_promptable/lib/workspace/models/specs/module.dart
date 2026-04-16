@@ -10,7 +10,6 @@ class Module extends Spec implements OfProjects {
   const Module({
     required super.name,
     super.metaData,
-    super.config,
     required this.projectIds,
   });
 

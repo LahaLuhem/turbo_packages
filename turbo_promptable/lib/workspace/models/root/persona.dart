@@ -1,5 +1,4 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:turbo_promptable/core/models/t_config.dart';
 import 'package:turbo_promptable/spawn/enums/t_cli_tool.dart';
 import 'package:turbo_promptable/spawn/enums/t_prompt_delivery.dart';
 import 'package:turbo_promptable/workspace/models/meta/t_meta_data.dart';
@@ -22,7 +21,6 @@ class Persona extends Role {
   const Persona({
     required super.name,
     super.metaData,
-    super.config,
     required super.expertise,
     super.activities,
     super.checklists,
@@ -43,7 +41,6 @@ class Persona extends Role {
     required String identity,
     String? name,
     TMetaData? metaData,
-    TConfig? config,
     String? expertise,
     List<Activity>? activities,
     List<Checklist>? checklists,
@@ -54,7 +51,6 @@ class Persona extends Role {
   }) : this(
          name: name ?? role.name,
          metaData: metaData ?? role.metaData,
-         config: config ?? role.config,
          expertise: expertise ?? role.expertise,
          activities: activities ?? role.activities,
          checklists: checklists ?? role.checklists,
@@ -64,33 +60,6 @@ class Persona extends Role {
          workflows: workflows ?? role.workflows,
          identity: identity,
        );
-
-  @override
-  Persona copyWith({
-    String? name,
-    TMetaData? metaData,
-    TConfig? config,
-    String? expertise,
-    List<Activity>? activities,
-    List<Checklist>? checklists,
-    List<Instruction>? instructions,
-    List<Template>? templates,
-    List<Tool>? tools,
-    List<Workflow>? workflows,
-    String? identity,
-  }) => Persona(
-    name: name ?? this.name,
-    metaData: metaData ?? this.metaData,
-    config: config ?? this.config,
-    expertise: expertise ?? this.expertise,
-    activities: activities ?? this.activities,
-    checklists: checklists ?? this.checklists,
-    instructions: instructions ?? this.instructions,
-    templates: templates ?? this.templates,
-    tools: tools ?? this.tools,
-    workflows: workflows ?? this.workflows,
-    identity: identity ?? this.identity,
-  );
 
   factory Persona.fromJson(Map<String, dynamic> json) =>
       _$PersonaFromJson(json);

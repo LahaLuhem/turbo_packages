@@ -8,7 +8,6 @@ class AcceptanceCriteria extends Checklist {
   const AcceptanceCriteria({
     required super.name,
     required super.items,
-    super.config,
   });
 
   factory AcceptanceCriteria.fromJson(Map<String, dynamic> json) =>

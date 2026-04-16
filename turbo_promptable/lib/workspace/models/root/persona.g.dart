@@ -8,6 +8,9 @@ part of 'persona.dart';
 
 Persona _$PersonaFromJson(Map<String, dynamic> json) => Persona(
   name: json['name'] as String,
+  metaData: json['metaData'] == null
+      ? null
+      : TMetaData.fromJson(json['metaData'] as Map<String, dynamic>),
   expertise: json['expertise'] as String,
   activities: (json['activities'] as List<dynamic>?)
       ?.map((e) => Activity.fromJson(e as Map<String, dynamic>))
@@ -37,6 +40,7 @@ Persona _$PersonaFromJson(Map<String, dynamic> json) => Persona(
 
 Map<String, dynamic> _$PersonaToJson(Persona instance) => <String, dynamic>{
   'name': instance.name,
+  'metaData': ?instance.metaData?.toJson(),
   'command': ?instance.command,
   'cliTool': ?_$TCliToolEnumMap[instance.cliTool],
   'promptDelivery': _$TPromptDeliveryEnumMap[instance.promptDelivery]!,

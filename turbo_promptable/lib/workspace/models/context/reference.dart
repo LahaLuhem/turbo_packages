@@ -8,7 +8,6 @@ class Reference extends TPromptable {
   const Reference({
     required super.name,
     super.metaData,
-    super.config,
   });
 
   factory Reference.fromJson(Map<String, dynamic> json) =>

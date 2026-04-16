@@ -7,7 +7,15 @@ part of 'documentation.dart';
 // **************************************************************************
 
 Documentation _$DocumentationFromJson(Map<String, dynamic> json) =>
-    Documentation(name: json['name'] as String);
+    Documentation(
+      name: json['name'] as String,
+      metaData: json['metaData'] == null
+          ? null
+          : TMetaData.fromJson(json['metaData'] as Map<String, dynamic>),
+    );
 
 Map<String, dynamic> _$DocumentationToJson(Documentation instance) =>
-    <String, dynamic>{'name': instance.name};
+    <String, dynamic>{
+      'name': instance.name,
+      'metaData': ?instance.metaData?.toJson(),
+    };

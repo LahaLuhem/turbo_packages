@@ -8,6 +8,9 @@ part of 'convention.dart';
 
 Convention _$ConventionFromJson(Map<String, dynamic> json) => Convention(
   name: json['name'] as String,
+  metaData: json['metaData'] == null
+      ? null
+      : TMetaData.fromJson(json['metaData'] as Map<String, dynamic>),
   principles: (json['principles'] as List<dynamic>?)
       ?.map((e) => e as String)
       .toList(),
@@ -35,6 +38,7 @@ Convention _$ConventionFromJson(Map<String, dynamic> json) => Convention(
 Map<String, dynamic> _$ConventionToJson(Convention instance) =>
     <String, dynamic>{
       'name': instance.name,
+      'metaData': ?instance.metaData?.toJson(),
       'principles': ?instance.principles,
       'rules': ?instance.rules,
       'reasons': ?instance.reasons,

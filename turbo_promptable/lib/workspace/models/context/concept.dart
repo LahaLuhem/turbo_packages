@@ -8,7 +8,6 @@ class Concept extends Context {
   const Concept({
     required super.name,
     super.metaData,
-    super.config,
   });
 
   factory Concept.fromJson(Map<String, dynamic> json) =>

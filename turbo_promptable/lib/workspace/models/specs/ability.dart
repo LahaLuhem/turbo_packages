@@ -12,7 +12,6 @@ class Ability extends Spec implements OfFeatures, OfModules {
   const Ability({
     required super.name,
     super.metaData,
-    super.config,
     required this.featureIds,
     required this.moduleIds,
   });

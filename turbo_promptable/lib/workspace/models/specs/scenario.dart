@@ -11,7 +11,6 @@ class TScenario extends Spec implements OfAbilities, OfJourneys {
   const TScenario({
     required super.name,
     super.metaData,
-    super.config,
     this.abilityIds,
     this.journeyIds,
   });

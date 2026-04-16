@@ -8,6 +8,9 @@ part of 'cli.dart';
 
 Cli _$CliFromJson(Map<String, dynamic> json) => Cli(
   name: json['name'] as String,
+  metaData: json['metaData'] == null
+      ? null
+      : TMetaData.fromJson(json['metaData'] as Map<String, dynamic>),
   description: json['description'] as String?,
   setup: (json['setup'] as List<dynamic>?)?.map((e) => e as String).toList(),
   rules: (json['rules'] as List<dynamic>?)?.map((e) => e as String).toList(),
@@ -22,6 +25,7 @@ Cli _$CliFromJson(Map<String, dynamic> json) => Cli(
 
 Map<String, dynamic> _$CliToJson(Cli instance) => <String, dynamic>{
   'name': instance.name,
+  'metaData': ?instance.metaData?.toJson(),
   'description': ?instance.description,
   'setup': ?instance.setup,
   'rules': ?instance.rules,

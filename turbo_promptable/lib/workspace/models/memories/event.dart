@@ -8,7 +8,6 @@ class Event extends Memory {
   const Event({
     required super.name,
     super.metaData,
-    super.config,
   });
 
   factory Event.fromJson(Map<String, dynamic> json) => _$EventFromJson(json);

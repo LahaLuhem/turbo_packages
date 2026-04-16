@@ -19,6 +19,9 @@ Agent _$AgentFromJson(Map<String, dynamic> json) => Agent(
   instructions: (json['instructions'] as List<dynamic>?)
       ?.map((e) => Instruction.fromJson(e as Map<String, dynamic>))
       .toList(),
+  metaData: json['metaData'] == null
+      ? null
+      : TMetaData.fromJson(json['metaData'] as Map<String, dynamic>),
   templates: (json['templates'] as List<dynamic>?)
       ?.map((e) => Template.fromJson(e as Map<String, dynamic>))
       .toList(),
@@ -37,6 +40,7 @@ Agent _$AgentFromJson(Map<String, dynamic> json) => Agent(
 
 Map<String, dynamic> _$AgentToJson(Agent instance) => <String, dynamic>{
   'name': instance.name,
+  'metaData': ?instance.metaData?.toJson(),
   'command': ?instance.command,
   'cliTool': ?_$TCliToolEnumMap[instance.cliTool],
   'promptDelivery': _$TPromptDeliveryEnumMap[instance.promptDelivery]!,

@@ -8,7 +8,6 @@ class Project extends Context {
   const Project({
     required super.name,
     super.metaData,
-    super.config,
   });
 
   factory Project.fromJson(Map<String, dynamic> json) =>

@@ -9,7 +9,6 @@ class TNFR extends Requirement {
   TNFR({
     required super.name,
     super.metaData,
-    super.config,
     super.abilityIds,
     super.journeyIds,
     super.scenarioIds,

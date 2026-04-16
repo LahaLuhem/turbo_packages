@@ -8,7 +8,6 @@ class Constraints extends Checklist {
   const Constraints({
     required super.name,
     required super.items,
-    super.config,
   });
 
   factory Constraints.fromJson(Map<String, dynamic> json) =>

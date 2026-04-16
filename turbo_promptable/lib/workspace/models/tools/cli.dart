@@ -8,7 +8,6 @@ class Cli extends Tool {
   const Cli({
     required super.name,
     super.metaData,
-    super.config,
     super.description,
     super.setup,
     super.rules,

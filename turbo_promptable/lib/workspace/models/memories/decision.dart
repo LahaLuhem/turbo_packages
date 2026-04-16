@@ -8,7 +8,6 @@ class Decision extends Memory {
   const Decision({
     required super.name,
     super.metaData,
-    super.config,
   });
 
   factory Decision.fromJson(Map<String, dynamic> json) =>

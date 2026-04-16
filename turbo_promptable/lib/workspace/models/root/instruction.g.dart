@@ -8,6 +8,9 @@ part of 'instruction.dart';
 
 Instruction _$InstructionFromJson(Map<String, dynamic> json) => Instruction(
   name: json['name'] as String,
+  metaData: json['metaData'] == null
+      ? null
+      : TMetaData.fromJson(json['metaData'] as Map<String, dynamic>),
   principles: (json['principles'] as List<dynamic>?)
       ?.map((e) => e as String)
       .toList(),
@@ -35,6 +38,7 @@ Instruction _$InstructionFromJson(Map<String, dynamic> json) => Instruction(
 Map<String, dynamic> _$InstructionToJson(Instruction instance) =>
     <String, dynamic>{
       'name': instance.name,
+      'metaData': ?instance.metaData?.toJson(),
       'principles': ?instance.principles,
       'rules': ?instance.rules,
       'reasons': ?instance.reasons,

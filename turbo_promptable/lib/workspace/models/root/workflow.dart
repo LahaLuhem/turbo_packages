@@ -10,7 +10,6 @@ class Workflow extends TPromptable {
   const Workflow({
     required super.name,
     super.metaData,
-    super.config,
     required this.steps,
   });
 

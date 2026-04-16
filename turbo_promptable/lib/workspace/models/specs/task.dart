@@ -13,7 +13,6 @@ class Task extends Spec implements OfIssues, OfPrds, OfMockups, OfPrototypes {
   const Task({
     required super.name,
     super.metaData,
-    super.config,
     this.issueIds,
     this.prdIds,
     this.mockupIds,

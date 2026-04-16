@@ -10,7 +10,6 @@ part 'checklist.g.dart';
 class Checklist extends TPromptable {
   const Checklist({
     required super.name,
-    super.config,
     super.metaData,
     required this.items,
   });

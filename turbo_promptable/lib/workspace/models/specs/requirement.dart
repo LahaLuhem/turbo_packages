@@ -14,7 +14,6 @@ class Requirement extends Spec implements OfAbilities, OfJourneys, OfScenarios {
   const Requirement({
     required super.name,
     super.metaData,
-    super.config,
     required this.abilityIds,
     required this.journeyIds,
     required this.scenarioIds,

@@ -26,7 +26,6 @@ class Prototype extends Spec
   const Prototype({
     required super.name,
     super.metaData,
-    super.config,
     this.featureIds,
     this.moduleIds,
     this.abilityIds,

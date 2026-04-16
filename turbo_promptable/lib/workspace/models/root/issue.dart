@@ -8,7 +8,6 @@ class Issue extends TPromptable {
   const Issue({
     required super.name,
     super.metaData,
-    super.config,
   });
 
   factory Issue.fromJson(Map<String, dynamic> json) => _$IssueFromJson(json);

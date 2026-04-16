@@ -8,7 +8,6 @@ class Subject extends Context {
   const Subject({
     required super.name,
     super.metaData,
-    super.config,
   });
 
   factory Subject.fromJson(Map<String, dynamic> json) =>

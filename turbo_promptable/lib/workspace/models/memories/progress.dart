@@ -8,7 +8,6 @@ class Progress extends Memory {
   const Progress({
     required super.name,
     super.metaData,
-    super.config,
   });
 
   factory Progress.fromJson(Map<String, dynamic> json) =>

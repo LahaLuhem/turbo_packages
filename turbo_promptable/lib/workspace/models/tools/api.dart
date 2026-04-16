@@ -8,7 +8,6 @@ class Api extends Tool {
   const Api({
     required super.name,
     super.metaData,
-    super.config,
     super.description,
     super.setup,
     super.rules,

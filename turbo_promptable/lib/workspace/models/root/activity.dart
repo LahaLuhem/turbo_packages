@@ -14,7 +14,6 @@ class Activity extends TPromptable {
     required this.input,
     required this.output,
     required this.workflow,
-    super.config,
     super.metaData,
   });
 

@@ -19,7 +19,6 @@ class Tool extends TPromptable {
   const Tool({
     required super.name,
     super.metaData,
-    super.config,
     this.description,
     this.setup,
     this.rules,

@@ -8,7 +8,6 @@ class Mcp extends Tool {
   const Mcp({
     required super.name,
     super.metaData,
-    super.config,
     super.description,
     super.setup,
     super.rules,

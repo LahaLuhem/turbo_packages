@@ -8,6 +8,9 @@ part of 'requirement.dart';
 
 Requirement _$RequirementFromJson(Map<String, dynamic> json) => Requirement(
   name: json['name'] as String,
+  metaData: json['metaData'] == null
+      ? null
+      : TMetaData.fromJson(json['metaData'] as Map<String, dynamic>),
   abilityIds: (json['abilityIds'] as List<dynamic>?)
       ?.map((e) => e as String)
       .toList(),
@@ -22,6 +25,7 @@ Requirement _$RequirementFromJson(Map<String, dynamic> json) => Requirement(
 Map<String, dynamic> _$RequirementToJson(Requirement instance) =>
     <String, dynamic>{
       'name': instance.name,
+      'metaData': ?instance.metaData?.toJson(),
       'abilityIds': ?instance.abilityIds,
       'journeyIds': ?instance.journeyIds,
       'scenarioIds': ?instance.scenarioIds,

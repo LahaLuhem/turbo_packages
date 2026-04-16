@@ -4,7 +4,6 @@ library turbo_promptable;
 
 export 'core/constants/tp_keys.dart';
 export 'core/extensions/t_collection_extensions.dart';
-export 'core/models/t_config.dart';
 export 'core/models/t_embed_type.dart';
 export 'core/models/t_md_section.dart';
 export 'core/models/t_render_type.dart';

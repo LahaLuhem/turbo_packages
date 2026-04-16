@@ -10,7 +10,6 @@ class Feature extends Spec implements OfProjects {
   const Feature({
     required super.name,
     super.metaData,
-    super.config,
     required this.projectIds,
   });
 

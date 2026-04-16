@@ -12,7 +12,6 @@ class Role extends TSpawnable {
   const Role({
     required super.name,
     super.metaData,
-    super.config,
     super.cliTool,
     super.command,
     super.promptDelivery,
@@ -41,7 +40,6 @@ class Role extends TSpawnable {
   Role copyWith({
     String? name,
     TMetaData? metaData,
-    TConfig? config,
     String? expertise,
     List<Activity>? activities,
     List<Checklist>? checklists,
@@ -52,7 +50,6 @@ class Role extends TSpawnable {
   }) => Role(
     name: name ?? this.name,
     metaData: metaData ?? this.metaData,
-    config: config ?? this.config,
     expertise: expertise ?? this.expertise,
     activities: activities ?? this.activities,
     checklists: checklists ?? this.checklists,

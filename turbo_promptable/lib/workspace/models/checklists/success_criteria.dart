@@ -8,7 +8,6 @@ class SuccessCriteria extends Checklist {
   const SuccessCriteria({
     required super.name,
     required super.items,
-    super.config,
   });
 
   factory SuccessCriteria.fromJson(Map<String, dynamic> json) =>

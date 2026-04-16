@@ -8,6 +8,9 @@ part of 'role.dart';
 
 Role _$RoleFromJson(Map<String, dynamic> json) => Role(
   name: json['name'] as String,
+  metaData: json['metaData'] == null
+      ? null
+      : TMetaData.fromJson(json['metaData'] as Map<String, dynamic>),
   cliTool: $enumDecodeNullable(_$TCliToolEnumMap, json['cliTool']),
   command: json['command'] as String?,
   promptDelivery:
@@ -36,6 +39,7 @@ Role _$RoleFromJson(Map<String, dynamic> json) => Role(
 
 Map<String, dynamic> _$RoleToJson(Role instance) => <String, dynamic>{
   'name': instance.name,
+  'metaData': ?instance.metaData?.toJson(),
   'command': ?instance.command,
   'cliTool': ?_$TCliToolEnumMap[instance.cliTool],
   'promptDelivery': _$TPromptDeliveryEnumMap[instance.promptDelivery]!,

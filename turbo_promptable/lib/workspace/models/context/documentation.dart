@@ -8,7 +8,6 @@ class Documentation extends Context {
   const Documentation({
     required super.name,
     super.metaData,
-    super.config,
   });
 
   factory Documentation.fromJson(Map<String, dynamic> json) =>

@@ -8,7 +8,6 @@ class NonGoals extends Checklist {
   const NonGoals({
     required super.name,
     required super.items,
-    super.config,
   });
 
   factory NonGoals.fromJson(Map<String, dynamic> json) =>

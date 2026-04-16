@@ -8,6 +8,9 @@ part of 'skill.dart';
 
 Skill _$SkillFromJson(Map<String, dynamic> json) => Skill(
   name: json['name'] as String,
+  metaData: json['metaData'] == null
+      ? null
+      : TMetaData.fromJson(json['metaData'] as Map<String, dynamic>),
   principles: (json['principles'] as List<dynamic>?)
       ?.map((e) => e as String)
       .toList(),
@@ -34,6 +37,7 @@ Skill _$SkillFromJson(Map<String, dynamic> json) => Skill(
 
 Map<String, dynamic> _$SkillToJson(Skill instance) => <String, dynamic>{
   'name': instance.name,
+  'metaData': ?instance.metaData?.toJson(),
   'principles': ?instance.principles,
   'rules': ?instance.rules,
   'reasons': ?instance.reasons,

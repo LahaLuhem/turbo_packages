@@ -22,7 +22,7 @@ class Output<SCHEMA extends Object> extends TPromptable {
   final SuccessCriteria? successCriteria;
   final Constraints? constraints;
   final NonGoals? nonGoals;
-  final SCHEMA schema;
+  final String schema;
 
   factory Output.fromJson(Map<String, dynamic> json) => _$OutputFromJson(json);
   @override

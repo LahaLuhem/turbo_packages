@@ -10,7 +10,6 @@ class Memory extends TPromptable {
   const Memory({
     required super.name,
     super.metaData,
-    super.config,
   });
 
   factory Memory.fromJson(Map<String, dynamic> json) => _$MemoryFromJson(json);

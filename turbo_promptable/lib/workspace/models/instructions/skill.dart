@@ -8,7 +8,6 @@ class Skill extends Instruction {
   Skill({
     required super.name,
     super.metaData,
-    super.config,
     super.principles,
     super.rules,
     super.reasons,

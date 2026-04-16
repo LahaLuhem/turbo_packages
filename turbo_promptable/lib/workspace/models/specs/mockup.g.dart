@@ -8,6 +8,9 @@ part of 'mockup.dart';
 
 Mockup _$MockupFromJson(Map<String, dynamic> json) => Mockup(
   name: json['name'] as String,
+  metaData: json['metaData'] == null
+      ? null
+      : TMetaData.fromJson(json['metaData'] as Map<String, dynamic>),
   abilityIds: (json['abilityIds'] as List<dynamic>?)
       ?.map((e) => e as String)
       .toList(),
@@ -31,6 +34,7 @@ Mockup _$MockupFromJson(Map<String, dynamic> json) => Mockup(
 
 Map<String, dynamic> _$MockupToJson(Mockup instance) => <String, dynamic>{
   'name': instance.name,
+  'metaData': ?instance.metaData?.toJson(),
   'abilityIds': ?instance.abilityIds,
   'featureIds': ?instance.featureIds,
   'moduleIds': ?instance.moduleIds,

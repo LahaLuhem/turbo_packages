@@ -8,6 +8,9 @@ part of 'api.dart';
 
 Api _$ApiFromJson(Map<String, dynamic> json) => Api(
   name: json['name'] as String,
+  metaData: json['metaData'] == null
+      ? null
+      : TMetaData.fromJson(json['metaData'] as Map<String, dynamic>),
   description: json['description'] as String?,
   setup: (json['setup'] as List<dynamic>?)?.map((e) => e as String).toList(),
   rules: (json['rules'] as List<dynamic>?)?.map((e) => e as String).toList(),
@@ -22,6 +25,7 @@ Api _$ApiFromJson(Map<String, dynamic> json) => Api(
 
 Map<String, dynamic> _$ApiToJson(Api instance) => <String, dynamic>{
   'name': instance.name,
+  'metaData': ?instance.metaData?.toJson(),
   'description': ?instance.description,
   'setup': ?instance.setup,
   'rules': ?instance.rules,

@@ -8,7 +8,6 @@ class Goal extends TPromptable {
   const Goal({
     required super.name,
     super.metaData,
-    super.config,
   });
 
   factory Goal.fromJson(Map<String, dynamic> json) => _$GoalFromJson(json);

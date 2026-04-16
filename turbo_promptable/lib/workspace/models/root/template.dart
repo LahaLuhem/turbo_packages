@@ -8,7 +8,6 @@ class Template extends TPromptable {
   const Template({
     required super.name,
     super.metaData,
-    super.config,
   });
 
   factory Template.fromJson(Map<String, dynamic> json) =>

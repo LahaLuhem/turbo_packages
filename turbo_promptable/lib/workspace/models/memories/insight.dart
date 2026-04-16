@@ -8,7 +8,6 @@ class Insight extends Memory {
   const Insight({
     required super.name,
     super.metaData,
-    super.config,
   });
 
   factory Insight.fromJson(Map<String, dynamic> json) =>

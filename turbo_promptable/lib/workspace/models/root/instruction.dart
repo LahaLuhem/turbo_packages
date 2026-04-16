@@ -11,7 +11,6 @@ class Instruction extends TPromptable {
   const Instruction({
     required super.name,
     super.metaData,
-    super.config,
     this.principles,
     this.rules,
     this.reasons,
