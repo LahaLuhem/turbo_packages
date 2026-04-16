@@ -13,14 +13,12 @@ TMetaData _$TMetaDataFromJson(Map<String, dynamic> json) => TMetaData(
       ?.map((e) => e as String)
       .toList(),
   emoji: json['emoji'] as String?,
-  tags: (json['tags'] as List<dynamic>?)
-      ?.map((e) => TTag.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  tags: (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList(),
 );
 
 Map<String, dynamic> _$TMetaDataToJson(TMetaData instance) => <String, dynamic>{
   'aliases': ?instance.aliases,
-  'tags': ?instance.tags?.map((e) => e.toJson()).toList(),
+  'tags': ?instance.tags,
   'description': ?instance.description,
   'emoji': ?instance.emoji,
   'name': ?instance.name,

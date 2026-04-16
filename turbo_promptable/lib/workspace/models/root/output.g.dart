@@ -6,9 +6,7 @@ part of 'output.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Output<SCHEMA> _$OutputFromJson<SCHEMA extends Object>(
-  Map<String, dynamic> json,
-) => Output<SCHEMA>(
+Output _$OutputFromJson(Map<String, dynamic> json) => Output(
   name: json['name'] as String,
   metaData: json['metaData'] == null
       ? null
@@ -27,9 +25,7 @@ Output<SCHEMA> _$OutputFromJson<SCHEMA extends Object>(
   schema: json['schema'] as String,
 );
 
-Map<String, dynamic> _$OutputToJson<SCHEMA extends Object>(
-  Output<SCHEMA> instance,
-) => <String, dynamic>{
+Map<String, dynamic> _$OutputToJson(Output instance) => <String, dynamic>{
   'name': instance.name,
   'metaData': ?instance.metaData?.toJson(),
   'successCriteria': ?instance.successCriteria?.toJson(),

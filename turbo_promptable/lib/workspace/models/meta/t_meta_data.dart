@@ -1,5 +1,4 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:turbo_promptable/workspace/models/meta/t_tag.dart';
 import 'package:turbo_serializable/abstracts/t_serializable.dart';
 
 part 't_meta_data.g.dart';
@@ -22,7 +21,7 @@ class TMetaData extends TSerializable {
   });
 
   final List<String>? aliases;
-  final List<TTag>? tags;
+  final List<String>? tags;
   final String? description;
   final String? emoji;
   final String? name;

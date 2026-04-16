@@ -13,7 +13,7 @@ Step _$StepFromJson(Map<String, dynamic> json) => Step(
       : TMetaData.fromJson(json['metaData'] as Map<String, dynamic>),
   input: Input.fromJson(json['input'] as Map<String, dynamic>),
   instructions: json['instructions'] as String?,
-  output: Output<Object>.fromJson(json['output'] as Map<String, dynamic>),
+  output: Output.fromJson(json['output'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$StepToJson(Step instance) => <String, dynamic>{
