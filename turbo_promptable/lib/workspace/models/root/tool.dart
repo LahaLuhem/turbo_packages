@@ -25,13 +25,11 @@ class Tool extends TPromptable {
     String? name,
     String? description,
     List<ToolAbility> Function(List<ToolAbility> abilities)? abilities,
-  }) {
-    return ToolSet(
-      description: description ?? this.description,
-      name: name ?? this.name,
-      abilities: abilities != null && this.abilities != null
-          ? abilities(this.abilities!)
-          : this.abilities,
-    );
-  }
+  }) => ToolSet(
+    description: description ?? this.description,
+    name: name ?? this.name,
+    abilities: abilities != null && this.abilities != null
+        ? abilities(this.abilities!)
+        : this.abilities,
+  );
 }
