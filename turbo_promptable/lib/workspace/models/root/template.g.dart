@@ -7,7 +7,8 @@ part of 'template.dart';
 // **************************************************************************
 
 Template _$TemplateFromJson(Map<String, dynamic> json) => Template(
-  name: json['name'] as String,
+  json['name'] as String,
+  value: json['value'] as String?,
   metaData: json['metaData'] == null
       ? null
       : TMetaData.fromJson(json['metaData'] as Map<String, dynamic>),
@@ -15,5 +16,6 @@ Template _$TemplateFromJson(Map<String, dynamic> json) => Template(
 
 Map<String, dynamic> _$TemplateToJson(Template instance) => <String, dynamic>{
   'name': instance.name,
+  'value': ?instance.value,
   'metaData': ?instance.metaData?.toJson(),
 };

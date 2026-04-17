@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:turbo_promptable/workspace/models/meta/t_promptable.dart';
+import 'package:turbo_promptable/workspace/models/root/template.dart';
 
 export 'package:turbo_promptable/workspace/models/meta/t_promptable.dart';
 
@@ -8,8 +9,8 @@ part 'instruction.g.dart';
 /// Behavioural guidance containing [principles], [rules], [mindset], and [examples].
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Instruction extends TPromptable {
-  const Instruction({
-    required super.name,
+  const Instruction(
+    String name, {
     super.metaData,
     this.principles,
     this.rules,
@@ -19,7 +20,10 @@ class Instruction extends TPromptable {
     this.responsibilities,
     this.understandings,
     this.examples,
-  });
+    this.template,
+  }) : super(
+         name: name,
+       );
 
   final List<String>? principles;
   final List<String>? rules;
@@ -29,9 +33,9 @@ class Instruction extends TPromptable {
   final List<String>? responsibilities;
   final List<String>? understandings;
   final List<String>? examples;
+  final Template? template;
 
-  factory Instruction.fromJson(Map<String, dynamic> json) =>
-      _$InstructionFromJson(json);
+  factory Instruction.fromJson(Map<String, dynamic> json) => _$InstructionFromJson(json);
   @override
   Map<String, dynamic> toJson() => _$InstructionToJson(this);
 }

@@ -5,13 +5,13 @@ part 'template.g.dart';
 
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Template extends TPromptable {
-  const Template({
-    required super.name,
+  const Template(
+    String name, {
+    super.value,
     super.metaData,
-  });
+  }) : super(name: name);
 
-  factory Template.fromJson(Map<String, dynamic> json) =>
-      _$TemplateFromJson(json);
+  factory Template.fromJson(Map<String, dynamic> json) => _$TemplateFromJson(json);
   @override
   Map<String, dynamic> toJson() => _$TemplateToJson(this);
 }

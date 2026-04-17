@@ -7,7 +7,7 @@ part of 'instruction.dart';
 // **************************************************************************
 
 Instruction _$InstructionFromJson(Map<String, dynamic> json) => Instruction(
-  name: json['name'] as String,
+  json['name'] as String,
   metaData: json['metaData'] == null
       ? null
       : TMetaData.fromJson(json['metaData'] as Map<String, dynamic>),
@@ -33,6 +33,9 @@ Instruction _$InstructionFromJson(Map<String, dynamic> json) => Instruction(
   examples: (json['examples'] as List<dynamic>?)
       ?.map((e) => e as String)
       .toList(),
+  template: json['template'] == null
+      ? null
+      : Template.fromJson(json['template'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$InstructionToJson(Instruction instance) =>
@@ -47,4 +50,5 @@ Map<String, dynamic> _$InstructionToJson(Instruction instance) =>
       'responsibilities': ?instance.responsibilities,
       'understandings': ?instance.understandings,
       'examples': ?instance.examples,
+      'template': ?instance.template?.toJson(),
     };

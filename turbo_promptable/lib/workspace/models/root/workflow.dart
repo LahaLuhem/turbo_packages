@@ -13,10 +13,12 @@ class Workflow extends TPromptable {
     super.metaData,
     required this.steps,
     required this.endGoal,
+    this.instructions,
   });
 
   final List<Step> steps;
   final EndGoal endGoal;
+  final List<Instruction>? instructions;
 
   factory Workflow.fromJson(Map<String, dynamic> json) => _$WorkflowFromJson(json);
   @override

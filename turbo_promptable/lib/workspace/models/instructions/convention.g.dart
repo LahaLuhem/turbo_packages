@@ -7,7 +7,7 @@ part of 'convention.dart';
 // **************************************************************************
 
 Convention _$ConventionFromJson(Map<String, dynamic> json) => Convention(
-  name: json['name'] as String,
+  name: json['name'],
   metaData: json['metaData'] == null
       ? null
       : TMetaData.fromJson(json['metaData'] as Map<String, dynamic>),
