@@ -5,8 +5,8 @@ part 'skill.g.dart';
 
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Skill extends Instruction {
-  Skill({
-    required super.name,
+  Skill(
+    super.name, {
     super.metaData,
     super.principles,
     super.rules,

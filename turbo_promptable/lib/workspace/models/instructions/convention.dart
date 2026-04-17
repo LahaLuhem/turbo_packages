@@ -5,8 +5,8 @@ part 'convention.g.dart';
 
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Convention extends Instruction {
-  Convention({
-    required super.name,
+  Convention(
+    super.name, {
     super.metaData,
     super.principles,
     super.rules,
@@ -18,8 +18,7 @@ class Convention extends Instruction {
     super.examples,
   });
 
-  factory Convention.fromJson(Map<String, dynamic> json) =>
-      _$ConventionFromJson(json);
+  factory Convention.fromJson(Map<String, dynamic> json) => _$ConventionFromJson(json);
   @override
   Map<String, dynamic> toJson() => _$ConventionToJson(this);
 }

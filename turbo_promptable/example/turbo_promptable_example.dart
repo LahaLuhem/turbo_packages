@@ -4,7 +4,7 @@ import 'package:turbo_promptable/turbo_promptable.dart';
 
 void main() {
   const instruction = Instruction(
-    name: 'Code Quality',
+    'Code Quality',
     rules: ['No unused imports', 'All public API must have dartdoc'],
     principles: ['Clarity over cleverness'],
   );
