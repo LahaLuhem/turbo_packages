@@ -1,6 +1,47 @@
 enum TCliTool {
+  /// Anthropic Claude Code CLI.
+  ///
+  /// Headless: **unwired**.
+  /// Source: https://code.claude.com/docs/en/cli-reference
+  /// Checked: 2026-04-17.
+  /// Rationale: Non-interactive mode (`claude -p "<prompt>"`) takes the
+  /// user prompt as a POSITIONAL string argument. There is no flag that
+  /// accepts a user-request FILE PATH. Additionally, `--system-prompt`
+  /// accepts inline text; the separate `--system-prompt-file` takes a
+  /// path. The fixed headless argv contract
+  /// `[systemPromptFlag, <path>, requestFlag, <path>]` cannot be
+  /// expressed with Claude Code's documented flag shape, so both
+  /// `headlessCommand` and `requestFlag` remain null. Revisiting
+  /// requires either the spec's argv contract to evolve or a
+  /// Claude-specific invoker.
   claude,
+
+  /// OpenAI Codex CLI.
+  ///
+  /// Headless: **unwired**.
+  /// Source: https://developers.openai.com/codex/cli/reference
+  /// Checked: 2026-04-17.
+  /// Rationale: The non-interactive subcommand is `codex exec`, which
+  /// takes the prompt as a POSITIONAL string or reads it from stdin
+  /// via `-`. No flag accepts a user-request file path. The current
+  /// documented flag set contains no `--system`/`--system-prompt`
+  /// entry either — system behavior is configured via
+  /// `~/.codex/config.toml`. Neither half of the fixed
+  /// `[systemPromptFlag, <path>, requestFlag, <path>]` contract is
+  /// satisfied, so both fields remain null.
   codex,
+
+  /// Cursor Agent CLI (executable name: `agent`).
+  ///
+  /// Headless: **unwired**.
+  /// Source: https://cursor.com/docs/cli/reference/parameters
+  /// Checked: 2026-04-17.
+  /// Rationale: Non-interactive mode is `agent -p "<prompt>"`; the
+  /// prompt is a POSITIONAL string and no flag takes a user-request
+  /// file path. The documented parameter table lists no
+  /// `--system`/`--system-prompt` flag either. The fixed
+  /// `[systemPromptFlag, <path>, requestFlag, <path>]` contract cannot
+  /// be expressed, so both fields remain null.
   cursor,
   ;
 
@@ -127,11 +168,17 @@ enum TCliTool {
 
   /// Non-interactive launch shape for `SpawnDeliveryMode.headless`.
   ///
-  /// When populated (dev-13), the first element is the executable and
-  /// the remaining elements are fixed leading flags that go before any
+  /// When populated, the first element is the executable and the
+  /// remaining elements are fixed leading flags that go before any
   /// per-spawn arguments (system prompt, request file). `null` means
-  /// this tool has not yet been wired for headless operation; the
-  /// spawn pipeline raises a dedicated domain exception in that case.
+  /// this tool has no documented non-interactive invocation that
+  /// matches the fixed headless argv contract; the spawn pipeline
+  /// raises [CliToolNotHeadlessCapableException] in that case.
+  ///
+  /// dev-13 (2026-04-17): after checking the official CLI references
+  /// for all three tools, every value remains `null`. See the per-
+  /// value doc comments above for the vendor URL, checked date, and
+  /// the specific flag-shape mismatch that prevents wiring.
   List<String>? get headlessCommand {
     switch (this) {
       case TCliTool.claude:
@@ -146,10 +193,16 @@ enum TCliTool {
   /// Flag that precedes the per-spawn request-file path in the
   /// headless argv.
   ///
-  /// When populated (dev-13), the resulting argv is
+  /// When populated, the resulting argv is
   /// `[...headlessCommand, systemPromptFlag, <systemPromptPath>,
-  /// requestFlag, <requestFilePath>]`. `null` means this tool has not
-  /// yet been wired for headless operation.
+  /// requestFlag, <requestFilePath>]`. `null` means this tool has no
+  /// documented flag that accepts a request-file PATH in
+  /// non-interactive mode.
+  ///
+  /// dev-13 (2026-04-17): all three tools take the user prompt as a
+  /// positional string (or stdin) rather than a path-valued flag, so
+  /// every value remains `null`. See the per-value doc comments above
+  /// for the vendor URL and checked date.
   String? get requestFlag {
     switch (this) {
       case TCliTool.claude:

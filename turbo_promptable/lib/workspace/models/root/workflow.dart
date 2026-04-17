@@ -1,6 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:turbo_promptable/turbo_promptable.dart';
 import 'package:turbo_promptable/workspace/models/meta/t_promptable.dart';
+import 'package:turbo_promptable/workspace/models/root/tool_set.dart';
 import 'package:turbo_promptable/workspace/models/workflows/step.dart';
 
 part 'workflow.g.dart';
@@ -14,11 +15,15 @@ class Workflow extends TPromptable {
     required this.steps,
     required this.endGoal,
     this.instructions,
+    this.tools,
+    this.toolSets,
   });
 
   final List<Step> steps;
   final EndGoal endGoal;
   final List<Instruction>? instructions;
+  final List<Tool>? tools;
+  final List<ToolSet>? toolSets;
 
   factory Workflow.fromJson(Map<String, dynamic> json) => _$WorkflowFromJson(json);
   @override

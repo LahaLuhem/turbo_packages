@@ -18,6 +18,12 @@ Workflow _$WorkflowFromJson(Map<String, dynamic> json) => Workflow(
   instructions: (json['instructions'] as List<dynamic>?)
       ?.map((e) => Instruction.fromJson(e as Map<String, dynamic>))
       .toList(),
+  tools: (json['tools'] as List<dynamic>?)
+      ?.map((e) => Tool.fromJson(e as Map<String, dynamic>))
+      .toList(),
+  toolSets: (json['toolSets'] as List<dynamic>?)
+      ?.map((e) => ToolSet.fromJson(e as Map<String, dynamic>))
+      .toList(),
 );
 
 Map<String, dynamic> _$WorkflowToJson(Workflow instance) => <String, dynamic>{
@@ -26,4 +32,6 @@ Map<String, dynamic> _$WorkflowToJson(Workflow instance) => <String, dynamic>{
   'steps': instance.steps.map((e) => e.toJson()).toList(),
   'endGoal': instance.endGoal.toJson(),
   'instructions': ?instance.instructions?.map((e) => e.toJson()).toList(),
+  'tools': ?instance.tools?.map((e) => e.toJson()).toList(),
+  'toolSets': ?instance.toolSets?.map((e) => e.toJson()).toList(),
 };
