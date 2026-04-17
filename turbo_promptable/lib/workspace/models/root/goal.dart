@@ -5,10 +5,13 @@ part 'goal.g.dart';
 
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class Goal extends TPromptable {
-  const Goal({
+  const Goal(
+    String value, {
     required super.name,
     super.metaData,
-  });
+  }) : super(
+         value: value,
+       );
 
   factory Goal.fromJson(Map<String, dynamic> json) => _$GoalFromJson(json);
   @override

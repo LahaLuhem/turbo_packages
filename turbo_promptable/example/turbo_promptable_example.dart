@@ -10,6 +10,9 @@ void main() {
   );
 
   const workflow = Workflow(
+    endGoal: EndGoal(
+      'Produce a comprehensive analysis report highlighting code quality issues and providing actionable suggestions for improvement.',
+    ),
     name: 'Review Workflow',
     steps: [
       Step(

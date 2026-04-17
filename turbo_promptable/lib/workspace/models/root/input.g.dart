@@ -12,7 +12,7 @@ Input _$InputFromJson(Map<String, dynamic> json) => Input(
       ?.map((e) => Context.fromJson(e as Map<String, dynamic>))
       .toList(),
   goals: (json['goals'] as List<dynamic>?)
-      ?.map((e) => Goal.fromJson(e as Map<String, dynamic>))
+      ?.map((e) => EndGoal.fromJson(e as Map<String, dynamic>))
       .toList(),
   issues: (json['issues'] as List<dynamic>?)
       ?.map((e) => Issue.fromJson(e as Map<String, dynamic>))

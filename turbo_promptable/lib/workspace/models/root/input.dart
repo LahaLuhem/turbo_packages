@@ -1,6 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:turbo_promptable/workspace/models/root/context.dart';
-import 'package:turbo_promptable/workspace/models/root/goal.dart';
+import 'package:turbo_promptable/workspace/models/root/end_goal.dart';
 import 'package:turbo_promptable/workspace/models/root/issue.dart';
 import 'package:turbo_promptable/workspace/models/root/spec.dart';
 
@@ -20,7 +20,7 @@ class Input extends TPromptable {
   });
 
   final List<Context>? context;
-  final List<Goal>? goals;
+  final List<EndGoal>? goals;
   final List<Issue>? issues;
   final List<Spec>? specs;
   final Map<String, Object>? parameters;

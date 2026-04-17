@@ -7,6 +7,7 @@ part of 'goal.dart';
 // **************************************************************************
 
 Goal _$GoalFromJson(Map<String, dynamic> json) => Goal(
+  json['value'] as String,
   name: json['name'] as String,
   metaData: json['metaData'] == null
       ? null
@@ -15,5 +16,6 @@ Goal _$GoalFromJson(Map<String, dynamic> json) => Goal(
 
 Map<String, dynamic> _$GoalToJson(Goal instance) => <String, dynamic>{
   'name': instance.name,
+  'value': ?instance.value,
   'metaData': ?instance.metaData?.toJson(),
 };

@@ -37,7 +37,7 @@ export 'workspace/models/meta/t_promptable.dart';
 export 'workspace/models/root/activity.dart';
 export 'workspace/models/root/checklist.dart';
 export 'workspace/models/root/context.dart';
-export 'workspace/models/root/goal.dart';
+export 'workspace/models/root/end_goal.dart';
 export 'workspace/models/root/input.dart';
 export 'workspace/models/root/instruction.dart';
 export 'workspace/models/root/issue.dart';

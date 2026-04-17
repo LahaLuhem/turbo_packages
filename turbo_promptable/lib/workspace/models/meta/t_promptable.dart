@@ -12,8 +12,8 @@ abstract class TPromptable extends TSerializable {
     this.metaData,
     this.cascadeNameToMetaData = true,
     this.cascadeDescriptionToMetaData = true,
-    this.value,
     this.values,
+    this.value,
   });
 
   // 🧩 DEPENDENCIES -------------------------------------------------------------------------- \\
@@ -33,13 +33,11 @@ abstract class TPromptable extends TSerializable {
     writeable: this,
     mdFrontmatterBuilder: (writeable) => writeable.mdFrontMatter(),
     mdBodyBuilder: (writeable, _) {
-      final json = Map<String, dynamic>.from(writeable.toJson())
-        ..remove(TSDefaults.metaDataKey);
+      final json = Map<String, dynamic>.from(writeable.toJson())..remove(TSDefaults.metaDataKey);
       return json.toMd(
         metaDataToFrontMatter: false,
         headingLevel: 2,
-        listItemBuilder: (key, item) =>
-            key == TSDefaults.itemsKey ? '- [ ] $item' : null,
+        listItemBuilder: (key, item) => key == TSDefaults.itemsKey ? '- [ ] $item' : null,
       );
     },
     mdBuilder: (writeable, frontmatter, body) =>
@@ -59,9 +57,7 @@ abstract class TPromptable extends TSerializable {
     if (cascadeNameToMetaData && name.isNotEmpty) {
       frontMatter['name'] = name;
     }
-    if (cascadeDescriptionToMetaData &&
-        description != null &&
-        description!.isNotEmpty) {
+    if (cascadeDescriptionToMetaData && description != null && description!.isNotEmpty) {
       frontMatter['description'] = description;
     }
     if (metaData != null) {
