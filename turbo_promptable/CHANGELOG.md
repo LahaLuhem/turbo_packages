@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-04-17
+
+### Added
+- Tool command model `ToolCommand` for declaring individual operations that a `Tool` exposes (CLI subcommands, REST endpoints, MCP functions, etc.)
+- Tool parameter models `ToolParameter` and `ToolParameterOption` for describing command inputs, enumerated options, defaults, and required flags
+- Tool ability model `ToolAbility` for describing the capabilities surfaced by a tool
+- `Mcp` tool model for declaring Model Context Protocol servers alongside the existing `Api`, `Cli`, and `Script` tool kinds
+- `TMetaData` is now re-exported from `meta/t_promptable.dart` so downstream models that depend on it no longer need a separate import
+
+### Changed
+- **BREAKING**: Removed the `Agent` root model. Use `Persona` extended with `TSpawnable` fields (`cliTool`, `command`, `promptDelivery`) to represent a launchable agent.
+- **BREAKING**: Dropped the `metaData` constructor parameter from leaf context/root models that do not need it (`Actor`, `Concept`, `Documentation`, `Project`, `Stakeholder`, `Subject`, `Checklist`, `Context`, and related models). Pass metadata only on the models that still declare the parameter.
+- **BREAKING**: Removed barrel exports for internal/auxiliary members: `core/constants/tp_keys.dart`, `core/models/t_config.dart`, `core/models/t_embed_type.dart`, `core/models/t_md_section.dart`, `core/models/t_render_type.dart`, `core/typedefs/t_body_builder_def.dart`, `workspace/models/checklists/acceptance_criteria.dart`, `workspace/models/checklists/constraints.dart`, `workspace/models/checklists/non_goals.dart`, and `workspace/models/meta/t_tag.dart`. Consumers that relied on those names should import the deep paths directly or model their own equivalents.
+- `TPromptable.mdFactory` now derives its body from `toJson()` (minus the metadata key) so frontmatter/body separation is consistent across every subclass.
+- Bumped minimum `turbo_serializable` constraint to `^0.5.0` (pulls in the `ts_map_extension` rename and the wider barrel exposure from that release).
+
+### Fixed
+- Removed unused and unnecessary imports flagged by the analyzer in `workspace/models/context/collection.dart`, `workspace/models/root/activity.dart`, and `workspace/models/root/persona.dart`.
+
 ## [0.3.0] - 2026-04-15
 
 ### Changed

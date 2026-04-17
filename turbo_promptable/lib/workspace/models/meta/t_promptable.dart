@@ -1,13 +1,9 @@
-import 'package:turbo_promptable/workspace/constants/tp_defaults.dart';
 import 'package:turbo_promptable/workspace/models/meta/t_meta_data.dart';
-import 'package:turbo_serializable/abstracts/t_serializable.dart';
-import 'package:turbo_serializable/abstracts/t_writeable.dart';
 import 'package:turbo_serializable/constants/ts_defaults.dart';
-import 'package:turbo_serializable/extensions/ts_string_extension.dart';
-import 'package:turbo_serializable/markdown/factories/t_md_factory.dart';
 import 'package:turbo_serializable/turbo_serializable.dart';
 
 export 'package:turbo_promptable/workspace/enums/t_body_type.dart';
+export 'package:turbo_promptable/workspace/models/meta/t_meta_data.dart';
 
 abstract class TPromptable extends TSerializable {
   const TPromptable({
@@ -36,12 +32,16 @@ abstract class TPromptable extends TSerializable {
   TMdFactory<TWriteable> get mdFactory => TMdFactory<TPromptable>(
     writeable: this,
     mdFrontmatterBuilder: (writeable) => writeable.mdFrontMatter(),
-    mdBodyBuilder: (writeable, _) => writeable.toMd(
-      includeMetaData: false,
-      headingLevel: 2,
-      listItemBuilder: (key, item) =>
-          key == TSDefaults.itemsKey ? '- [ ] $item' : null,
-    ),
+    mdBodyBuilder: (writeable, _) {
+      final json = Map<String, dynamic>.from(writeable.toJson())
+        ..remove(TSDefaults.metaDataKey);
+      return json.toMd(
+        metaDataToFrontMatter: false,
+        headingLevel: 2,
+        listItemBuilder: (key, item) =>
+            key == TSDefaults.itemsKey ? '- [ ] $item' : null,
+      );
+    },
     mdBuilder: (writeable, frontmatter, body) =>
         '$frontmatter\n\n'
         '$body',
@@ -59,7 +59,9 @@ abstract class TPromptable extends TSerializable {
     if (cascadeNameToMetaData && name.isNotEmpty) {
       frontMatter['name'] = name;
     }
-    if (cascadeDescriptionToMetaData && description != null && description!.isNotEmpty) {
+    if (cascadeDescriptionToMetaData &&
+        description != null &&
+        description!.isNotEmpty) {
       frontMatter['description'] = description;
     }
     if (metaData != null) {

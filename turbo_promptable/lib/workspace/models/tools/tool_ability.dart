@@ -24,7 +24,8 @@ class ToolAbility extends TPromptable {
   final Input input;
   final Output output;
 
-  factory ToolAbility.fromJson(Map<String, dynamic> json) => _$ToolAbilityFromJson(json);
+  factory ToolAbility.fromJson(Map<String, dynamic> json) =>
+      _$ToolAbilityFromJson(json);
   @override
   Map<String, dynamic> toJson() => _$ToolAbilityToJson(this);
 }

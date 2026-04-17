@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-04-17
+
+### Added
+- Barrel exports for `TSerializableCustomId`, `TWriteableCustomId`, `TsMapExtension`, `TsStringExtension`, `TMdFactory` + markdown typedefs, `TXmlFactory` + xml typedefs, and `TYamlFactory` + yaml typedefs. These members were previously reachable only via deep imports.
+
+### Changed
+- **BREAKING**: Renamed file `lib/extensions/ts_map_extenion.dart` (typo) to `lib/extensions/ts_map_extension.dart`. Direct deep imports of the old path must update to the corrected path, or import via the `package:turbo_serializable/turbo_serializable.dart` barrel.
+- Expanded the JSON-to-markdown pipeline in `TMdFactory` so body output is sourced from the serialized map (enabling metadata-aware dropping of frontmatter keys) instead of a separate builder call.
+- Tightened `key_builder_def`, `key_value_builder_def`, and `value_builder_def` typedef signatures.
+
 ## [0.4.2] - 2026-04-15
 
 ### Fixed

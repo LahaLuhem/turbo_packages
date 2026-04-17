@@ -18,7 +18,7 @@ A minimal serialization abstraction for the turbo ecosystem with optional multi-
 
 ```yaml
 dependencies:
-  turbo_serializable: ^0.3.0
+  turbo_serializable: ^0.5.0
 ```
 
 ## Quick Start

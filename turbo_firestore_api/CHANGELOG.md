@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.0] - 2026-04-17
+
+### Changed
+- **BREAKING**: Bumped `turbo_serializable` constraint from `^0.3.0` to `^0.5.0`. Consumers on older `turbo_serializable` versions must upgrade to `0.5.x`, which includes the `ts_map_extension` file rename and expanded barrel exports. No API changes in `turbo_firestore_api` itself.
+
 ## [0.10.1] - 2026-04-14
 
 ### Fixed
