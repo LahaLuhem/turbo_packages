@@ -36,6 +36,9 @@ Instruction _$InstructionFromJson(Map<String, dynamic> json) => Instruction(
   template: json['template'] == null
       ? null
       : Template.fromJson(json['template'] as Map<String, dynamic>),
+  child: json['child'] == null
+      ? null
+      : Instruction.fromJson(json['child'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$InstructionToJson(Instruction instance) =>
@@ -51,4 +54,5 @@ Map<String, dynamic> _$InstructionToJson(Instruction instance) =>
       'understandings': ?instance.understandings,
       'examples': ?instance.examples,
       'template': ?instance.template?.toJson(),
+      'child': ?instance.child?.toJson(),
     };

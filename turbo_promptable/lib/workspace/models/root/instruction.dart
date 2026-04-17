@@ -21,6 +21,7 @@ class Instruction extends TPromptable {
     this.understandings,
     this.examples,
     this.template,
+    this.child,
   }) : super(
          name: name,
        );
@@ -34,6 +35,7 @@ class Instruction extends TPromptable {
   final List<String>? understandings;
   final List<String>? examples;
   final Template? template;
+  final Instruction? child;
 
   factory Instruction.fromJson(Map<String, dynamic> json) => _$InstructionFromJson(json);
   @override
