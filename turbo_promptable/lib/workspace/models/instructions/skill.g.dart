@@ -7,7 +7,7 @@ part of 'skill.dart';
 // **************************************************************************
 
 Skill _$SkillFromJson(Map<String, dynamic> json) => Skill(
-  name: json['name'],
+  json['name'] as String,
   metaData: json['metaData'] == null
       ? null
       : TMetaData.fromJson(json['metaData'] as Map<String, dynamic>),
