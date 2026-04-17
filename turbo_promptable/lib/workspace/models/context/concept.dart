@@ -7,7 +7,6 @@ part 'concept.g.dart';
 class Concept extends Context {
   const Concept({
     required super.name,
-    super.metaData,
   });
 
   factory Concept.fromJson(Map<String, dynamic> json) =>

@@ -7,13 +7,8 @@ part 'script.g.dart';
 class Script extends Tool {
   const Script({
     required super.name,
-    super.metaData,
     super.description,
-    super.setup,
-    super.rules,
-    super.commands,
-    super.examples,
-    super.notes,
+    super.abilities,
   });
 
   factory Script.fromJson(Map<String, dynamic> json) => _$ScriptFromJson(json);

@@ -14,7 +14,8 @@ void main() {
     steps: [
       Step(
         name: 'Analyse',
-        instructions: 'Review the source code for quality issues based on the provided instructions.',
+        instructions:
+            'Review the source code for quality issues based on the provided instructions.',
         input: Input(
           name: 'Source Code',
         ),
@@ -33,10 +34,5 @@ void main() {
     workflows: [workflow],
   );
 
-  final agent = Agent.fromRole(
-    role,
-    identity: 'A meticulous reviewer focused on maintainability.',
-  );
-
-  print('Agent JSON:\n${agent.toJson()}');
+  print(role.toMd());
 }

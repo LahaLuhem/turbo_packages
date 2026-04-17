@@ -7,7 +7,6 @@ part 'documentation.g.dart';
 class Documentation extends Context {
   const Documentation({
     required super.name,
-    super.metaData,
   });
 
   factory Documentation.fromJson(Map<String, dynamic> json) =>

@@ -11,25 +11,19 @@ Output _$OutputFromJson(Map<String, dynamic> json) => Output(
   metaData: json['metaData'] == null
       ? null
       : TMetaData.fromJson(json['metaData'] as Map<String, dynamic>),
-  successCriteria: json['successCriteria'] == null
+  criteria: json['criteria'] == null
       ? null
-      : SuccessCriteria.fromJson(
-          json['successCriteria'] as Map<String, dynamic>,
-        ),
+      : Checklist.fromJson(json['criteria'] as Map<String, dynamic>),
   constraints: json['constraints'] == null
       ? null
-      : Constraints.fromJson(json['constraints'] as Map<String, dynamic>),
-  nonGoals: json['nonGoals'] == null
-      ? null
-      : NonGoals.fromJson(json['nonGoals'] as Map<String, dynamic>),
+      : Checklist.fromJson(json['constraints'] as Map<String, dynamic>),
   schema: json['schema'] as String,
 );
 
 Map<String, dynamic> _$OutputToJson(Output instance) => <String, dynamic>{
   'name': instance.name,
   'metaData': ?instance.metaData?.toJson(),
-  'successCriteria': ?instance.successCriteria?.toJson(),
+  'criteria': ?instance.criteria?.toJson(),
   'constraints': ?instance.constraints?.toJson(),
-  'nonGoals': ?instance.nonGoals?.toJson(),
   'schema': instance.schema,
 };

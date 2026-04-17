@@ -2,12 +2,7 @@
 /// workflows, and tools as type-safe Dart objects.
 library turbo_promptable;
 
-export 'core/constants/tp_keys.dart';
 export 'core/extensions/t_collection_extensions.dart';
-export 'core/models/t_embed_type.dart';
-export 'core/models/t_md_section.dart';
-export 'core/models/t_render_type.dart';
-export 'core/typedefs/t_body_builder_def.dart';
 export 'spawn/models/t_file.dart';
 export 'spawn/models/t_folder.dart';
 export 'spawn/models/t_spawn_config.dart';
@@ -23,9 +18,6 @@ export 'workspace/abstracts/of_prototypes.dart';
 export 'workspace/abstracts/of_scenarios.dart';
 export 'workspace/enums/t_body_type.dart';
 export 'workspace/enums/t_ref_type.dart';
-export 'workspace/models/checklists/acceptance_criteria.dart';
-export 'workspace/models/checklists/constraints.dart';
-export 'workspace/models/checklists/non_goals.dart';
 export 'workspace/models/context/actor.dart';
 export 'workspace/models/context/collection.dart';
 export 'workspace/models/context/concept.dart';
@@ -43,7 +35,6 @@ export 'workspace/models/memories/progress.dart';
 export 'workspace/models/meta/t_meta_data.dart';
 export 'workspace/models/meta/t_promptable.dart';
 export 'workspace/models/root/activity.dart';
-export 'workspace/models/root/agent.dart';
 export 'workspace/models/root/checklist.dart';
 export 'workspace/models/root/context.dart';
 export 'workspace/models/root/goal.dart';

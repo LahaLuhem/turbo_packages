@@ -6,8 +6,8 @@ import 'package:turbo_serializable/abstracts/t_writeable_custom_id.dart';
 /// the object into YAML, Markdown, and XML representations. This class
 /// provides a non-generic version that works with dynamic ID types.
 ///
-/// For type-safe ID handling, use the generic `TSerializableId<T>` variant
-/// in `t_serializable_custom_id.dart`.
+/// For type-safe ID handling, use [TSerializableCustomId] in
+/// `t_serializable_custom_id.dart`.
 ///
 /// Example:
 /// ```dart

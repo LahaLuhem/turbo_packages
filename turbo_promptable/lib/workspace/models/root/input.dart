@@ -12,17 +12,18 @@ part 'input.g.dart';
 class Input extends TPromptable {
   const Input({
     required super.name,
-    super.metaData,
     this.context,
     this.goals,
     this.issues,
     this.specs,
+    this.parameters,
   });
 
   final List<Context>? context;
   final List<Goal>? goals;
   final List<Issue>? issues;
   final List<Spec>? specs;
+  final Map<String, Object>? parameters;
 
   factory Input.fromJson(Map<String, dynamic> json) => _$InputFromJson(json);
   @override

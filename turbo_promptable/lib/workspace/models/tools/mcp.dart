@@ -7,13 +7,8 @@ part 'mcp.g.dart';
 class Mcp extends Tool {
   const Mcp({
     required super.name,
-    super.metaData,
     super.description,
-    super.setup,
-    super.rules,
-    super.commands,
-    super.examples,
-    super.notes,
+    super.abilities,
   });
 
   factory Mcp.fromJson(Map<String, dynamic> json) => _$McpFromJson(json);

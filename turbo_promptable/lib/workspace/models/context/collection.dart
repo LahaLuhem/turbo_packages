@@ -4,7 +4,6 @@ import 'package:turbo_serializable/turbo_serializable.dart';
 class Collection extends Context {
   const Collection({
     required super.name,
-    super.metaData,
     required this.items,
   });
 

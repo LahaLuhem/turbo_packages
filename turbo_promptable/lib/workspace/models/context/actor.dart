@@ -7,7 +7,6 @@ part 'actor.g.dart';
 class Actor extends Context {
   const Actor({
     required super.name,
-    super.metaData,
   });
 
   factory Actor.fromJson(Map<String, dynamic> json) => _$ActorFromJson(json);

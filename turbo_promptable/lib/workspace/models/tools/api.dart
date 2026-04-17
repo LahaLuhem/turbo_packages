@@ -7,13 +7,8 @@ part 'api.g.dart';
 class Api extends Tool {
   const Api({
     required super.name,
-    super.metaData,
     super.description,
-    super.setup,
-    super.rules,
-    super.commands,
-    super.examples,
-    super.notes,
+    super.abilities,
   });
 
   factory Api.fromJson(Map<String, dynamic> json) => _$ApiFromJson(json);

@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:turbo_promptable/turbo_promptable.dart';
 import 'package:turbo_promptable/workspace/models/meta/t_promptable.dart';
 import 'package:turbo_promptable/workspace/models/root/input.dart';
 import 'package:turbo_promptable/workspace/models/root/output.dart';
@@ -11,18 +12,15 @@ part 'activity.g.dart';
 class Activity extends TPromptable {
   const Activity({
     required super.name,
-    required this.input,
-    required this.output,
     required this.workflow,
     super.metaData,
+    this.role,
   });
 
-  final Input input;
+  final Role? role;
   final Workflow workflow;
-  final Output output;
 
-  factory Activity.fromJson(Map<String, dynamic> json) =>
-      _$ActivityFromJson(json);
+  factory Activity.fromJson(Map<String, dynamic> json) => _$ActivityFromJson(json);
   @override
   Map<String, dynamic> toJson() => _$ActivityToJson(this);
 }

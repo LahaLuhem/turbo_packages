@@ -7,13 +7,8 @@ part 'cli.g.dart';
 class Cli extends Tool {
   const Cli({
     required super.name,
-    super.metaData,
     super.description,
-    super.setup,
-    super.rules,
-    super.commands,
-    super.examples,
-    super.notes,
+    super.abilities,
   });
 
   factory Cli.fromJson(Map<String, dynamic> json) => _$CliFromJson(json);

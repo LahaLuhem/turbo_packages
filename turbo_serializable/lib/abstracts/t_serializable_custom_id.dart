@@ -43,7 +43,7 @@ import 'package:turbo_serializable/abstracts/t_writeable_custom_id.dart';
 ///   Map<String, dynamic> toJson() => {'id': _id.value};
 /// }
 /// ```
-abstract class TSerializableId<T> extends TWriteableCustomId<T> {
+abstract class TSerializableCustomId<T> extends TWriteableCustomId<T> {
   /// Converts this object to a YAML string.
   ///
   /// Uses [yamlBuilder] to serialize the result of [toJson()].

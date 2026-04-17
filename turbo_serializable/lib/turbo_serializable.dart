@@ -70,6 +70,16 @@
 library turbo_serializable;
 
 export 'abstracts/t_serializable.dart';
+export 'abstracts/t_serializable_custom_id.dart';
 export 'abstracts/t_serializable_id.dart';
 export 'abstracts/t_writeable.dart';
+export 'abstracts/t_writeable_custom_id.dart';
 export 'abstracts/t_writeable_id.dart';
+export 'extensions/ts_map_extension.dart';
+export 'extensions/ts_string_extension.dart';
+export 'markdown/factories/t_md_factory.dart';
+export 'markdown/typedefs/t_markdown_typedefs.dart';
+export 'xml/factories/t_xml_factory.dart';
+export 'xml/typedefs/t_xml_typedefs.dart';
+export 'yaml/factories/t_yaml_factory.dart';
+export 'yaml/typedefs/t_yaml_typedefs.dart';

@@ -9,11 +9,11 @@ part 'context.g.dart';
 class Context extends TPromptable {
   const Context({
     required super.name,
-    super.metaData,
   });
 
   factory Context.fromJson(Map<String, dynamic> json) =>
       _$ContextFromJson(json);
+
   @override
   Map<String, dynamic> toJson() => _$ContextToJson(this);
 }

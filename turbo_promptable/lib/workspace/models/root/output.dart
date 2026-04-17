@@ -1,6 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:turbo_promptable/turbo_promptable.dart';
-import 'package:turbo_promptable/workspace/models/checklists/success_criteria.dart';
 
 part 'output.g.dart';
 
@@ -9,15 +8,13 @@ class Output extends TPromptable {
   const Output({
     required super.name,
     super.metaData,
-    this.successCriteria,
+    this.criteria,
     this.constraints,
-    this.nonGoals,
     required this.schema,
   });
 
-  final SuccessCriteria? successCriteria;
-  final Constraints? constraints;
-  final NonGoals? nonGoals;
+  final Checklist? criteria;
+  final Checklist? constraints;
   final String schema;
 
   factory Output.fromJson(Map<String, dynamic> json) => _$OutputFromJson(json);

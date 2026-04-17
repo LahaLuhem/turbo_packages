@@ -8,9 +8,6 @@ part of 'input.dart';
 
 Input _$InputFromJson(Map<String, dynamic> json) => Input(
   name: json['name'] as String,
-  metaData: json['metaData'] == null
-      ? null
-      : TMetaData.fromJson(json['metaData'] as Map<String, dynamic>),
   context: (json['context'] as List<dynamic>?)
       ?.map((e) => Context.fromJson(e as Map<String, dynamic>))
       .toList(),
@@ -23,13 +20,16 @@ Input _$InputFromJson(Map<String, dynamic> json) => Input(
   specs: (json['specs'] as List<dynamic>?)
       ?.map((e) => Spec.fromJson(e as Map<String, dynamic>))
       .toList(),
+  parameters: (json['parameters'] as Map<String, dynamic>?)?.map(
+    (k, e) => MapEntry(k, e as Object),
+  ),
 );
 
 Map<String, dynamic> _$InputToJson(Input instance) => <String, dynamic>{
   'name': instance.name,
-  'metaData': ?instance.metaData?.toJson(),
   'context': ?instance.context?.map((e) => e.toJson()).toList(),
   'goals': ?instance.goals?.map((e) => e.toJson()).toList(),
   'issues': ?instance.issues?.map((e) => e.toJson()).toList(),
   'specs': ?instance.specs?.map((e) => e.toJson()).toList(),
+  'parameters': ?instance.parameters,
 };

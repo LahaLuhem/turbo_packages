@@ -7,7 +7,6 @@ part 'stakeholder.g.dart';
 class Stakeholder extends Context {
   const Stakeholder({
     required super.name,
-    super.metaData,
   });
 
   factory Stakeholder.fromJson(Map<String, dynamic> json) =>
