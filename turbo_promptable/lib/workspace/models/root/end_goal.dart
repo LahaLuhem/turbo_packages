@@ -1,8 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:turbo_promptable/turbo_promptable.dart';
 import 'package:turbo_promptable/workspace/models/checklists/acceptance_criteria.dart';
 import 'package:turbo_promptable/workspace/models/checklists/constraints.dart';
-import 'package:turbo_promptable/workspace/models/meta/t_promptable.dart';
 import 'package:turbo_promptable/workspace/models/root/goal.dart';
 
 part 'end_goal.g.dart';

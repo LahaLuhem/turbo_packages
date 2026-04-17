@@ -1,8 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:turbo_promptable/turbo_promptable.dart';
-import 'package:turbo_promptable/workspace/models/meta/t_promptable.dart';
 import 'package:turbo_promptable/workspace/models/root/tool_set.dart';
-import 'package:turbo_promptable/workspace/models/workflows/step.dart';
 
 part 'workflow.g.dart';
 

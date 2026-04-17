@@ -1,6 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:turbo_promptable/turbo_promptable.dart';
-import 'package:turbo_promptable/workspace/models/meta/t_promptable.dart';
 
 export 'package:turbo_promptable/workspace/models/meta/t_promptable.dart';
 
