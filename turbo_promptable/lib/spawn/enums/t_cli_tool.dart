@@ -1,61 +1,73 @@
+import 'package:turbo_promptable/spawn/records/headless_invocation.dart';
+import 'package:turbo_promptable/spawn/records/interactive_invocation.dart';
 import 'package:turbo_promptable/spawn/records/system_prompt_invocation.dart';
 
 enum TCliTool {
   /// Anthropic Claude Code CLI.
   ///
-  /// System prompt: **wired** via path-valued flag `--system-prompt-file`.
-  /// Headless (request file): **unwired**.
-  /// Source: https://code.claude.com/docs/en/cli-reference
+  /// Invocation surface:
+  /// - [command] resolves to `claude` on PATH.
+  /// - [systemPromptInvocation] returns [SystemPromptArgv] for the
+  ///   path-valued flag `--system-prompt-file`.
+  /// - [isolationArgv] returns `['--strict-mcp-config']` so the child
+  ///   loads zero MCP servers while OAuth / keychain auth remain intact.
+  /// - [headlessInvocation] shapes the user prompt as the positional
+  ///   argument after `-p`.
+  /// Source: https://docs.claude.com/en/docs/claude-code/cli-reference
   /// Checked: 2026-04-17.
-  /// Rationale: `--system-prompt` accepts inline text; `--system-prompt-file`
-  /// takes a path — the spawn pipeline already writes the rendered
-  /// system prompt to disk per spawn, so the file-path flag is the
-  /// direct fit. The non-interactive user prompt (`claude -p
-  /// "<prompt>"`) is still POSITIONAL with no path-valued flag
-  /// equivalent, so the fixed headless argv contract
-  /// `[..., requestFlag, <path>]` cannot be expressed and both
-  /// `headlessCommand` and `requestFlag` stay null.
   claude,
 
   /// OpenAI Codex CLI.
   ///
-  /// System prompt: **unsupported** in dev-16 (see [systemPromptInvocation]).
-  /// Headless (request file): **unwired**.
-  /// Source: https://developers.openai.com/codex/cli/reference
+  /// Invocation surface:
+  /// - [command] resolves to `codex` on PATH.
+  /// - [systemPromptInvocation] returns [SystemPromptUnsupported] —
+  ///   codex exposes no `--system-prompt*` flag. Headless launches
+  ///   stitch the rendered system prompt onto the request body inside
+  ///   [headlessInvocation]; interactive launches deliver the system
+  ///   prompt via `AGENTS.md` at cwd (outside this package).
+  /// - [isolationArgv] returns `['-c', 'mcp_servers={}']` so the child
+  ///   loads zero MCP servers. `CODEX_HOME` is NOT redirected —
+  ///   auth.json lives under `~/.codex/` and redirection would break
+  ///   Codex subscription auth.
+  /// Source: https://github.com/openai/codex
   /// Checked: 2026-04-17.
-  /// Rationale: System behavior is configured via `~/.codex/config.toml`,
-  /// not a CLI flag. Wiring a per-spawn config file write (including
-  /// its manifest tracking and cleanup in `DespawnService`) is a
-  /// distinct design spike out of scope for dev-16; this value
-  /// returns [SystemPromptUnsupported] until that work lands. The
-  /// non-interactive subcommand `codex exec` also takes the user
-  /// prompt as a POSITIONAL string or via stdin `-` and exposes no
-  /// request-file flag, so `headlessCommand` and `requestFlag`
-  /// remain null.
   codex,
 
-  /// Cursor Agent CLI (executable name: `agent`).
+  /// Cursor Agent CLI.
   ///
-  /// System prompt: **unsupported** (see [systemPromptInvocation]).
-  /// Headless (request file): **unwired**.
-  /// Source: https://cursor.com/docs/cli/reference/parameters
+  /// Invocation surface:
+  /// - [command] resolves to `cursor-agent` on PATH. The binary's own
+  ///   `--help` names the executable `agent`, but `cursor-agent` is the
+  ///   published package name and avoids PATH collisions with other
+  ///   `agent` binaries.
+  /// - [systemPromptInvocation] returns [SystemPromptUnsupported] —
+  ///   cursor-agent exposes no `--system-prompt*` flag. Headless
+  ///   launches stitch the rendered system prompt onto the request
+  ///   body inside [headlessInvocation]; interactive launches deliver
+  ///   the system prompt via `AGENTS.md` at cwd (outside this package).
+  /// - [isolationArgv] is empty: cursor-agent's documented CLI surface
+  ///   exposes no flag or environment variable to disable user-global
+  ///   MCP servers. See the `isolationArgv` doc comment for the gap.
+  /// Source: https://docs.cursor.com/en/cli/reference/parameters
   /// Checked: 2026-04-17.
-  /// Rationale: The documented parameter table lists no
-  /// `--system`/`--system-prompt` flag and no request-file flag.
-  /// Non-interactive mode is `agent -p "<prompt>"` with a POSITIONAL
-  /// prompt. Both the system-prompt and headless halves stay
-  /// unwired.
   cursor,
   ;
 
   String get command {
     switch (this) {
       case TCliTool.claude:
+        // Source: https://docs.claude.com/en/docs/claude-code/cli-reference
+        // Checked: 2026-04-17.
         return 'claude';
       case TCliTool.codex:
+        // Source: https://github.com/openai/codex
+        // Checked: 2026-04-17.
         return 'codex';
       case TCliTool.cursor:
-        return 'agent';
+        // Source: https://docs.cursor.com/en/cli/reference/parameters
+        // Checked: 2026-04-17.
+        return 'cursor-agent';
     }
   }
 
@@ -71,7 +83,7 @@ enum TCliTool {
   }
 
   /// Describes how this tool accepts a system prompt for a
-  /// non-interactive launch.
+  /// non-interactive launch via a CLI flag.
   ///
   /// The caller must already have rendered the system prompt to a
   /// string and written it to an absolute path on disk.
@@ -81,20 +93,15 @@ enum TCliTool {
   ///   tools whose flag takes a file path or whose mechanism writes
   ///   a sidecar config file).
   ///
-  /// Per-tool resolution (checked 2026-04-17, see enum-value doc
-  /// comments above):
+  /// Per-tool resolution:
   /// - [TCliTool.claude]: `SystemPromptArgv(['--system-prompt-file',
   ///   renderedPromptPath])` — path-valued flag.
-  /// - [TCliTool.codex]: [SystemPromptUnsupported] (config-file
-  ///   mechanism exists but wiring is out of scope for dev-16).
-  /// - [TCliTool.cursor]: [SystemPromptUnsupported] (no documented
-  ///   mechanism).
-  ///
-  /// The inline-text-flag variant is modeled by the same
-  /// [SystemPromptArgv] shape — an enum value wanting that shape
-  /// would return `SystemPromptArgv([inlineFlag, renderedPromptContent])`.
-  /// No current tool exercises it; the enum surface supports it so
-  /// a future value can opt in without consumer changes.
+  /// - [TCliTool.codex]: [SystemPromptUnsupported] — no documented
+  ///   flag. Headless launches stitch the rendered prompt onto the
+  ///   request body via [headlessInvocation].
+  /// - [TCliTool.cursor]: [SystemPromptUnsupported] — no documented
+  ///   flag. Headless launches stitch the rendered prompt onto the
+  ///   request body via [headlessInvocation].
   SystemPromptInvocation systemPromptInvocation({
     required String renderedPromptContent,
     required String renderedPromptPath,
@@ -111,14 +118,125 @@ enum TCliTool {
     }
   }
 
-  String get bareMcpFlag {
+  /// Per-tool argv fragment that strips user-global MCP server
+  /// inheritance from any child launch. SAFE on both interactive and
+  /// headless launches; never affects authentication.
+  List<String> get isolationArgv {
     switch (this) {
       case TCliTool.claude:
-        return '--strict-mcp-config';
+        // `--strict-mcp-config` — child loads only MCP servers from
+        // `--mcp-config`. With no paired `--mcp-config`, the child
+        // loads zero MCP servers. OAuth / keychain auth untouched.
+        // Source: https://docs.claude.com/en/docs/claude-code/cli-reference
+        // Checked: 2026-04-17.
+        return const ['--strict-mcp-config'];
       case TCliTool.codex:
-        return '--bare-mcp';
+        // `-c mcp_servers={}` — per-invocation config override empties
+        // the `mcp_servers` table. Highest precedence over
+        // `~/.codex/config.toml`. Auth and all other config intact.
+        // `CODEX_HOME` is NOT redirected: it would break subscription
+        // auth stored at `~/.codex/auth.json`.
+        // Source: https://github.com/openai/codex
+        // Checked: 2026-04-17.
+        return const ['-c', 'mcp_servers={}'];
       case TCliTool.cursor:
-        return '--bare-mcp';
+        // No documented flag or environment variable disables
+        // user-global MCP servers for cursor-agent. The invariant is
+        // surfaced here as an empty list so a future cursor release
+        // can be wired with a one-line change.
+        // Source: https://docs.cursor.com/en/cli/reference/parameters
+        // Checked: 2026-04-17.
+        return const <String>[];
+    }
+  }
+
+  /// Fully-composed non-interactive launch argv for this tool.
+  ///
+  /// - [requestBody] is the user's request body read from the request
+  ///   file by the spawn pipeline.
+  /// - [systemPromptArgv] is the pre-resolved system-prompt fragment
+  ///   for tools that accept a flag (claude); ignored by tools that
+  ///   stitch the rendered prompt onto the request body (codex,
+  ///   cursor).
+  /// - [renderedSystemPrompt] is the rendered system prompt text for
+  ///   the current spawn; used by stitching tools.
+  HeadlessInvocation headlessInvocation({
+    required String requestBody,
+    required List<String> systemPromptArgv,
+    required String renderedSystemPrompt,
+  }) {
+    switch (this) {
+      case TCliTool.claude:
+        // Source: https://docs.claude.com/en/docs/claude-code/cli-reference
+        // Checked: 2026-04-17.
+        return HeadlessInvocation(
+          executable: 'claude',
+          arguments: [
+            ...isolationArgv,
+            ...systemPromptArgv,
+            '-p',
+            requestBody,
+          ],
+        );
+      case TCliTool.codex:
+        // Source: https://github.com/openai/codex
+        // Checked: 2026-04-17.
+        return HeadlessInvocation(
+          executable: 'codex',
+          arguments: [
+            'exec',
+            ...isolationArgv,
+            _stitchSystemPromptAndRequest(renderedSystemPrompt, requestBody),
+          ],
+        );
+      case TCliTool.cursor:
+        // Source: https://docs.cursor.com/en/cli/reference/parameters
+        // Checked: 2026-04-17.
+        return HeadlessInvocation(
+          executable: 'cursor-agent',
+          arguments: [
+            ...isolationArgv,
+            '-p',
+            _stitchSystemPromptAndRequest(renderedSystemPrompt, requestBody),
+          ],
+        );
+    }
+  }
+
+  /// Fully-composed interactive launch argv for this tool.
+  ///
+  /// - [systemPromptArgv] is the pre-resolved system-prompt fragment
+  ///   for tools that accept a flag (claude); ignored by codex and
+  ///   cursor, which rely on `AGENTS.md` delivery at cwd for
+  ///   interactive mode (outside this package).
+  InteractiveInvocation interactiveInvocation({
+    required List<String> systemPromptArgv,
+  }) {
+    switch (this) {
+      case TCliTool.claude:
+        // Source: https://docs.claude.com/en/docs/claude-code/cli-reference
+        // Checked: 2026-04-17.
+        return InteractiveInvocation(
+          executable: 'claude',
+          arguments: [
+            ...isolationArgv,
+            ...systemPromptArgv,
+          ],
+        );
+      case TCliTool.codex:
+        // Source: https://github.com/openai/codex
+        // Checked: 2026-04-17.
+        return InteractiveInvocation(
+          executable: 'codex',
+          arguments: [...isolationArgv],
+        );
+      case TCliTool.cursor:
+        // Source: https://docs.cursor.com/en/cli/reference/parameters
+        // Checked: 2026-04-17.
+        return InteractiveInvocation(
+          executable: 'cursor-agent',
+          arguments: [...isolationArgv],
+        );
     }
   }
 
@@ -187,65 +305,27 @@ enum TCliTool {
         return '$homeFolderPath/skills';
     }
   }
+}
 
-  String get sourcesOverrideFlag {
-    switch (this) {
-      case TCliTool.claude:
-        return '--setting-sources';
-      case TCliTool.codex:
-        return '--sources';
-      case TCliTool.cursor:
-        return '--sources';
-    }
-  }
-
-  /// Non-interactive launch shape for `SpawnDeliveryMode.headless`.
-  ///
-  /// When populated, the first element is the executable and the
-  /// remaining elements are fixed leading flags that go before any
-  /// per-spawn arguments (system prompt, request file). `null` means
-  /// this tool has no documented non-interactive invocation that
-  /// matches the fixed headless argv contract; the spawn pipeline
-  /// raises [CliToolNotHeadlessCapableException] in that case.
-  ///
-  /// dev-13 (2026-04-17): after checking the official CLI references
-  /// for all three tools, every value remains `null`. See the per-
-  /// value doc comments above for the vendor URL, checked date, and
-  /// the specific flag-shape mismatch that prevents wiring.
-  List<String>? get headlessCommand {
-    switch (this) {
-      case TCliTool.claude:
-        return null;
-      case TCliTool.codex:
-        return null;
-      case TCliTool.cursor:
-        return null;
-    }
-  }
-
-  /// Flag that precedes the per-spawn request-file path in the
-  /// headless argv.
-  ///
-  /// When populated, the resulting argv is
-  /// `[...headlessCommand, ...systemPromptArgv, requestFlag,
-  /// <requestFilePath>]` where `systemPromptArgv` is the resolved
-  /// fragment from [systemPromptInvocation]. `null` means this tool
-  /// has no
-  /// documented flag that accepts a request-file PATH in
-  /// non-interactive mode.
-  ///
-  /// dev-13 (2026-04-17): all three tools take the user prompt as a
-  /// positional string (or stdin) rather than a path-valued flag, so
-  /// every value remains `null`. See the per-value doc comments above
-  /// for the vendor URL and checked date.
-  String? get requestFlag {
-    switch (this) {
-      case TCliTool.claude:
-        return null;
-      case TCliTool.codex:
-        return null;
-      case TCliTool.cursor:
-        return null;
-    }
-  }
+/// Wraps a rendered system prompt and a user request body into a single
+/// text payload with XML-tagged boundaries. Used by [TCliTool.codex] and
+/// [TCliTool.cursor] headless invocations, neither of which exposes a
+/// `--system-prompt*` flag.
+///
+/// The output is deterministic and preserves the boundary tags even when
+/// either input is empty. XML tags are chosen because Anthropic and
+/// OpenAI prompt-engineering guidance both report reliable handling of
+/// XML-delimited sections by their model backends; Markdown headings
+/// would risk collision with user-authored Markdown in the request body.
+String _stitchSystemPromptAndRequest(
+  String renderedSystemPrompt,
+  String requestBody,
+) {
+  return '<system-prompt>\n'
+      '$renderedSystemPrompt\n'
+      '</system-prompt>\n'
+      '\n'
+      '<user-request>\n'
+      '$requestBody\n'
+      '</user-request>';
 }
