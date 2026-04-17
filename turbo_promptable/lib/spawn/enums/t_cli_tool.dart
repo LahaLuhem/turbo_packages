@@ -1,47 +1,50 @@
+import 'package:turbo_promptable/spawn/records/system_prompt_invocation.dart';
+
 enum TCliTool {
   /// Anthropic Claude Code CLI.
   ///
-  /// Headless: **unwired**.
+  /// System prompt: **wired** via path-valued flag `--system-prompt-file`.
+  /// Headless (request file): **unwired**.
   /// Source: https://code.claude.com/docs/en/cli-reference
   /// Checked: 2026-04-17.
-  /// Rationale: Non-interactive mode (`claude -p "<prompt>"`) takes the
-  /// user prompt as a POSITIONAL string argument. There is no flag that
-  /// accepts a user-request FILE PATH. Additionally, `--system-prompt`
-  /// accepts inline text; the separate `--system-prompt-file` takes a
-  /// path. The fixed headless argv contract
-  /// `[systemPromptFlag, <path>, requestFlag, <path>]` cannot be
-  /// expressed with Claude Code's documented flag shape, so both
-  /// `headlessCommand` and `requestFlag` remain null. Revisiting
-  /// requires either the spec's argv contract to evolve or a
-  /// Claude-specific invoker.
+  /// Rationale: `--system-prompt` accepts inline text; `--system-prompt-file`
+  /// takes a path — the spawn pipeline already writes the rendered
+  /// system prompt to disk per spawn, so the file-path flag is the
+  /// direct fit. The non-interactive user prompt (`claude -p
+  /// "<prompt>"`) is still POSITIONAL with no path-valued flag
+  /// equivalent, so the fixed headless argv contract
+  /// `[..., requestFlag, <path>]` cannot be expressed and both
+  /// `headlessCommand` and `requestFlag` stay null.
   claude,
 
   /// OpenAI Codex CLI.
   ///
-  /// Headless: **unwired**.
+  /// System prompt: **unsupported** in dev-16 (see [systemPromptInvocation]).
+  /// Headless (request file): **unwired**.
   /// Source: https://developers.openai.com/codex/cli/reference
   /// Checked: 2026-04-17.
-  /// Rationale: The non-interactive subcommand is `codex exec`, which
-  /// takes the prompt as a POSITIONAL string or reads it from stdin
-  /// via `-`. No flag accepts a user-request file path. The current
-  /// documented flag set contains no `--system`/`--system-prompt`
-  /// entry either — system behavior is configured via
-  /// `~/.codex/config.toml`. Neither half of the fixed
-  /// `[systemPromptFlag, <path>, requestFlag, <path>]` contract is
-  /// satisfied, so both fields remain null.
+  /// Rationale: System behavior is configured via `~/.codex/config.toml`,
+  /// not a CLI flag. Wiring a per-spawn config file write (including
+  /// its manifest tracking and cleanup in `DespawnService`) is a
+  /// distinct design spike out of scope for dev-16; this value
+  /// returns [SystemPromptUnsupported] until that work lands. The
+  /// non-interactive subcommand `codex exec` also takes the user
+  /// prompt as a POSITIONAL string or via stdin `-` and exposes no
+  /// request-file flag, so `headlessCommand` and `requestFlag`
+  /// remain null.
   codex,
 
   /// Cursor Agent CLI (executable name: `agent`).
   ///
-  /// Headless: **unwired**.
+  /// System prompt: **unsupported** (see [systemPromptInvocation]).
+  /// Headless (request file): **unwired**.
   /// Source: https://cursor.com/docs/cli/reference/parameters
   /// Checked: 2026-04-17.
-  /// Rationale: Non-interactive mode is `agent -p "<prompt>"`; the
-  /// prompt is a POSITIONAL string and no flag takes a user-request
-  /// file path. The documented parameter table lists no
-  /// `--system`/`--system-prompt` flag either. The fixed
-  /// `[systemPromptFlag, <path>, requestFlag, <path>]` contract cannot
-  /// be expressed, so both fields remain null.
+  /// Rationale: The documented parameter table lists no
+  /// `--system`/`--system-prompt` flag and no request-file flag.
+  /// Non-interactive mode is `agent -p "<prompt>"` with a POSITIONAL
+  /// prompt. Both the system-prompt and headless halves stay
+  /// unwired.
   cursor,
   ;
 
@@ -67,14 +70,44 @@ enum TCliTool {
     }
   }
 
-  String get systemPromptFlag {
+  /// Describes how this tool accepts a system prompt for a
+  /// non-interactive launch.
+  ///
+  /// The caller must already have rendered the system prompt to a
+  /// string and written it to an absolute path on disk.
+  /// - [renderedPromptContent] is the verbatim rendered prompt text
+  ///   (used by tools whose flag takes inline text).
+  /// - [renderedPromptPath] is the absolute path on disk (used by
+  ///   tools whose flag takes a file path or whose mechanism writes
+  ///   a sidecar config file).
+  ///
+  /// Per-tool resolution (checked 2026-04-17, see enum-value doc
+  /// comments above):
+  /// - [TCliTool.claude]: `SystemPromptArgv(['--system-prompt-file',
+  ///   renderedPromptPath])` — path-valued flag.
+  /// - [TCliTool.codex]: [SystemPromptUnsupported] (config-file
+  ///   mechanism exists but wiring is out of scope for dev-16).
+  /// - [TCliTool.cursor]: [SystemPromptUnsupported] (no documented
+  ///   mechanism).
+  ///
+  /// The inline-text-flag variant is modeled by the same
+  /// [SystemPromptArgv] shape — an enum value wanting that shape
+  /// would return `SystemPromptArgv([inlineFlag, renderedPromptContent])`.
+  /// No current tool exercises it; the enum surface supports it so
+  /// a future value can opt in without consumer changes.
+  SystemPromptInvocation systemPromptInvocation({
+    required String renderedPromptContent,
+    required String renderedPromptPath,
+  }) {
     switch (this) {
       case TCliTool.claude:
-        return '--system-prompt';
+        return SystemPromptArgv(
+          ['--system-prompt-file', renderedPromptPath],
+        );
       case TCliTool.codex:
-        return '--system';
+        return const SystemPromptUnsupported();
       case TCliTool.cursor:
-        return '--system';
+        return const SystemPromptUnsupported();
     }
   }
 
@@ -194,8 +227,10 @@ enum TCliTool {
   /// headless argv.
   ///
   /// When populated, the resulting argv is
-  /// `[...headlessCommand, systemPromptFlag, <systemPromptPath>,
-  /// requestFlag, <requestFilePath>]`. `null` means this tool has no
+  /// `[...headlessCommand, ...systemPromptArgv, requestFlag,
+  /// <requestFilePath>]` where `systemPromptArgv` is the resolved
+  /// fragment from [systemPromptInvocation]. `null` means this tool
+  /// has no
   /// documented flag that accepts a request-file PATH in
   /// non-interactive mode.
   ///
