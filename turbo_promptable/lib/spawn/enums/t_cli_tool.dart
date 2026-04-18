@@ -9,7 +9,6 @@ enum TCliTool {
   String spawn({
     required String request,
     String? conversationId,
-    String? systemPromptPath,
     String? systemPrompt,
     String? tools,
     bool yolo = true,
@@ -19,9 +18,6 @@ enum TCliTool {
   }) {
     final pConversation = conversationId != null ? ' ${resume(conversationId)}' : '';
     final pSystemPrompt = systemPrompt != null ? ' ${this.systemPrompt(systemPrompt)}' : '';
-    final pSystemPromptFile = systemPromptPath != null
-        ? ' ${systemPromptFile(systemPromptPath)}'
-        : '';
     final pTools = tools != null ? ' ${this.tools(tools)}' : '';
     final pYolo = '${yolo ? ' ${this.yolo}' : ''}';
     final pModel = model != null ? ' ${this.model(model)}' : '';
@@ -30,7 +26,6 @@ enum TCliTool {
     return '$command'
         '$pConversation'
         '$pSystemPrompt'
-        '$pSystemPromptFile'
         '$pTools'
         '$pYolo'
         '$pModel'
@@ -102,16 +97,6 @@ enum TCliTool {
       case TCliTool.codex:
       case TCliTool.cursor:
         return '<System>$value</System>';
-    }
-  }
-
-  String systemPromptFile(String path) {
-    switch (this) {
-      case TCliTool.claude:
-        return '--system-prompt-file $path';
-      case TCliTool.codex:
-      case TCliTool.cursor:
-        return '<System>@$path</System>';
     }
   }
 

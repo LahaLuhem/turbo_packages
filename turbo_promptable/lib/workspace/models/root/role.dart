@@ -1,6 +1,4 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:turbo_promptable/spawn/abstracts/t_spawnable.dart';
-import 'package:turbo_promptable/spawn/enums/t_cli_tool.dart';
 import 'package:turbo_promptable/turbo_promptable.dart';
 
 part 'role.g.dart';

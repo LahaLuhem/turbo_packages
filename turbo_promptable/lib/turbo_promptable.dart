@@ -5,7 +5,6 @@ library turbo_promptable;
 export 'core/extensions/t_collection_extensions.dart';
 export 'spawn/models/t_file.dart';
 export 'spawn/models/t_folder.dart';
-export 'spawn/models/t_spawn_config.dart';
 export 'spawn/records/headless_invocation.dart';
 export 'spawn/records/interactive_invocation.dart';
 export 'spawn/records/system_prompt_invocation.dart';
