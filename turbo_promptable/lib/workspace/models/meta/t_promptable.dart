@@ -1,3 +1,5 @@
+import 'package:turbo_promptable/workspace/enums/t_body_type.dart';
+import 'package:turbo_promptable/workspace/enums/t_ref_type.dart';
 import 'package:turbo_promptable/workspace/models/meta/t_meta_data.dart';
 import 'package:turbo_serializable/constants/ts_defaults.dart';
 import 'package:turbo_serializable/turbo_serializable.dart';
@@ -65,4 +67,57 @@ abstract class TPromptable extends TSerializable {
     }
     return frontMatter;
   }
+
+  String ref({
+    String? openRef,
+    String? closeRef,
+    required TBodyType bodyType,
+  }) =>
+      '${openRef ?? TRefType.curlyBraces.openDouble}'
+          ' ${switch (bodyType) {
+        TBodyType.md => name,
+        TBodyType.xml => xmlKey,
+        TBodyType.yaml => yamlKey,
+        TBodyType.json => jsonKey,
+      }} '
+          '${closeRef ?? TRefType.curlyBraces.closeDouble}';
+
+  // 🏗️ HELPERS ------------------------------------------------------------------------------- \\
+
+  String refMd({
+    String? openRef,
+    String? closeRef,
+  }) => ref(
+    bodyType: TBodyType.md,
+    openRef: openRef,
+    closeRef: closeRef,
+  );
+
+  String refXml({
+    String? openRef,
+    String? closeRef,
+  }) => ref(
+    bodyType: TBodyType.xml,
+    openRef: openRef,
+    closeRef: closeRef,
+  );
+
+  String refYaml({
+    String? openRef,
+    String? closeRef,
+  }) => ref(
+    bodyType: TBodyType.yaml,
+    openRef: openRef,
+    closeRef: closeRef,
+  );
+
+  String refJson({
+    String? openRef,
+    String? closeRef,
+  }) => ref(
+    bodyType: TBodyType.json,
+    openRef: openRef,
+    closeRef: closeRef,
+  );
+
 }

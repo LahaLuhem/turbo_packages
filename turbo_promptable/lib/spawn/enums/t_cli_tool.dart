@@ -1,257 +1,156 @@
-import 'package:turbo_promptable/spawn/records/headless_invocation.dart';
-import 'package:turbo_promptable/spawn/records/interactive_invocation.dart';
-import 'package:turbo_promptable/spawn/records/system_prompt_invocation.dart';
+enum ConfigSource {
+  local,
+  global,
+  none,
+}
 
 enum TCliTool {
-  /// Anthropic Claude Code CLI.
-  ///
-  /// Invocation surface:
-  /// - [command] resolves to `claude` on PATH.
-  /// - [systemPromptInvocation] returns [SystemPromptArgv] for the
-  ///   path-valued flag `--system-prompt-file`.
-  /// - [isolationArgv] returns `['--strict-mcp-config']` so the child
-  ///   loads zero MCP servers while OAuth / keychain auth remain intact.
-  /// - [headlessInvocation] shapes the user prompt as the positional
-  ///   argument after `-p`.
-  /// Source: https://docs.claude.com/en/docs/claude-code/cli-reference
-  /// Checked: 2026-04-17.
   claude,
-
-  /// OpenAI Codex CLI.
-  ///
-  /// Invocation surface:
-  /// - [command] resolves to `codex` on PATH.
-  /// - [systemPromptInvocation] returns [SystemPromptUnsupported] —
-  ///   codex exposes no `--system-prompt*` flag. Headless launches
-  ///   stitch the rendered system prompt onto the request body inside
-  ///   [headlessInvocation]; interactive launches deliver the system
-  ///   prompt via `AGENTS.md` at cwd (outside this package).
-  /// - [isolationArgv] returns `['-c', 'mcp_servers={}']` so the child
-  ///   loads zero MCP servers. `CODEX_HOME` is NOT redirected —
-  ///   auth.json lives under `~/.codex/` and redirection would break
-  ///   Codex subscription auth.
-  /// Source: https://github.com/openai/codex
-  /// Checked: 2026-04-17.
   codex,
-
-  /// Cursor Agent CLI.
-  ///
-  /// Invocation surface:
-  /// - [command] resolves to `cursor-agent` on PATH. The binary's own
-  ///   `--help` names the executable `agent`, but `cursor-agent` is the
-  ///   published package name and avoids PATH collisions with other
-  ///   `agent` binaries.
-  /// - [systemPromptInvocation] returns [SystemPromptUnsupported] —
-  ///   cursor-agent exposes no `--system-prompt*` flag. Headless
-  ///   launches stitch the rendered system prompt onto the request
-  ///   body inside [headlessInvocation]; interactive launches deliver
-  ///   the system prompt via `AGENTS.md` at cwd (outside this package).
-  /// - [isolationArgv] is empty: cursor-agent's documented CLI surface
-  ///   exposes no flag or environment variable to disable user-global
-  ///   MCP servers. See the `isolationArgv` doc comment for the gap.
-  /// Source: https://docs.cursor.com/en/cli/reference/parameters
-  /// Checked: 2026-04-17.
   cursor,
   ;
+
+  String spawn({
+    required String request,
+    String? conversationId,
+    String? systemPromptPath,
+    String? systemPrompt,
+    String? tools,
+    bool yolo = true,
+    String? model,
+    bool headless = true,
+    ConfigSource mcpsConfigSource = ConfigSource.none,
+  }) {
+    final pConversation = conversationId != null ? ' ${resume(conversationId)}' : '';
+    final pSystemPrompt = systemPrompt != null ? ' ${this.systemPrompt(systemPrompt)}' : '';
+    final pSystemPromptFile = systemPromptPath != null
+        ? ' ${systemPromptFile(systemPromptPath)}'
+        : '';
+    final pTools = tools != null ? ' ${this.tools(tools)}' : '';
+    final pYolo = '${yolo ? ' ${this.yolo}' : ''}';
+    final pModel = model != null ? ' ${this.model(model)}' : '';
+    final pHeadless = headless && this.headless != null ? ' ${this.headless}' : '';
+    final pMcpsConfig = mcpsConfig(source: mcpsConfigSource);
+    return '$command'
+        '$pConversation'
+        '$pSystemPrompt'
+        '$pSystemPromptFile'
+        '$pTools'
+        '$pYolo'
+        '$pModel'
+        '$pHeadless'
+        '$pMcpsConfig'
+        '$request';
+  }
 
   String get command {
     switch (this) {
       case TCliTool.claude:
-        // Source: https://docs.claude.com/en/docs/claude-code/cli-reference
-        // Checked: 2026-04-17.
         return 'claude';
       case TCliTool.codex:
-        // Source: https://github.com/openai/codex
-        // Checked: 2026-04-17.
         return 'codex';
       case TCliTool.cursor:
-        // Source: https://docs.cursor.com/en/cli/reference/parameters
-        // Checked: 2026-04-17.
-        return 'cursor-agent';
+        return 'agent';
     }
   }
 
-  String get yoloFlag {
+  String get yolo {
     switch (this) {
       case TCliTool.claude:
         return '--dangerously-skip-permissions';
       case TCliTool.codex:
-        return '--yolo';
+        return '--yolo --ask-for-approval never';
       case TCliTool.cursor:
-        return '--yolo';
+        return '--yolo --force';
     }
   }
 
-  /// Describes how this tool accepts a system prompt for a
-  /// non-interactive launch via a CLI flag.
-  ///
-  /// The caller must already have rendered the system prompt to a
-  /// string and written it to an absolute path on disk.
-  /// - [renderedPromptContent] is the verbatim rendered prompt text
-  ///   (used by tools whose flag takes inline text).
-  /// - [renderedPromptPath] is the absolute path on disk (used by
-  ///   tools whose flag takes a file path or whose mechanism writes
-  ///   a sidecar config file).
-  ///
-  /// Per-tool resolution:
-  /// - [TCliTool.claude]: `SystemPromptArgv(['--system-prompt-file',
-  ///   renderedPromptPath])` — path-valued flag.
-  /// - [TCliTool.codex]: [SystemPromptUnsupported] — no documented
-  ///   flag. Headless launches stitch the rendered prompt onto the
-  ///   request body via [headlessInvocation].
-  /// - [TCliTool.cursor]: [SystemPromptUnsupported] — no documented
-  ///   flag. Headless launches stitch the rendered prompt onto the
-  ///   request body via [headlessInvocation].
-  SystemPromptInvocation systemPromptInvocation({
-    required String renderedPromptContent,
-    required String renderedPromptPath,
+  String model(String? value) {
+    switch (this) {
+      case TCliTool.claude:
+        return '--model $value';
+      case TCliTool.codex:
+        return '--model $value';
+      case TCliTool.cursor:
+        return '--model $value';
+    }
+  }
+
+  String resume(String conversationId) {
+    switch (this) {
+      case TCliTool.claude:
+        return '--conversation $conversationId';
+      case TCliTool.codex:
+        return 'resume $conversationId';
+      case TCliTool.cursor:
+        return '--resume=$conversationId';
+    }
+  }
+
+  String tools(String tools) {
+    switch (this) {
+      case TCliTool.claude:
+        return '--tools $tools';
+      case TCliTool.codex:
+        return '';
+      case TCliTool.cursor:
+        return '';
+    }
+  }
+
+  String systemPrompt(String value) {
+    switch (this) {
+      case TCliTool.claude:
+        return '--system-prompt '
+            '''$value''';
+      case TCliTool.codex:
+      case TCliTool.cursor:
+        return '<System>$value</System>';
+    }
+  }
+
+  String systemPromptFile(String path) {
+    switch (this) {
+      case TCliTool.claude:
+        return '--system-prompt-file $path';
+      case TCliTool.codex:
+      case TCliTool.cursor:
+        return '<System>@$path</System>';
+    }
+  }
+
+  String? get headless {
+    switch (this) {
+      case TCliTool.claude:
+        return '--disable-slash-commands -p';
+      case TCliTool.codex:
+        return 'exec';
+      case TCliTool.cursor:
+        return '-p';
+    }
+  }
+
+  String mcpsConfig({
+    required ConfigSource source,
   }) {
     switch (this) {
       case TCliTool.claude:
-        return SystemPromptArgv(
-          ['--system-prompt-file', renderedPromptPath],
-        );
+        switch (source) {
+          case ConfigSource.local:
+            return '--strict-mcp-config --mcp-config $mcpsPath';
+          case ConfigSource.global:
+            return '';
+          case ConfigSource.none:
+            return '--strict-mcp-config';
+        }
       case TCliTool.codex:
-        return const SystemPromptUnsupported();
+        return '';
       case TCliTool.cursor:
-        return const SystemPromptUnsupported();
+        return '';
     }
   }
 
-  /// Per-tool argv fragment that strips user-global MCP server
-  /// inheritance from any child launch. SAFE on both interactive and
-  /// headless launches; never affects authentication.
-  List<String> get isolationArgv {
-    switch (this) {
-      case TCliTool.claude:
-        // `--strict-mcp-config` — child loads only MCP servers from
-        // `--mcp-config`. With no paired `--mcp-config`, the child
-        // loads zero MCP servers. OAuth / keychain auth untouched.
-        // Source: https://docs.claude.com/en/docs/claude-code/cli-reference
-        // Checked: 2026-04-17.
-        return const ['--strict-mcp-config'];
-      case TCliTool.codex:
-        // `-c mcp_servers={}` — per-invocation config override empties
-        // the `mcp_servers` table. Highest precedence over
-        // `~/.codex/config.toml`. Auth and all other config intact.
-        // `CODEX_HOME` is NOT redirected: it would break subscription
-        // auth stored at `~/.codex/auth.json`.
-        // Source: https://github.com/openai/codex
-        // Checked: 2026-04-17.
-        return const ['-c', 'mcp_servers={}'];
-      case TCliTool.cursor:
-        // No documented flag or environment variable disables
-        // user-global MCP servers for cursor-agent. The invariant is
-        // surfaced here as an empty list so a future cursor release
-        // can be wired with a one-line change.
-        // Source: https://docs.cursor.com/en/cli/reference/parameters
-        // Checked: 2026-04-17.
-        return const <String>[];
-    }
-  }
-
-  /// Fully-composed non-interactive launch argv for this tool.
-  ///
-  /// - [requestBody] is the user's request body read from the request
-  ///   file by the spawn pipeline.
-  /// - [systemPromptArgv] is the pre-resolved system-prompt fragment
-  ///   for tools that accept a flag (claude); ignored by tools that
-  ///   stitch the rendered prompt onto the request body (codex,
-  ///   cursor).
-  /// - [renderedSystemPrompt] is the rendered system prompt text for
-  ///   the current spawn; used by stitching tools.
-  HeadlessInvocation headlessInvocation({
-    required String requestBody,
-    required List<String> systemPromptArgv,
-    required String renderedSystemPrompt,
-  }) {
-    switch (this) {
-      case TCliTool.claude:
-        // Source: https://docs.claude.com/en/docs/claude-code/cli-reference
-        // Checked: 2026-04-17.
-        return HeadlessInvocation(
-          executable: 'claude',
-          arguments: [
-            ...isolationArgv,
-            ...systemPromptArgv,
-            '-p',
-            requestBody,
-          ],
-        );
-      case TCliTool.codex:
-        // Source: https://github.com/openai/codex
-        // Checked: 2026-04-17.
-        return HeadlessInvocation(
-          executable: 'codex',
-          arguments: [
-            'exec',
-            ...isolationArgv,
-            _stitchSystemPromptAndRequest(renderedSystemPrompt, requestBody),
-          ],
-        );
-      case TCliTool.cursor:
-        // Source: https://docs.cursor.com/en/cli/reference/parameters
-        // Checked: 2026-04-17.
-        return HeadlessInvocation(
-          executable: 'cursor-agent',
-          arguments: [
-            ...isolationArgv,
-            '-p',
-            _stitchSystemPromptAndRequest(renderedSystemPrompt, requestBody),
-          ],
-        );
-    }
-  }
-
-  /// Fully-composed interactive launch argv for this tool.
-  ///
-  /// - [systemPromptArgv] is the pre-resolved system-prompt fragment
-  ///   for tools that accept a flag (claude); ignored by codex and
-  ///   cursor, which rely on `AGENTS.md` delivery at cwd for
-  ///   interactive mode (outside this package).
-  InteractiveInvocation interactiveInvocation({
-    required List<String> systemPromptArgv,
-  }) {
-    switch (this) {
-      case TCliTool.claude:
-        // Source: https://docs.claude.com/en/docs/claude-code/cli-reference
-        // Checked: 2026-04-17.
-        return InteractiveInvocation(
-          executable: 'claude',
-          arguments: [
-            ...isolationArgv,
-            ...systemPromptArgv,
-          ],
-        );
-      case TCliTool.codex:
-        // Source: https://github.com/openai/codex
-        // Checked: 2026-04-17.
-        return InteractiveInvocation(
-          executable: 'codex',
-          arguments: [...isolationArgv],
-        );
-      case TCliTool.cursor:
-        // Source: https://docs.cursor.com/en/cli/reference/parameters
-        // Checked: 2026-04-17.
-        return InteractiveInvocation(
-          executable: 'cursor-agent',
-          arguments: [...isolationArgv],
-        );
-    }
-  }
-
-  String get mcpConfigFlag {
-    switch (this) {
-      case TCliTool.claude:
-        return '--mcp-config';
-      case TCliTool.codex:
-        return '--mcp-config';
-      case TCliTool.cursor:
-        return '--mcp-config';
-    }
-  }
-
-  String get homeFolderPath {
+  String get homePath {
     switch (this) {
       case TCliTool.claude:
         return '.claude';
@@ -262,70 +161,58 @@ enum TCliTool {
     }
   }
 
-  String get mcpFilePath {
+  String get mcpsPath {
     switch (this) {
       case TCliTool.claude:
         return '.mcp.json';
       case TCliTool.codex:
-        return '$homeFolderPath/mcp.json';
+        return '$homePath/mcp.json';
       case TCliTool.cursor:
-        return '$homeFolderPath/mcp.json';
+        return '$homePath/mcp.json';
     }
   }
 
-  String get promptFolderPath {
+  String get commandsPath {
     switch (this) {
       case TCliTool.claude:
-        return '$homeFolderPath/commands';
+        return '$homePath/commands';
       case TCliTool.codex:
-        return '$homeFolderPath/prompts';
+        return '$homePath/prompts';
       case TCliTool.cursor:
-        return '$homeFolderPath/commands';
+        return '$homePath/commands';
     }
   }
 
-  String get agentsFolderPath {
+  String get subAgentsPath {
     switch (this) {
       case TCliTool.claude:
-        return '$homeFolderPath/agents';
+        return '$homePath/agents';
       case TCliTool.codex:
-        return '$homeFolderPath/agents';
+        return '$homePath/agents';
       case TCliTool.cursor:
-        return '$homeFolderPath/agents';
+        return '$homePath/agents';
     }
   }
 
-  String get skillsFolderPath {
+  String get skillsPath {
     switch (this) {
       case TCliTool.claude:
-        return '$homeFolderPath/skills';
+        return '$homePath/skills';
       case TCliTool.codex:
-        return '$homeFolderPath/skills';
+        return '$homePath/skills';
       case TCliTool.cursor:
-        return '$homeFolderPath/skills';
+        return '$homePath/skills';
     }
   }
-}
 
-/// Wraps a rendered system prompt and a user request body into a single
-/// text payload with XML-tagged boundaries. Used by [TCliTool.codex] and
-/// [TCliTool.cursor] headless invocations, neither of which exposes a
-/// `--system-prompt*` flag.
-///
-/// The output is deterministic and preserves the boundary tags even when
-/// either input is empty. XML tags are chosen because Anthropic and
-/// OpenAI prompt-engineering guidance both report reliable handling of
-/// XML-delimited sections by their model backends; Markdown headings
-/// would risk collision with user-authored Markdown in the request body.
-String _stitchSystemPromptAndRequest(
-  String renderedSystemPrompt,
-  String requestBody,
-) {
-  return '<system-prompt>\n'
-      '$renderedSystemPrompt\n'
-      '</system-prompt>\n'
-      '\n'
-      '<user-request>\n'
-      '$requestBody\n'
-      '</user-request>';
+  String get sourcesOverrideFlag {
+    switch (this) {
+      case TCliTool.claude:
+        return '--setting-sources';
+      case TCliTool.codex:
+        return '';
+      case TCliTool.cursor:
+        return '--sources';
+    }
+  }
 }
