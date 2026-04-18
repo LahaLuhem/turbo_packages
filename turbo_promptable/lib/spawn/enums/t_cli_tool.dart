@@ -1,8 +1,4 @@
-enum ConfigSource {
-  local,
-  global,
-  none,
-}
+import 'package:turbo_promptable/spawn/enums/t_config_source.dart';
 
 enum TCliTool {
   claude,
@@ -202,17 +198,6 @@ enum TCliTool {
         return '$homePath/skills';
       case TCliTool.cursor:
         return '$homePath/skills';
-    }
-  }
-
-  String get sourcesOverrideFlag {
-    switch (this) {
-      case TCliTool.claude:
-        return '--setting-sources';
-      case TCliTool.codex:
-        return '';
-      case TCliTool.cursor:
-        return '--sources';
     }
   }
 }
