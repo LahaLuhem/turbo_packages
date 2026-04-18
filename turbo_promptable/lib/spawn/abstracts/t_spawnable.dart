@@ -1,6 +1,4 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:turbo_promptable/spawn/enums/t_cli_tool.dart';
-import 'package:turbo_promptable/spawn/enums/t_prompt_delivery.dart';
 import 'package:turbo_promptable/turbo_promptable.dart';
 
 @JsonSerializable(
@@ -11,13 +9,14 @@ import 'package:turbo_promptable/turbo_promptable.dart';
 abstract class TSpawnable extends TPromptable {
   const TSpawnable({
     required super.name,
+    required this.command,
+    super.description,
     super.metaData,
-    this.cliTool,
-    this.command,
-    this.promptDelivery = TPromptDelivery.system,
+    super.cascadeNameToMetaData = true,
+    super.cascadeDescriptionToMetaData = true,
+    super.values,
+    super.value,
   });
 
-  final String? command;
-  final TCliTool? cliTool;
-  final TPromptDelivery promptDelivery;
+  final String command;
 }

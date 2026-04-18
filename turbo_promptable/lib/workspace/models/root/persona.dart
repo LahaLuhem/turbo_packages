@@ -1,6 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:turbo_promptable/spawn/enums/t_cli_tool.dart';
-import 'package:turbo_promptable/spawn/enums/t_prompt_delivery.dart';
 import 'package:turbo_promptable/workspace/models/root/activity.dart';
 import 'package:turbo_promptable/workspace/models/root/checklist.dart';
 import 'package:turbo_promptable/workspace/models/root/instruction.dart';
@@ -11,7 +10,6 @@ import 'package:turbo_promptable/workspace/models/root/workflow.dart';
 
 part 'persona.g.dart';
 
-/// A [Role] augmented with an [identity] that describes the persona's character.
 @JsonSerializable(
   explicitToJson: true,
   includeIfNull: false,
@@ -19,17 +17,14 @@ part 'persona.g.dart';
 class Persona extends Role {
   const Persona({
     required super.name,
-    super.metaData,
     required super.expertise,
+    super.metaData,
     super.activities,
     super.checklists,
     super.instructions,
     super.templates,
     super.tools,
     super.workflows,
-    super.cliTool,
-    super.command,
-    super.promptDelivery,
     required this.identity,
   });
 
@@ -60,8 +55,7 @@ class Persona extends Role {
          identity: identity,
        );
 
-  factory Persona.fromJson(Map<String, dynamic> json) =>
-      _$PersonaFromJson(json);
+  factory Persona.fromJson(Map<String, dynamic> json) => _$PersonaFromJson(json);
   @override
   Map<String, dynamic> toJson() => _$PersonaToJson(this);
 }

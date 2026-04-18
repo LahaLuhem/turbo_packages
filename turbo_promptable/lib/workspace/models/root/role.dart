@@ -1,20 +1,15 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:turbo_promptable/spawn/abstracts/t_spawnable.dart';
 import 'package:turbo_promptable/spawn/enums/t_cli_tool.dart';
-import 'package:turbo_promptable/spawn/enums/t_prompt_delivery.dart';
 import 'package:turbo_promptable/turbo_promptable.dart';
 
 part 'role.g.dart';
 
-/// A role that can be assigned to a [Persona] or [Agent], with specific expertise and capabilities.
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
-class Role extends TSpawnable {
+class Role extends TPromptable {
   const Role({
     required super.name,
     super.metaData,
-    super.cliTool,
-    super.command,
-    super.promptDelivery,
     required this.expertise,
     this.activities,
     this.checklists,
