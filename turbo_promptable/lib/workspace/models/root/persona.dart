@@ -18,12 +18,8 @@ class Persona extends Role {
     required super.name,
     required super.expertise,
     super.metaData,
-    super.activities,
-    super.checklists,
     super.instructions,
-    super.templates,
     super.tools,
-    super.workflows,
     this.identity,
   });
 
@@ -35,22 +31,14 @@ class Persona extends Role {
     String? name,
     TMetaData? metaData,
     String? expertise,
-    List<Activity>? activities,
-    List<Checklist>? checklists,
     List<Instruction>? instructions,
-    List<Template>? templates,
     List<Tool>? tools,
-    List<Workflow>? workflows,
   }) : this(
          name: name ?? role.name,
          metaData: metaData ?? role.metaData,
          expertise: expertise ?? role.expertise,
-         activities: activities ?? role.activities,
-         checklists: checklists ?? role.checklists,
          instructions: instructions ?? role.instructions,
-         templates: templates ?? role.templates,
          tools: tools ?? role.tools,
-         workflows: workflows ?? role.workflows,
          identity: identity,
        );
 

@@ -34,7 +34,6 @@ void main() {
     name: 'Code Reviewer',
     expertise: 'Static analysis and code quality',
     instructions: [instruction],
-    workflows: [workflow],
   );
 
   print(role.toMd());
