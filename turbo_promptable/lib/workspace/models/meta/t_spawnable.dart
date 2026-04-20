@@ -8,12 +8,16 @@ export 'package:turbo_promptable/workspace/models/meta/t_meta_data.dart';
 abstract class TSpawnable extends TPromptable {
   const TSpawnable(
     String name, {
+    required this.id,
     this.allowedTools,
     this.yolo = true,
     this.model,
     this.headless = true,
-  }) : super(name: name);
+  }) : super(
+         name: name,
+       );
 
+  final String id;
   final String? allowedTools;
   final bool yolo;
   final String? model;

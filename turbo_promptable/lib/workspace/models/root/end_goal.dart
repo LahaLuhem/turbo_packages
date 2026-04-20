@@ -9,12 +9,11 @@ part 'end_goal.g.dart';
 class EndGoal extends Goal {
   const EndGoal(
     super.value, {
+    required super.name,
     this.acceptanceCriteria,
     this.constraints,
     super.metaData,
-  }) : super(
-         name: 'End Goal',
-       );
+  });
 
   final AcceptanceCriteria? acceptanceCriteria;
   final Constraints? constraints;

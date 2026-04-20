@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+
 import 'package:turbo_promptable/workspace/models/root/tool.dart';
 
 part 'script.g.dart';

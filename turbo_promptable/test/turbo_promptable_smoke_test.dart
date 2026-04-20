@@ -3,7 +3,10 @@ import 'package:turbo_promptable/turbo_promptable.dart';
 
 void main() {
   test('Goal serializes name via toJson', () {
-    const goal = EndGoal('Ship');
+    final goal = EndGoal(
+      'Ship',
+      name: 'Ship Goal',
+    );
     expect(goal.toJson()['name'], 'Ship');
   });
 }

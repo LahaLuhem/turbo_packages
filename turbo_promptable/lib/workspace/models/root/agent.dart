@@ -14,6 +14,7 @@ part 'agent.g.dart';
 class Agent<IDENTITY extends Role> extends TSpawnable {
   const Agent(
     super.name, {
+    required super.id,
     super.allowedTools,
     super.yolo = true,
     super.model,
