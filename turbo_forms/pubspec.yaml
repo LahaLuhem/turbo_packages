@@ -20,7 +20,7 @@ dependencies:
   flutter:
     sdk: flutter
   equatable: ^2.0.5
-  shadcn_ui: ^0.53.5
+  shadcn_ui: ^0.54.0
   turbo_notifiers: ^1.1.0
   turbolytics: ^1.1.0
 
