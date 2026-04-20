@@ -1,31 +1,38 @@
 import 'package:meta/meta.dart';
 import 'package:turbo_promptable/spawn/enums/t_cli_tool.dart';
-import 'package:turbo_promptable/spawn/enums/t_config_source.dart';
-import 'package:turbo_serializable/abstracts/t_writeable.dart';
+import 'package:turbo_promptable/turbo_promptable.dart';
 
 export 'package:turbo_promptable/workspace/enums/t_body_type.dart';
 export 'package:turbo_promptable/workspace/models/meta/t_meta_data.dart';
 
-abstract class TSpawnable extends TWriteable {
-  const TSpawnable({
-    required this.cliTool,
-    this.tools,
+abstract class TSpawnable extends TPromptable {
+  const TSpawnable(
+    String name, {
+    this.allowedTools,
     this.yolo = true,
     this.model,
     this.headless = true,
-    this.mcpsConfigSource = ConfigSource.none,
-  });
+  }) : super(name: name);
 
-  final String? tools;
+  final String? allowedTools;
   final bool yolo;
   final String? model;
   final bool headless;
-  final ConfigSource mcpsConfigSource;
-  final TCliTool cliTool;
+
+  String get systemPrompt;
 
   @mustCallSuper
   String spawn({
     required String prompt,
+    required TCliTool cliTool,
     String? conversationId,
-  });
+  }) => cliTool.spawn(
+    request: prompt,
+    conversationId: conversationId,
+    systemPrompt: systemPrompt,
+    allowedTools: allowedTools,
+    yolo: yolo,
+    model: model,
+    headless: headless,
+  );
 }

@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:turbo_promptable/spawn/enums/t_config_source.dart';
+import 'package:turbo_promptable/turbo_promptable.dart';
 import 'package:turbo_promptable/workspace/models/meta/t_spawnable.dart';
 import 'package:turbo_promptable/workspace/models/root/role.dart';
 
@@ -11,29 +12,18 @@ part 'agent.g.dart';
   genericArgumentFactories: true,
 )
 class Agent<IDENTITY extends Role> extends TSpawnable {
-  const Agent({
-    required super.cliTool,
-    super.tools,
+  const Agent(
+    super.name, {
+    super.allowedTools,
     super.yolo = true,
     super.model,
     super.headless = true,
-    super.mcpsConfigSource = ConfigSource.none,
     required this.identity,
+    this.workflow,
   });
 
   final IDENTITY identity;
-
-  @override
-  String spawn({required String prompt, String? conversationId}) => cliTool.spawn(
-    request: prompt,
-    conversationId: conversationId,
-    systemPrompt: identity.toMd(),
-    tools: tools,
-    yolo: yolo,
-    model: model,
-    headless: headless,
-    mcpsConfigSource: mcpsConfigSource,
-  );
+  final Workflow? workflow;
 
   factory Agent.fromJson(
     Map<String, dynamic> json,
@@ -45,4 +35,7 @@ class Agent<IDENTITY extends Role> extends TSpawnable {
     this,
     (IDENTITY identity) => identity.toJson(),
   );
+
+  @override
+  String get systemPrompt => identity.toMd();
 }

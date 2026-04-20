@@ -36,7 +36,6 @@ export 'workspace/models/memories/meeting.dart';
 export 'workspace/models/memories/progress.dart';
 export 'workspace/models/meta/t_meta_data.dart';
 export 'workspace/models/meta/t_promptable.dart';
-export 'workspace/models/root/activity.dart';
 export 'workspace/models/root/checklist.dart';
 export 'workspace/models/root/context.dart';
 export 'workspace/models/root/end_goal.dart';

@@ -10,19 +10,17 @@ enum TCliTool {
     required String request,
     String? conversationId,
     String? systemPrompt,
-    String? tools,
+    String? allowedTools,
     bool yolo = true,
     String? model,
     bool headless = true,
-    ConfigSource mcpsConfigSource = ConfigSource.none,
   }) {
     final pConversation = conversationId != null ? ' ${resume(conversationId)}' : '';
     final pSystemPrompt = systemPrompt != null ? ' ${this.systemPrompt(systemPrompt)}' : '';
-    final pTools = tools != null ? ' ${this.tools(tools)}' : '';
+    final pTools = allowedTools != null ? ' ${this.allowedTools(allowedTools)}' : '';
     final pYolo = '${yolo ? ' ${this.yolo}' : ''}';
     final pModel = model != null ? ' ${this.model(model)}' : '';
     final pHeadless = headless && this.headless != null ? ' ${this.headless}' : '';
-    final pMcpsConfig = mcpsConfig(source: mcpsConfigSource);
     return '$command'
         '$pConversation'
         '$pSystemPrompt'
@@ -30,7 +28,6 @@ enum TCliTool {
         '$pYolo'
         '$pModel'
         '$pHeadless'
-        '$pMcpsConfig'
         '$request';
   }
 
@@ -78,7 +75,7 @@ enum TCliTool {
     }
   }
 
-  String tools(String tools) {
+  String allowedTools(String tools) {
     switch (this) {
       case TCliTool.claude:
         return '--tools $tools';

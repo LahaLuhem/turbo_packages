@@ -10,38 +10,26 @@ Agent<IDENTITY> _$AgentFromJson<IDENTITY extends Role>(
   Map<String, dynamic> json,
   IDENTITY Function(Object? json) fromJsonIDENTITY,
 ) => Agent<IDENTITY>(
-  cliTool: $enumDecode(_$TCliToolEnumMap, json['cliTool']),
-  tools: json['tools'] as String?,
+  json['name'] as String,
+  allowedTools: json['allowedTools'] as String?,
   yolo: json['yolo'] as bool? ?? true,
   model: json['model'] as String?,
   headless: json['headless'] as bool? ?? true,
-  mcpsConfigSource:
-      $enumDecodeNullable(_$ConfigSourceEnumMap, json['mcpsConfigSource']) ??
-      ConfigSource.none,
   identity: fromJsonIDENTITY(json['identity']),
+  workflow: json['workflow'] == null
+      ? null
+      : Workflow.fromJson(json['workflow'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$AgentToJson<IDENTITY extends Role>(
   Agent<IDENTITY> instance,
   Object? Function(IDENTITY value) toJsonIDENTITY,
 ) => <String, dynamic>{
-  'tools': ?instance.tools,
+  'name': instance.name,
+  'allowedTools': ?instance.allowedTools,
   'yolo': instance.yolo,
   'model': ?instance.model,
   'headless': instance.headless,
-  'mcpsConfigSource': _$ConfigSourceEnumMap[instance.mcpsConfigSource]!,
-  'cliTool': _$TCliToolEnumMap[instance.cliTool]!,
   'identity': toJsonIDENTITY(instance.identity),
-};
-
-const _$TCliToolEnumMap = {
-  TCliTool.claude: 'claude',
-  TCliTool.codex: 'codex',
-  TCliTool.cursor: 'cursor',
-};
-
-const _$ConfigSourceEnumMap = {
-  ConfigSource.local: 'local',
-  ConfigSource.global: 'global',
-  ConfigSource.none: 'none',
+  'workflow': ?instance.workflow?.toJson(),
 };

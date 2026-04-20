@@ -1,11 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:turbo_promptable/workspace/models/root/activity.dart';
-import 'package:turbo_promptable/workspace/models/root/checklist.dart';
 import 'package:turbo_promptable/workspace/models/root/instruction.dart';
 import 'package:turbo_promptable/workspace/models/root/role.dart';
-import 'package:turbo_promptable/workspace/models/root/template.dart';
 import 'package:turbo_promptable/workspace/models/root/tool.dart';
-import 'package:turbo_promptable/workspace/models/root/workflow.dart';
 
 part 'persona.g.dart';
 
