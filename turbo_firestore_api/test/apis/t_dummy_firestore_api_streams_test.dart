@@ -5,12 +5,13 @@ import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:turbo_firestore_api/apis/t_dummy_firestore_api.dart';
 import 'package:turbo_firestore_api/exceptions/t_firestore_exception.dart';
+import 'package:turbo_serializable/abstracts/t_writeable.dart';
 
 // ---------------------------------------------------------------------------
 // Synthetic fixture DTO
 // ---------------------------------------------------------------------------
 
-class _SimpleDto {
+class _SimpleDto extends TWriteable {
   _SimpleDto({
     required this.id,
     required this.name,
@@ -35,6 +36,18 @@ class _SimpleDto {
   final bool isActive;
   final Timestamp? createdAt;
   final Timestamp? updatedAt;
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'age': age,
+      'isActive': isActive,
+      if (createdAt != null) 'createdAt': createdAt!,
+      if (updatedAt != null) 'updatedAt': updatedAt!,
+    };
+  }
 }
 
 // ---------------------------------------------------------------------------

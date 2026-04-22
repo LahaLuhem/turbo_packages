@@ -507,9 +507,9 @@ final class TValueGeneratorRegistry {
       },
 
       // Timestamp fields.
-      'createdat': dateTimeOrTimestamp(randomPastDate),
-      'updatedat': dateTimeOrTimestamp(randomPastDate),
-      'deletedat': dateTimeOrTimestamp(randomPastDate),
+      'createdAt': dateTimeOrTimestamp(randomPastDate),
+      'updatedAt': dateTimeOrTimestamp(randomPastDate),
+      'deletedAt': dateTimeOrTimestamp(randomPastDate),
       'timestamp': dateTimeOrTimestamp(randomPastDate),
 
       // Numeric fields.

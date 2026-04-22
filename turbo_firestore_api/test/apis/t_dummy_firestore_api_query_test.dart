@@ -10,7 +10,7 @@ import 'package:turbo_serializable/abstracts/t_writeable.dart';
 // Synthetic fixture DTO
 // ---------------------------------------------------------------------------
 
-class _QueryDto {
+class _QueryDto extends TWriteable {
   _QueryDto({
     required this.id,
     required this.name,
@@ -32,10 +32,21 @@ class _QueryDto {
   final String status;
   final Timestamp? createdAt;
   final Timestamp? updatedAt;
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'status': status,
+      if (createdAt != null) 'createdAt': createdAt!,
+      if (updatedAt != null) 'updatedAt': updatedAt!,
+    };
+  }
 }
 
 /// A DTO with no `name` field for graceful-degradation testing.
-class _NoNameDto {
+class _NoNameDto extends TWriteable {
   _NoNameDto({
     required this.id,
     required this.code,
@@ -48,6 +59,14 @@ class _NoNameDto {
 
   final String id;
   final int code;
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'code': code,
+    };
+  }
 }
 
 // ---------------------------------------------------------------------------

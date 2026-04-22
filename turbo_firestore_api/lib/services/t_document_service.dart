@@ -20,10 +20,6 @@ import 'package:turbolytics/turbolytics.dart';
 
 import '../extensions/completer_extension.dart';
 
-part 'after_sync_t_document_service.dart';
-part 'before_after_sync_t_document_service.dart';
-part 'before_sync_t_document_service.dart';
-
 /// A service for managing a single Firestore document with synchronized local state.
 ///
 /// Extends [TAuthSyncService] to provide functionality for managing a single document
@@ -76,6 +72,9 @@ abstract class TDocumentService<
     _isReady.completeIfNotComplete();
     return super.dispose();
   }
+
+  /// Marks the service as ready by completing the ready state.
+  void markAsReady() => _isReady.completeIfNotComplete();
 
   // 👂 LISTENERS ----------------------------------------------------------------------------- \\
   // ⚡️ OVERRIDES ----------------------------------------------------------------------------- \\
@@ -161,7 +160,7 @@ abstract class TDocumentService<
     return TAuthVars(
           id: id ?? api.genId,
           now: DateTime.now(),
-          userId: cachedUserId ?? TValues.noAuthId,
+          userId: cachedUserId ?? TValues.unknownId,
         )
         as V;
   }
@@ -194,6 +193,18 @@ abstract class TDocumentService<
 
   // 🏗️ HELPERS ------------------------------------------------------------------------------- \\
   // ⚙️ LOCAL MUTATORS ------------------------------------------------------------------------ \\
+
+  /// Clears the local document state.
+  void clearLocalDoc({bool doNotifyListeners = true}) {
+    log.debug('Clearing local doc');
+    if (doNotifyListeners) {
+      beforeLocalNotifyUpdate?.call(null);
+    }
+    _doc.update(null, doNotifyListeners: doNotifyListeners);
+    if (doNotifyListeners) {
+      afterLocalNotifyUpdate?.call(null);
+    }
+  }
 
   /// Forces a rebuild of the local state.
   void rebuild() => _doc.rebuild();

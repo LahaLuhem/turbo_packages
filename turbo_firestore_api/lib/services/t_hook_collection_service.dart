@@ -1,20 +1,24 @@
-part of 't_collection_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:turbo_firestore_api/apis/t_firestore_api.dart';
+import 'package:turbo_firestore_api/extensions/t_list_extension.dart';
+import 'package:turbo_firestore_api/services/t_collection_service.dart';
+import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
 
-/// A collection service that allows notification before synchronizing data.
+/// A collection service that allows notification both before and after synchronizing data.
 ///
-/// Extends [TCollectionService] to provide a hook for notifying before
+/// Extends [TCollectionService] to provide hooks for notifying both before and after
 /// the local state is updated with new data from Firestore.
 ///
 /// Type Parameters:
 /// - [T] - The document type, must extend [TWriteableId]
 /// - [API] - The Firestore API type, must extend [TFirestoreApi]
-abstract class BeforeSyncTCollectionService<
+abstract class THookCollectionService<
   T extends TWriteableId,
   API extends TFirestoreApi<T>
 >
     extends TCollectionService<T, API> {
-  /// Creates a new [BeforeSyncTCollectionService] instance.
-  BeforeSyncTCollectionService({
+  /// Creates a new [THookCollectionService] instance.
+  THookCollectionService({
     required super.api,
     super.initialiseStream = true,
   });
@@ -28,7 +32,16 @@ abstract class BeforeSyncTCollectionService<
   /// - [docs] - The new documents from Firestore
   Future<void> beforeSyncNotifyUpdate(List<T> docs);
 
-  /// Handles incoming data updates from Firestore with pre-sync notification.
+  /// Called after the local state has been updated with new data.
+  ///
+  /// Use this method to perform any necessary operations after
+  /// the documents have been synchronized with local state.
+  ///
+  /// Parameters:
+  /// - [docs] - The new documents from Firestore
+  Future<void> afterSyncNotifyUpdate(List<T> docs);
+
+  /// Handles incoming data updates from Firestore with pre and post-sync notifications.
   ///
   /// This callback is triggered when:
   /// - New document data is received from Firestore
@@ -38,6 +51,7 @@ abstract class BeforeSyncTCollectionService<
   /// - Notifies before sync via [beforeSyncNotifyUpdate] if user is authenticated
   /// - Updates local state with new document data
   /// - Marks the service as ready after first update
+  /// - Notifies after sync via [afterSyncNotifyUpdate]
   /// - Clears local state if user is not authenticated
   ///
   /// Parameters:
@@ -53,14 +67,14 @@ abstract class BeforeSyncTCollectionService<
         docsPerIdNotifier.update(
           docs.toIdMap((element) => element.id),
         );
-        _isReady.completeIfNotComplete();
+        markAsReady();
+        await afterSyncNotifyUpdate(docs);
         log.debug('Updated ${docs.length} docs');
       } else {
         log.debug('User is null, clearing docs');
         await beforeSyncNotifyUpdate([]);
-        docsPerIdNotifier.update(
-          {},
-        );
+        clearLocalDocs();
+        await afterSyncNotifyUpdate([]);
       }
     };
   }

@@ -12,7 +12,7 @@ import 'package:turbo_serializable/abstracts/t_writeable.dart';
 // Synthetic fixture DTO
 // ---------------------------------------------------------------------------
 
-class _SimpleDto {
+class _SimpleDto extends TWriteable {
   _SimpleDto({
     required this.id,
     required this.name,
@@ -37,6 +37,18 @@ class _SimpleDto {
   final bool isActive;
   final Timestamp? createdAt;
   final Timestamp? updatedAt;
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'age': age,
+      'isActive': isActive,
+      if (createdAt != null) 'createdAt': createdAt!,
+      if (updatedAt != null) 'updatedAt': updatedAt!,
+    };
+  }
 }
 
 // ---------------------------------------------------------------------------

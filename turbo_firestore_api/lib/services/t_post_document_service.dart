@@ -1,4 +1,7 @@
-part of 't_document_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:turbo_firestore_api/apis/t_firestore_api.dart';
+import 'package:turbo_firestore_api/services/t_document_service.dart';
+import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
 
 /// A document service that allows notification after synchronizing data.
 ///
@@ -8,13 +11,13 @@ part of 't_document_service.dart';
 /// Type Parameters:
 /// - [T] - The document type, must extend [TWriteableId]
 /// - [API] - The Firestore API type, must extend [TFirestoreApi]
-abstract class AfterSyncTDocumentService<
+abstract class TPostDocumentService<
   T extends TWriteableId,
   API extends TFirestoreApi<T>
 >
     extends TDocumentService<T, API> {
-  /// Creates a new [AfterSyncTDocumentService] instance.
-  AfterSyncTDocumentService({required super.api});
+  /// Creates a new [TPostDocumentService] instance.
+  TPostDocumentService({required super.api});
 
   /// Called after the local state has been updated with new data.
   ///
@@ -50,16 +53,16 @@ abstract class AfterSyncTDocumentService<
             id: value.id,
             doc: (current, _) => value,
           );
-          _isReady.completeIfNotComplete();
+          markAsReady();
           await afterSyncNotifyUpdate(pDoc);
         } else {
-          _doc.update(null);
+          clearLocalDoc();
           await afterSyncNotifyUpdate(value);
         }
         log.debug('Updated doc');
       } else {
         log.debug('User is null, clearing doc');
-        _doc.update(null);
+        clearLocalDoc();
         await afterSyncNotifyUpdate(null);
       }
     };

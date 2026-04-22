@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart' hide Type;
+import 'package:turbo_firestore_api/constants/t_firestore_api_defaults.dart';
 import 'package:turbo_firestore_api/enums/t_operation_type.dart';
 import 'package:turbo_firestore_api/enums/t_search_term_type.dart';
 import 'package:turbo_firestore_api/enums/t_timestamp_type.dart';
@@ -34,14 +35,14 @@ abstract class _TFirestoreApiBase<T> {
     Map<String, dynamic> Function(T value)? toJson,
     T Function(Map<String, dynamic> json)? fromJson,
     T Function(Map<String, dynamic> json)? fromJsonError,
-    bool tryAddLocalId = false,
+    bool tryAddLocalId = TFirestoreApiDefaults.tryAddLocalId,
     TFirestoreLogger? logger,
-    String createdAtFieldName = 'createdAt',
-    String updatedAtFieldName = 'updatedAt',
-    String idFieldName = 'id',
-    String documentReferenceFieldName = 'documentReference',
-    bool isCollectionGroup = false,
-    bool tryAddLocalDocumentReference = false,
+    String createdAtFieldName = TFirestoreApiDefaults.createdAtFieldName,
+    String updatedAtFieldName = TFirestoreApiDefaults.updatedAtFieldName,
+    String idFieldName = TFirestoreApiDefaults.idFieldName,
+    String documentReferenceFieldName = TFirestoreApiDefaults.documentReferenceFieldName,
+    bool isCollectionGroup = TFirestoreApiDefaults.isCollectionGroup,
+    bool tryAddLocalDocumentReference = TFirestoreApiDefaults.tryAddLocalDocumentReference,
     GetOptions? getOptions,
   }) : _firebaseFirestore = firebaseFirestore,
        _collectionPath = collectionPath,
@@ -146,8 +147,7 @@ abstract class _TFirestoreApiBase<T> {
   WriteBatch get writeBatch => _firebaseFirestore.batch();
 
   /// The current collection
-  CollectionReference get collection =>
-      _firebaseFirestore.collection(_collectionPath());
+  CollectionReference get collection => _firebaseFirestore.collection(_collectionPath());
 
   /// A new document
   DocumentReference get doc => collection.doc();
@@ -413,7 +413,7 @@ abstract class _TFirestoreApiBase<T> {
 ///   where: (ref) => ref.where('age', isGreaterThanOrEqualTo: 18),
 /// );
 /// ```
-class TFirestoreApi<T> extends _TFirestoreApiBase<T>
+class TFirestoreApi<T extends TWriteable> extends _TFirestoreApiBase<T>
     with
         TurboFirestoreGetApi<T>,
         TurboFirestoreListApi<T>,

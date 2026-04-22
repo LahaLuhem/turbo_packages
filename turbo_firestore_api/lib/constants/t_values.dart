@@ -1,5 +1,5 @@
 abstract class TValues {
   TValues._();
 
-  static const noAuthId = 'no-auth-id';
+  static const unknownId = 'unknown-id';
 }

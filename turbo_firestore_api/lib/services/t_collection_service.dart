@@ -19,10 +19,6 @@ import 'package:turbo_serializable/abstracts/t_serializable.dart';
 import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
 import 'package:turbolytics/turbolytics.dart';
 
-part 'after_sync_t_collection_service.dart';
-part 'before_after_sync_t_collection_service.dart';
-part 'before_sync_t_collection_service.dart';
-
 /// A service for managing a collection of Firestore documents with synchronized local state.
 ///
 /// The [TCollectionService] provides a robust foundation for managing collections of documents
@@ -59,10 +55,7 @@ part 'before_sync_t_collection_service.dart';
 /// - Automatic stream update blocking during mutations
 /// - Error handling and logging
 /// - User authentication state synchronization
-abstract class TCollectionService<
-  T extends TWriteableId,
-  API extends TFirestoreApi<T>
->
+abstract class TCollectionService<T extends TWriteableId, API extends TFirestoreApi<T>>
     extends TAuthSyncService<List<T>>
     with Turbolytics {
   /// Creates a new [TCollectionService] instance.
@@ -92,6 +85,9 @@ abstract class TCollectionService<
     _isReady.completeIfNotComplete();
     return super.dispose();
   }
+
+  /// Marks the service as ready by completing the ready state.
+  void markAsReady() => _isReady.completeIfNotComplete();
 
   // 👂 LISTENERS ----------------------------------------------------------------------------- \\
   // ⚡️ OVERRIDES ----------------------------------------------------------------------------- \\
@@ -167,7 +163,7 @@ abstract class TCollectionService<
       TAuthVars(
             id: id ?? api.genId,
             now: DateTime.now(),
-            userId: cachedUserId ?? TValues.noAuthId,
+            userId: cachedUserId ?? TValues.unknownId,
           )
           as V;
 
@@ -194,6 +190,15 @@ abstract class TCollectionService<
 
   // 🏗️ HELPERS ------------------------------------------------------------------------------- \\
   // ⚙️ LOCAL MUTATORS ------------------------------------------------------------------------ \\
+
+  /// Clears all documents from local state.
+  void clearLocalDocs({bool doNotifyListeners = true}) {
+    log.debug('Clearing all local docs');
+    docsPerIdNotifier.update(
+      {},
+      doNotifyListeners: doNotifyListeners,
+    );
+  }
 
   /// Forces a rebuild of the local state.
   void rebuild() => docsPerIdNotifier.rebuild();
@@ -418,8 +423,7 @@ abstract class TCollectionService<
         doNotifyListeners: doNotifyListeners,
       );
       final future = api.createDoc(
-        writeable:
-            remoteUpdateRequestBuilder?.call(pDoc) ?? pDoc as TSerializable,
+        writeable: remoteUpdateRequestBuilder?.call(pDoc) ?? pDoc as TSerializable,
         id: id,
         transaction: transaction,
         merge: true,
@@ -472,8 +476,7 @@ abstract class TCollectionService<
         doNotifyListeners: doNotifyListeners,
       );
       final future = api.updateDoc(
-        writeable:
-            remoteUpdateRequestBuilder?.call(pDoc) ?? pDoc as TWriteableId,
+        writeable: remoteUpdateRequestBuilder?.call(pDoc) ?? pDoc as TWriteableId,
         id: id,
         transaction: transaction,
       );

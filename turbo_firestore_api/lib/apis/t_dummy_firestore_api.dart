@@ -33,33 +33,33 @@ part '_t_dummy_probing_map.dart';
 /// Forwards to [_TDummyProbingMap.probe] so unit tests can exercise the
 /// probing engine without exposing the private class.
 @visibleForTesting
-TDummySchema probeDummySchemaForTesting<T>(
+TDummySchema probeDummySchemaForTesting<T extends TWriteable>(
   T Function(Map<String, dynamic>) fromJson,
 ) => _TDummyProbingMap.probe<T>(fromJson);
 
 /// Returns the probed schema from a [TDummyFirestoreApi] instance.
 @visibleForTesting
-TDummySchema dummySchemaForTesting<T>(TDummyFirestoreApi<T> api) => api._schema;
+TDummySchema dummySchemaForTesting<T extends TWriteable>(TDummyFirestoreApi<T> api) => api._schema;
 
 /// Returns the value generator registry from a [TDummyFirestoreApi] instance.
 @visibleForTesting
-TValueGeneratorRegistry dummyRegistryForTesting<T>(
+TValueGeneratorRegistry dummyRegistryForTesting<T extends TWriteable>(
   TDummyFirestoreApi<T> api,
 ) => api._registry;
 
 /// Generates a deterministic dummy id from a [TDummyFirestoreApi] instance.
 @visibleForTesting
-String genDummyIdForTesting<T>(TDummyFirestoreApi<T> api) => api._genDummyId();
+String genDummyIdForTesting<T extends TWriteable>(TDummyFirestoreApi<T> api) => api._genDummyId();
 
 /// Awaits the latency gate of a [TDummyFirestoreApi] instance.
 @visibleForTesting
-Future<void> applyDummyLatencyForTesting<T>(
+Future<void> applyDummyLatencyForTesting<T extends TWriteable>(
   TDummyFirestoreApi<T> api,
 ) => api._applyLatency();
 
 /// Rolls a simulated failure exception from a [TDummyFirestoreApi] instance.
 @visibleForTesting
-TFirestoreException? rollDummyFailureExceptionForTesting<T>(
+TFirestoreException? rollDummyFailureExceptionForTesting<T extends TWriteable>(
   TDummyFirestoreApi<T> api, {
   required TOperationType operationType,
   String? id,
@@ -72,14 +72,14 @@ TFirestoreException? rollDummyFailureExceptionForTesting<T>(
 
 /// Registers a collection stream controller for testing dispose behavior.
 @visibleForTesting
-void addCollectionControllerForTesting<T>(
+void addCollectionControllerForTesting<T extends TWriteable>(
   TDummyFirestoreApi<T> api,
   StreamController<List<T>> controller,
 ) => api._collectionControllers.add(controller);
 
 /// Registers a document stream controller for testing dispose behavior.
 @visibleForTesting
-void addDocControllerForTesting<T>(
+void addDocControllerForTesting<T extends TWriteable>(
   TDummyFirestoreApi<T> api,
   String id,
   StreamController<T?> controller,
@@ -87,7 +87,7 @@ void addDocControllerForTesting<T>(
 
 /// Exposes the query filter/sort seam for testing.
 @visibleForTesting
-List<Map<String, dynamic>> applyDummyQueryFilterAndSortForTesting<T>(
+List<Map<String, dynamic>> applyDummyQueryFilterAndSortForTesting<T extends TWriteable>(
   TDummyFirestoreApi<T> api, {
   required String? whereDescription,
   required List<Map<String, dynamic>> input,
@@ -98,56 +98,56 @@ List<Map<String, dynamic>> applyDummyQueryFilterAndSortForTesting<T>(
 
 /// Returns the raw in-memory store for testing.
 @visibleForTesting
-Map<String, Map<String, dynamic>> dummyStoreForTesting<T>(
+Map<String, Map<String, dynamic>> dummyStoreForTesting<T extends TWriteable>(
   TDummyFirestoreApi<T> api,
 ) => api._store;
 
 /// Returns the number of active typed collection stream controllers.
 @visibleForTesting
-int collectionControllerCountForTesting<T>(TDummyFirestoreApi<T> api) =>
+int collectionControllerCountForTesting<T extends TWriteable>(TDummyFirestoreApi<T> api) =>
     api._collectionControllers.length;
 
 /// Returns the number of active raw collection stream controllers.
 @visibleForTesting
-int rawCollectionControllerCountForTesting<T>(TDummyFirestoreApi<T> api) =>
+int rawCollectionControllerCountForTesting<T extends TWriteable>(TDummyFirestoreApi<T> api) =>
     api._rawCollectionControllers.length;
 
 /// Returns the number of active document stream controllers for [id].
 @visibleForTesting
-int docControllerCountForTesting<T>(TDummyFirestoreApi<T> api, String id) =>
+int docControllerCountForTesting<T extends TWriteable>(TDummyFirestoreApi<T> api, String id) =>
     api._docControllers[id]?.length ?? 0;
 
 /// Returns the default collection size for testing.
 @visibleForTesting
-int dummyDefaultCollectionSizeForTesting<T>(TDummyFirestoreApi<T> api) =>
+int dummyDefaultCollectionSizeForTesting<T extends TWriteable>(TDummyFirestoreApi<T> api) =>
     api._defaultCollectionSize;
 
 /// Returns the path snapshot for testing.
 @visibleForTesting
-String dummyPathSnapshotForTesting<T>(TDummyFirestoreApi<T> api) =>
+String dummyPathSnapshotForTesting<T extends TWriteable>(TDummyFirestoreApi<T> api) =>
     api._pathSnapshot;
 
 /// Returns the query filters for testing.
 @visibleForTesting
-Map<String, bool Function(Map<String, dynamic>)> dummyQueryFiltersForTesting<T>(
+Map<String, bool Function(Map<String, dynamic>)> dummyQueryFiltersForTesting<T extends TWriteable>(
   TDummyFirestoreApi<T> api,
 ) => api._queryFilters;
 
 /// Returns the query sort comparators for testing.
 @visibleForTesting
 Map<String, int Function(Map<String, dynamic>, Map<String, dynamic>)>
-dummyQuerySortForTesting<T>(TDummyFirestoreApi<T> api) => api._querySort;
+dummyQuerySortForTesting<T extends TWriteable>(TDummyFirestoreApi<T> api) => api._querySort;
 
 /// Generates a raw JSON map for a document with the given [id].
 @visibleForTesting
-Map<String, dynamic> generateDocJsonForTesting<T>(
+Map<String, dynamic> generateDocJsonForTesting<T extends TWriteable>(
   TDummyFirestoreApi<T> api, {
   required String id,
 }) => api._generateDocJson(id: id);
 
 /// Applies timestamps to a raw JSON map.
 @visibleForTesting
-Map<String, dynamic> applyTimestampsForTesting<T>(
+Map<String, dynamic> applyTimestampsForTesting<T extends TWriteable>(
   TDummyFirestoreApi<T> api, {
   required Map<String, dynamic> json,
   required TTimestampType type,
@@ -155,12 +155,12 @@ Map<String, dynamic> applyTimestampsForTesting<T>(
 
 /// Re-emits the full store snapshot to every open collection controller.
 @visibleForTesting
-void emitCollectionsForTesting<T>(TDummyFirestoreApi<T> api) =>
+void emitCollectionsForTesting<T extends TWriteable>(TDummyFirestoreApi<T> api) =>
     api._emitCollections();
 
 /// Re-emits a single document to every open controller for the given [id].
 @visibleForTesting
-void emitDocForTesting<T>(TDummyFirestoreApi<T> api, String id, T? entity) =>
+void emitDocForTesting<T extends TWriteable>(TDummyFirestoreApi<T> api, String id, T? entity) =>
     api._emitDoc(id, entity);
 
 // ---------------------------------------------------------------------------
@@ -177,7 +177,7 @@ void emitDocForTesting<T>(TDummyFirestoreApi<T> api, String id, T? entity) =>
 ///
 /// This class delivers the skeleton: constructor, init pipeline, internal
 /// helpers, and dispose. Read/write/stream overrides land in subsequent tasks.
-class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
+class TDummyFirestoreApi<T extends TWriteable> extends TFirestoreApi<T> {
   /// Creates a dummy API that produces realistic fake data in memory.
   ///
   /// Accepts the same parameters as [TFirestoreApi] plus dummy-only
@@ -1947,7 +1947,7 @@ class TDummyFirestoreApi<T> extends TFirestoreApi<T> {
 /// A library-private dummy [WriteBatch] that queues mutation closures and
 /// applies them in order on [commit], emitting exactly one collection
 /// snapshot for the entire batch.
-class _TDummyWriteBatch<T> implements WriteBatch {
+class _TDummyWriteBatch<T extends TWriteable> implements WriteBatch {
   _TDummyWriteBatch._({required TDummyFirestoreApi<T> api}) : _api = api;
 
   final TDummyFirestoreApi<T> _api;
@@ -2063,7 +2063,7 @@ class _TDummyWriteBatch<T> implements WriteBatch {
 ///
 /// Mutations are applied inline (immediately visible within the handler).
 /// The [runTransaction] override emits once after the handler returns.
-class _TDummyTransaction<T> implements Transaction {
+class _TDummyTransaction<T extends TWriteable> implements Transaction {
   _TDummyTransaction._({required TDummyFirestoreApi<T> api}) : _api = api;
 
   final TDummyFirestoreApi<T> _api;
@@ -2206,7 +2206,7 @@ class _TDummyDocumentSnapshot<T extends Object?>
 /// Supported members: [id], [path], [firestore], [get], [update], [delete],
 /// [set], [snapshots]. Unsupported members throw [UnimplementedError] with
 /// a dummy-mode guidance message.
-class _TDummyDocumentReference<D, T> implements DocumentReference<D> {
+class _TDummyDocumentReference<D, T extends TWriteable> implements DocumentReference<D> {
   /// Creates a raw-mode reference returning `Map<String, dynamic>` data.
   _TDummyDocumentReference.raw({
     required TDummyFirestoreApi<T> api,

@@ -6,12 +6,13 @@ import 'package:turbo_firestore_api/apis/t_dummy_firestore_api.dart';
 import 'package:turbo_firestore_api/enums/t_operation_type.dart';
 import 'package:turbo_firestore_api/exceptions/t_firestore_exception.dart';
 import 'package:turbo_firestore_api/generators/t_dummy_schema.dart';
+import 'package:turbo_serializable/abstracts/t_writeable.dart';
 
 // ---------------------------------------------------------------------------
 // Synthetic fixture DTO
 // ---------------------------------------------------------------------------
 
-class _SimpleDto {
+class _SimpleDto extends TWriteable {
   _SimpleDto({required this.name, required this.age, required this.isActive});
 
   factory _SimpleDto.fromJson(Map<String, dynamic> json) => _SimpleDto(
@@ -24,6 +25,7 @@ class _SimpleDto {
   final int age;
   final bool isActive;
 
+  @override
   Map<String, dynamic> toJson() => {
     'name': name,
     'age': age,

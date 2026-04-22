@@ -2,12 +2,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:turbo_firestore_api/apis/t_dummy_firestore_api.dart';
 import 'package:turbo_firestore_api/generators/t_dummy_schema.dart';
+import 'package:turbo_serializable/abstracts/t_writeable.dart';
 
 // ---------------------------------------------------------------------------
 // Synthetic fixture DTOs
 // ---------------------------------------------------------------------------
 
-class _FlatDto {
+class _FlatDto extends TWriteable {
   _FlatDto({
     required this.name,
     required this.age,
@@ -23,6 +24,15 @@ class _FlatDto {
   final String name;
   final int age;
   final bool isActive;
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'age': age,
+      'isActive': isActive,
+    };
+  }
 }
 
 class _NestedChild {
@@ -37,7 +47,7 @@ class _NestedChild {
   final int zip;
 }
 
-class _NestedParent {
+class _NestedParent extends TWriteable {
   _NestedParent({required this.title, required this.address});
 
   factory _NestedParent.fromJson(Map<String, dynamic> json) => _NestedParent(
@@ -47,9 +57,20 @@ class _NestedParent {
 
   final String title;
   final _NestedChild address;
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'address': {
+        'street': address.street,
+        'zip': address.zip,
+      },
+    };
+  }
 }
 
-class _ListDto {
+class _ListDto extends TWriteable {
   _ListDto({required this.name, required this.tags});
 
   factory _ListDto.fromJson(Map<String, dynamic> json) => _ListDto(
@@ -59,22 +80,37 @@ class _ListDto {
 
   final String name;
   final List<String> tags;
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'tags': tags,
+    };
+  }
 }
 
-class _UnsupportedTypeDto {
+class _UnsupportedTypeDto extends TWriteable {
   _UnsupportedTypeDto({required this.name, required this.link});
 
-  factory _UnsupportedTypeDto.fromJson(Map<String, dynamic> json) =>
-      _UnsupportedTypeDto(
-        name: json['name'] as String,
-        link: json['link'] as Uri,
-      );
+  factory _UnsupportedTypeDto.fromJson(Map<String, dynamic> json) => _UnsupportedTypeDto(
+    name: json['name'] as String,
+    link: json['link'] as Uri,
+  );
 
   final String name;
   final Uri link;
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'link': link.toString(),
+    };
+  }
 }
 
-class _RawMapDto {
+class _RawMapDto extends TWriteable {
   _RawMapDto({required this.label, required this.metadata});
 
   factory _RawMapDto.fromJson(Map<String, dynamic> json) => _RawMapDto(
@@ -84,9 +120,17 @@ class _RawMapDto {
 
   final String label;
   final Map<String, dynamic> metadata;
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      'label': label,
+      'metadata': metadata,
+    };
+  }
 }
 
-class _TimestampDto {
+class _TimestampDto extends TWriteable {
   _TimestampDto({required this.createdAt, required this.score});
 
   factory _TimestampDto.fromJson(Map<String, dynamic> json) => _TimestampDto(
@@ -96,6 +140,14 @@ class _TimestampDto {
 
   final Timestamp createdAt;
   final double score;
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      'createdAt': createdAt,
+      'score': score,
+    };
+  }
 }
 
 // ---------------------------------------------------------------------------
