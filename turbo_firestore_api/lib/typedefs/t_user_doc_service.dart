@@ -10,17 +10,29 @@ class TUserDocService<WRITEABLE extends TWriteableId> extends TDocService<WRITEA
   TUserDocService({
     required super.collection,
     required super.defaultValue,
+    this.userIdLocation = UserIdLocation.docId,
     super.apiBuilder,
     super.streamBuilder,
     super.initialValue,
     super.initialiseStream = true,
   });
 
+  final UserIdLocation userIdLocation;
+
   @override
   Stream<WRITEABLE?> Function(User user) get stream =>
       (user) =>
           streamBuilder?.call(user, api, this) ??
-          api.streamByDocIdWithConverter(
-            id: user.uid,
-          );
+          switch (userIdLocation) {
+            UserIdLocation.docId => api.streamByDocIdWithConverter(
+              id: user.uid,
+            ),
+            UserIdLocation.field => api.streamByQueryWithConverter(,
+              whereDescription: '${api.userIdFieldName} == ${user.uid}',
+              collectionReferenceQuery: (collectionReference) => collectionReference.where(
+                api.userIdFieldName,
+                isEqualTo: user.uid,
+              ),
+            ).map((event) => event.firstOrNull),
+          };
 }

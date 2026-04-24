@@ -1,0 +1,4 @@
+enum UserIdLocation {
+  docId,
+  field,
+}
