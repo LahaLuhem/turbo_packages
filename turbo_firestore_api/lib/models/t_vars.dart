@@ -8,11 +8,15 @@ class TVars {
     required this.id,
     required this.now,
     required this.userId,
+    required this.defaultId,
+    required this.unknownIdFallback,
   });
 
   final String? userId;
   final String id;
   final DateTime now;
+  final String defaultId;
+  final String unknownIdFallback;
 
   @override
   bool operator ==(Object other) =>

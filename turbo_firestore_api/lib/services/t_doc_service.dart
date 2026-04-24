@@ -194,7 +194,9 @@ class TDocService<WRITEABLE extends TWriteableId> extends TAuthSyncService<WRITE
       TVars(
             id: id ?? api.genId,
             now: DateTime.now(),
-            userId: userId ?? TValues.unknownId,
+            userId: userId,
+            defaultId: collection.defaultId,
+            unknownIdFallback: collection.unknownIdFallback,
           )
           as V;
 

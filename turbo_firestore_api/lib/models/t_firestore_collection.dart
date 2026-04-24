@@ -17,21 +17,27 @@ class TFirestoreCollection<WRITEABLE extends TWriteableId> {
     this.tryAddLocalDocumentReference = TFirestoreApiDefaults.tryAddLocalDocumentReference,
     this.tryAddLocalId = TFirestoreApiDefaults.tryAddLocalId,
     this.updatedAtFieldName = TFirestoreApiDefaults.updatedAtFieldName,
+    this.defaultId = TFirestoreApiDefaults.defaultId,
+    this.unknownIdFallback = TFirestoreApiDefaults.unknownIdFallback,
+    this.userIdFieldName = TFirestoreApiDefaults.userIdFieldName,
   });
 
   final Map<String, dynamic> Function(WRITEABLE value) toJson;
   final String apiName;
   final String collectionName;
   final String createdAtFieldName;
+  final String defaultId;
   final String documentReferenceFieldName;
   final String idFieldName;
+  final String unknownIdFallback;
   final String updatedAtFieldName;
+  final String userIdFieldName;
+  final TValueBuilder<WRITEABLE> defaultValue;
   final WRITEABLE Function(Map<String, dynamic> json) fromJson;
   final WRITEABLE Function(Map<String, dynamic> json)? fromJsonError;
   final bool isCollectionGroup;
   final bool tryAddLocalDocumentReference;
   final bool tryAddLocalId;
-  final TValueBuilder<WRITEABLE> defaultValue;
 
   TFirestoreApi<WRITEABLE> api({
     FirebaseFirestore? firebaseFirestore,
@@ -42,6 +48,9 @@ class TFirestoreCollection<WRITEABLE extends TWriteableId> {
     TValueBuilder<WRITEABLE>? defaultValue,
   }) => TFirestoreApi<WRITEABLE>(
     defaultValue: defaultValue ?? this.defaultValue,
+    userIdFieldName: userIdFieldName,
+    defaultId: defaultId,
+    unknownIdFallback: unknownIdFallback,
     collectionPath: () => path?.call(collectionName) ?? collectionName,
     createdAtFieldName: createdAtFieldName,
     documentReferenceFieldName: documentReferenceFieldName,

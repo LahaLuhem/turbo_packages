@@ -46,7 +46,6 @@ export 'apis/t_firestore_api.dart';
 export 'constants/t_auth_errors.dart';
 export 'constants/t_error_codes.dart';
 export 'constants/t_firestore_api_defaults.dart';
-export 'constants/t_values.dart';
 /// Enums for configuring API behavior
 export 'enums/t_operation_type.dart';
 export 'enums/t_parse_type.dart';

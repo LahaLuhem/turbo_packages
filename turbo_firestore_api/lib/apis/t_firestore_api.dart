@@ -8,9 +8,7 @@ import 'package:turbo_firestore_api/enums/t_timestamp_type.dart';
 import 'package:turbo_firestore_api/exceptions/invalid_json_exception.dart';
 import 'package:turbo_firestore_api/exceptions/t_firestore_exception.dart';
 import 'package:turbo_firestore_api/extensions/t_map_extension.dart';
-import 'package:turbo_firestore_api/models/t_firestore_collection.dart';
 import 'package:turbo_firestore_api/models/t_sensitive_data.dart';
-import 'package:turbo_firestore_api/models/t_vars.dart';
 import 'package:turbo_firestore_api/models/t_write_batch_with_reference.dart';
 import 'package:turbo_firestore_api/typedefs/collection_reference_def.dart';
 import 'package:turbo_firestore_api/typedefs/t_value_builder_def.dart';
@@ -48,6 +46,8 @@ abstract class _TFirestoreApiBase<T> {
     bool isCollectionGroup = TFirestoreApiDefaults.isCollectionGroup,
     bool tryAddLocalDocumentReference = TFirestoreApiDefaults.tryAddLocalDocumentReference,
     GetOptions? getOptions,
+    this.unknownIdFallback = TFirestoreApiDefaults.unknownIdFallback,
+    this.defaultId = TFirestoreApiDefaults.defaultId,
   }) : _firebaseFirestore = firebaseFirestore,
        _collectionPath = collectionPath,
        _toJson = toJson,
@@ -125,6 +125,12 @@ abstract class _TFirestoreApiBase<T> {
 
   /// Used to provide a userId field to your create/update methods if necessary.
   final String userIdFieldName;
+
+  /// Used to provide an unknown id for unknown objects.
+  final String unknownIdFallback;
+
+  /// Used to provide a default id for default objects.
+  final String defaultId;
 
   /// Used to provide a reference field to your create/update methods if necessary.
   ///
@@ -478,5 +484,7 @@ class TFirestoreApi<T extends TWriteable> extends _TFirestoreApiBase<T>
     super.tryAddLocalDocumentReference,
     super.getOptions,
     super.userIdFieldName,
+    super.defaultId,
+    super.unknownIdFallback,
   });
 }

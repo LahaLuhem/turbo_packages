@@ -191,7 +191,9 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
       TVars(
             id: id ?? api.genId,
             now: DateTime.now(),
-            userId: userId ?? TValues.unknownId,
+            userId: userId,
+            defaultId: api.defaultId,
+            unknownIdFallback: api.unknownIdFallback,
           )
           as V;
 
