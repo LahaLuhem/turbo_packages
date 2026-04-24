@@ -472,7 +472,7 @@ abstract class TCollectionService<WRITEABLE extends TWriteableId>
     Transaction? transaction,
     required String id,
     required UpdateDocDef<WRITEABLE> doc,
-    TWriteableId Function(WRITEABLE doc)? remoteUpdateRequestBuilder,
+    WRITEABLE Function(WRITEABLE doc)? remoteUpdateRequestBuilder,
     bool doNotifyListeners = true,
   }) async {
     try {
@@ -483,7 +483,7 @@ abstract class TCollectionService<WRITEABLE extends TWriteableId>
         doNotifyListeners: doNotifyListeners,
       );
       final future = api.updateDoc(
-        writeable: remoteUpdateRequestBuilder?.call(pDoc) ?? pDoc as TWriteableId,
+        writeable: remoteUpdateRequestBuilder?.call(pDoc) ?? pDoc,
         id: id,
         transaction: transaction,
       );
@@ -581,7 +581,7 @@ abstract class TCollectionService<WRITEABLE extends TWriteableId>
           (await api.updateDoc(
             id: pDoc.id,
             transaction: transaction,
-            writeable: pDoc as TWriteableId,
+            writeable: pDoc,
           )).throwWhenFail();
         }
         return TurboResponse.success(result: pDocs);
@@ -591,7 +591,7 @@ abstract class TCollectionService<WRITEABLE extends TWriteableId>
           await api.updateDocInBatch(
             id: pDoc.id,
             writeBatch: batch,
-            writeable: pDoc as TWriteableId,
+            writeable: pDoc,
           );
         }
         final future = batch.commit();

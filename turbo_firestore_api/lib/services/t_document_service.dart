@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:turbo_firestore_api/apis/t_firestore_api.dart';
 import 'package:turbo_firestore_api/constants/t_values.dart';
 import 'package:turbo_firestore_api/exceptions/t_firestore_exception.dart';
+import 'package:turbo_firestore_api/extensions/completer_extension.dart';
 import 'package:turbo_firestore_api/models/t_auth_vars.dart';
 import 'package:turbo_firestore_api/models/t_firestore_collection.dart';
 import 'package:turbo_firestore_api/services/t_auth_sync_service.dart';
@@ -15,11 +16,8 @@ import 'package:turbo_firestore_api/typedefs/update_doc_def.dart';
 import 'package:turbo_firestore_api/typedefs/upsert_doc_def.dart';
 import 'package:turbo_notifiers/turbo_notifiers.dart';
 import 'package:turbo_response/turbo_response.dart';
-import 'package:turbo_serializable/abstracts/t_writeable.dart';
 import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
 import 'package:turbolytics/turbolytics.dart';
-
-import '../extensions/completer_extension.dart';
 
 /// A service for managing a single Firestore document with synchronized local state.
 ///
@@ -383,7 +381,7 @@ abstract class TDocumentService<WRITEABLE extends TWriteableId> extends TAuthSyn
     Transaction? transaction,
     required String id,
     required UpdateDocDef<WRITEABLE> doc,
-    TWriteable Function(WRITEABLE doc)? remoteUpdateRequestBuilder,
+    WRITEABLE Function(WRITEABLE doc)? remoteUpdateRequestBuilder,
     bool doNotifyListeners = true,
   }) async {
     try {
@@ -394,7 +392,7 @@ abstract class TDocumentService<WRITEABLE extends TWriteableId> extends TAuthSyn
         doNotifyListeners: doNotifyListeners,
       );
       final future = api.updateDoc(
-        writeable: remoteUpdateRequestBuilder?.call(pDoc) ?? pDoc as TWriteable,
+        writeable: remoteUpdateRequestBuilder?.call(pDoc) ?? pDoc,
         id: id,
         transaction: transaction,
       );
@@ -483,7 +481,7 @@ abstract class TDocumentService<WRITEABLE extends TWriteableId> extends TAuthSyn
     Transaction? transaction,
     required String id,
     required UpsertDocDef<WRITEABLE> doc,
-    TWriteableId Function(WRITEABLE doc)? remoteUpdateRequestBuilder,
+    WRITEABLE Function(WRITEABLE doc)? remoteUpdateRequestBuilder,
     bool doNotifyListeners = true,
   }) async {
     try {
@@ -494,7 +492,7 @@ abstract class TDocumentService<WRITEABLE extends TWriteableId> extends TAuthSyn
         doNotifyListeners: doNotifyListeners,
       );
       final future = api.createDoc(
-        writeable: remoteUpdateRequestBuilder?.call(pDoc) ?? pDoc as TWriteableId,
+        writeable: remoteUpdateRequestBuilder?.call(pDoc) ?? pDoc,
         id: id,
         transaction: transaction,
         merge: true,
