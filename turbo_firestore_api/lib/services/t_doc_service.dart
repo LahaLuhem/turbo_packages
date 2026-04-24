@@ -24,7 +24,7 @@ import 'package:turbolytics/turbolytics.dart';
 ///
 /// Type Parameters:
 /// - [WRITEABLE] - The document type, must extend [TWriteableId]
-class TDocService<WRITEABLE extends TWriteableId> extends TAuthSyncService<WRITEABLE?>
+class TDocService<WRITEABLE extends TWriteableId> extends TAuthSyncService<WRITEABLE>
     with Turbolytics {
   /// Creates a new [TDocService] instance.
   ///
@@ -203,7 +203,7 @@ class TDocService<WRITEABLE extends TWriteableId> extends TAuthSyncService<WRITE
   Listenable get listenable => _doc;
 
   /// Value listenable for the document state.
-  ValueListenable<WRITEABLE?> get doc => _doc;
+  ValueListenable<WRITEABLE> get doc => _doc;
 
   /// Whether a document exists in local state.
 
