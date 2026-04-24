@@ -9,6 +9,8 @@ import '../dtos/example_dto.dart';
 class ExampleAPI extends TFirestoreApi<ExampleDTO> {
   ExampleAPI()
     : super(
+        defaultValue: (vars) =>
+            ExampleDTO(thisIsABoolean: false, thisIsANumber: 0, thisIsAString: 'yes'),
         collectionPath: () => 'Examples',
         firebaseFirestore: FirebaseFirestore.instance,
         fromJson: ExampleDTO.fromJson,

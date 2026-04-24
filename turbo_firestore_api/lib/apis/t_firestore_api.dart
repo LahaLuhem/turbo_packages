@@ -34,7 +34,7 @@ abstract class _TFirestoreApiBase<T> {
   _TFirestoreApiBase({
     required FirebaseFirestore firebaseFirestore,
     required String Function() collectionPath,
-    required this.defaultValueBuilder,
+    required this.defaultValue,
     Map<String, dynamic> Function(T value)? toJson,
     T Function(Map<String, dynamic> json)? fromJson,
     T Function(Map<String, dynamic> json)? fromJsonError,
@@ -79,7 +79,7 @@ abstract class _TFirestoreApiBase<T> {
   final T Function(Map<String, dynamic> json)? _fromJson;
 
   /// Used to provide a default value.
-  final TValueBuilder<T> defaultValueBuilder;
+  final TValueBuilder<T> defaultValue;
 
   /// Used to deserialize your data to JSON when using 'WithConverter' methods and a data error occurs.
   ///
@@ -464,7 +464,7 @@ class TFirestoreApi<T extends TWriteable> extends _TFirestoreApiBase<T>
   TFirestoreApi({
     required super.firebaseFirestore,
     required super.collectionPath,
-    required super.defaultValueBuilder,
+    required super.defaultValue,
     super.toJson,
     super.fromJson,
     super.fromJsonError,

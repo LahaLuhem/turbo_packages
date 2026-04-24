@@ -121,7 +121,7 @@ class TDocService<WRITEABLE extends TWriteableId> extends TAuthSyncService<WRITE
         } else {
           _doc.update(
             defaultValue?.call(vars(), collection, this) ??
-                api.defaultValueBuilder(
+                api.defaultValue(
                   vars(),
                 ),
           );
@@ -132,7 +132,7 @@ class TDocService<WRITEABLE extends TWriteableId> extends TAuthSyncService<WRITE
         log.debug('User is null, clearing doc');
         _doc.update(
           defaultValue?.call(vars(), collection, this) ??
-              api.defaultValueBuilder(
+              api.defaultValue(
                 vars(),
               ),
         );
@@ -177,7 +177,7 @@ class TDocService<WRITEABLE extends TWriteableId> extends TAuthSyncService<WRITE
   late final _doc = TNotifier<WRITEABLE>(
     initialValue?.call(vars(), collection, this) ??
         (defaultValue?.call(vars(), collection, this) ??
-            api.defaultValueBuilder(
+            api.defaultValue(
               vars(),
             )),
     forceUpdate: true,
@@ -229,7 +229,7 @@ class TDocService<WRITEABLE extends TWriteableId> extends TAuthSyncService<WRITE
     }
     _doc.update(
       defaultValue?.call(vars(), collection, this) ??
-          api.defaultValueBuilder(
+          api.defaultValue(
             vars(),
           ),
       doNotifyListeners: doNotifyListeners,
@@ -258,7 +258,7 @@ class TDocService<WRITEABLE extends TWriteableId> extends TAuthSyncService<WRITE
     }
     _doc.update(
       defaultValue?.call(vars(), collection, this) ??
-          api.defaultValueBuilder(
+          api.defaultValue(
             vars(),
           ),
       doNotifyListeners: doNotifyListeners,
