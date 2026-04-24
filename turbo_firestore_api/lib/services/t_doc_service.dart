@@ -33,12 +33,12 @@ class TDocService<WRITEABLE extends TWriteableId> extends TAuthSyncService<WRITE
   /// - [apiBuilder] - Optional builder function to create the Firestore API instance
   /// - [initialiseStream] - Whether to automatically initialize the Firestore stream on service
   TDocService({
+    required this.defaultValue,
     this.apiBuilder,
     this.streamBuilder,
     required this.collection,
     super.initialiseStream = true,
     this.initialValue,
-    this.defaultValue,
   });
 
   // 📍 LOCATOR ------------------------------------------------------------------------------- \\
@@ -62,7 +62,7 @@ class TDocService<WRITEABLE extends TWriteableId> extends TAuthSyncService<WRITE
 
   @protected
   /// Function to provide default document value.
-  final TDocValueBuilderDef<WRITEABLE>? defaultValue;
+  final TDocValueBuilderDef<WRITEABLE> defaultValue;
 
   // 🎬 INIT & DISPOSE ------------------------------------------------------------------------ \\
 
@@ -120,10 +120,7 @@ class TDocService<WRITEABLE extends TWriteableId> extends TAuthSyncService<WRITE
           );
         } else {
           _doc.update(
-            defaultValue?.call(vars(), collection, this) ??
-                api.defaultValue(
-                  vars(),
-                ),
+            defaultValue.call(vars(), collection, this),
           );
         }
         _isReady.completeIfNotComplete();
@@ -131,10 +128,7 @@ class TDocService<WRITEABLE extends TWriteableId> extends TAuthSyncService<WRITE
       } else {
         log.debug('User is null, clearing doc');
         _doc.update(
-          defaultValue?.call(vars(), collection, this) ??
-              api.defaultValue(
-                vars(),
-              ),
+          defaultValue.call(vars(), collection, this),
         );
       }
     };
@@ -175,11 +169,7 @@ class TDocService<WRITEABLE extends TWriteableId> extends TAuthSyncService<WRITE
 
   /// Local state for the document.
   late final _doc = TNotifier<WRITEABLE>(
-    initialValue?.call(vars(), collection, this) ??
-        (defaultValue?.call(vars(), collection, this) ??
-            api.defaultValue(
-              vars(),
-            )),
+    initialValue?.call(vars(), collection, this) ?? (defaultValue.call(vars(), collection, this)),
     forceUpdate: true,
   );
 
@@ -230,10 +220,7 @@ class TDocService<WRITEABLE extends TWriteableId> extends TAuthSyncService<WRITE
       beforeLocalNotifyUpdate?.call(null);
     }
     _doc.update(
-      defaultValue?.call(vars(), collection, this) ??
-          api.defaultValue(
-            vars(),
-          ),
+      defaultValue.call(vars(), collection, this),
       doNotifyListeners: doNotifyListeners,
     );
     if (doNotifyListeners) {
@@ -259,10 +246,7 @@ class TDocService<WRITEABLE extends TWriteableId> extends TAuthSyncService<WRITE
       beforeLocalNotifyUpdate?.call(null);
     }
     _doc.update(
-      defaultValue?.call(vars(), collection, this) ??
-          api.defaultValue(
-            vars(),
-          ),
+      defaultValue.call(vars(), collection, this),
       doNotifyListeners: doNotifyListeners,
     );
     if (doNotifyListeners) {

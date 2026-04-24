@@ -8,7 +8,6 @@ class TFirestoreCollection<WRITEABLE extends TWriteableId> {
     required this.collectionName,
     required this.fromJson,
     required this.toJson,
-    required this.defaultValue,
     this.createdAtFieldName = TFirestoreApiDefaults.createdAtFieldName,
     this.documentReferenceFieldName = TFirestoreApiDefaults.documentReferenceFieldName,
     this.fromJsonError,
@@ -32,7 +31,6 @@ class TFirestoreCollection<WRITEABLE extends TWriteableId> {
   final String unknownIdFallback;
   final String updatedAtFieldName;
   final String userIdFieldName;
-  final WRITEABLE defaultValue;
   final WRITEABLE Function(Map<String, dynamic> json) fromJson;
   final WRITEABLE Function(Map<String, dynamic> json)? fromJsonError;
   final bool isCollectionGroup;
@@ -45,9 +43,7 @@ class TFirestoreCollection<WRITEABLE extends TWriteableId> {
     String Function(String collectionName)? path,
     TFirestoreLogger? logger,
     bool? isCollectionGroup,
-    TValueBuilder<WRITEABLE>? defaultValue,
   }) => TFirestoreApi<WRITEABLE>(
-    defaultValue: defaultValue ?? (_) => this.defaultValue,
     userIdFieldName: userIdFieldName,
     defaultId: defaultId,
     unknownIdFallback: unknownIdFallback,
@@ -83,7 +79,7 @@ class TFirestoreCollection<WRITEABLE extends TWriteableId> {
   );
 
   TDocService<WRITEABLE> docService({
-    TDocValueBuilderDef<WRITEABLE>? defaultValue,
+    required TDocValueBuilderDef<WRITEABLE> defaultValue,
     TDocApiBuilderDef<WRITEABLE>? apiBuilder,
     TDocStreamBuilderDef<WRITEABLE>? streamBuilder,
     TDocValueBuilderDef<WRITEABLE>? initialValue,
