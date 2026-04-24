@@ -1,6 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:turbo_firestore_api/apis/t_firestore_api.dart';
-import 'package:turbo_firestore_api/models/t_firestore_collection.dart';
 import 'package:turbo_firestore_api/services/t_document_service.dart';
 import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
 
@@ -11,12 +9,8 @@ import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
 ///
 /// Type Parameters:
 /// - [WRITEABLE] - The document type, must extend [TWriteableId]
-/// - [COLLECTION] - The Firestore collection type, must extend [TFirestoreCollection] with the same [WRITEABLE] type
-abstract class THookDocumentService<
-  WRITEABLE extends TWriteableId,
-  COLLECTION extends TFirestoreCollection<WRITEABLE>
->
-    extends TDocumentService<WRITEABLE, COLLECTION> {
+abstract class THookDocumentService<WRITEABLE extends TWriteableId>
+    extends TDocumentService<WRITEABLE> {
   /// Creates a new [THookDocumentService] instance.
   THookDocumentService({
     required super.collection,

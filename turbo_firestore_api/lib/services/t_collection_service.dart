@@ -33,7 +33,6 @@ import 'package:turbolytics/turbolytics.dart';
 ///
 /// Type Parameters:
 /// - [WRITEABLE] - The document type, must extend [TWriteableId]
-/// - [COLLECTION] - The Firestore collection definition, must extend [TFirestoreCollection]
 ///
 /// Example:
 /// ```dart
@@ -56,10 +55,7 @@ import 'package:turbolytics/turbolytics.dart';
 /// - Automatic stream update blocking during mutations
 /// - Error handling and logging
 /// - User authentication state synchronization
-abstract class TCollectionService<
-  WRITEABLE extends TWriteableId,
-  COLLECTION extends TFirestoreCollection<WRITEABLE>
->
+abstract class TCollectionService<WRITEABLE extends TWriteableId>
     extends TAuthSyncService<List<WRITEABLE>>
     with Turbolytics {
   /// Creates a new [TCollectionService] instance.
@@ -68,7 +64,7 @@ abstract class TCollectionService<
   /// - [api] - The Firestore API instance for remote operations
   TCollectionService({
     required this.collection,
-    TFirestoreApi<WRITEABLE> Function(COLLECTION collection)? apiBuilder,
+    TFirestoreApi<WRITEABLE> Function(TFirestoreCollection<WRITEABLE> collection)? apiBuilder,
     super.initialiseStream = true,
   }) : _apiBuilder = apiBuilder;
 
@@ -76,10 +72,10 @@ abstract class TCollectionService<
   // 🧩 DEPENDENCIES -------------------------------------------------------------------------- \\
 
   /// The Firestore collection definition that this service manages.
-  final COLLECTION collection;
+  final TFirestoreCollection<WRITEABLE> collection;
 
   /// Optional builder function to create the Firestore API instance. If not provided, the API will be created using the collection's `api()` method.
-  final TFirestoreApi<WRITEABLE> Function(COLLECTION collection)? _apiBuilder;
+  final TFirestoreApi<WRITEABLE> Function(TFirestoreCollection<WRITEABLE> collection)? _apiBuilder;
 
   // 🎬 INIT & DISPOSE ------------------------------------------------------------------------ \\
 

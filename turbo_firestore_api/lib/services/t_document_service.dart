@@ -34,12 +34,7 @@ import '../extensions/completer_extension.dart';
 ///
 /// Type Parameters:
 /// - [WRITEABLE] - The document type, must extend [TWriteableId]
-/// - [COLLECTION] - The Firestore collection type, must extend [TFirestoreCollection] with the same [WRITEABLE] type
-abstract class TDocumentService<
-  WRITEABLE extends TWriteableId,
-  COLLECTION extends TFirestoreCollection<WRITEABLE>
->
-    extends TAuthSyncService<WRITEABLE?>
+abstract class TDocumentService<WRITEABLE extends TWriteableId> extends TAuthSyncService<WRITEABLE?>
     with Turbolytics {
   /// Creates a new [TDocumentService] instance.
   ///
@@ -48,7 +43,7 @@ abstract class TDocumentService<
   /// - [apiBuilder] - Optional builder function to create the Firestore API instance
   /// - [initialiseStream] - Whether to automatically initialize the Firestore stream on service
   TDocumentService({
-    TFirestoreApi<WRITEABLE> Function(COLLECTION collection)? apiBuilder,
+    TFirestoreApi<WRITEABLE> Function(TFirestoreCollection<WRITEABLE> collection)? apiBuilder,
     required this.collection,
     super.initialiseStream = true,
   }) : _apiBuilder = apiBuilder;
@@ -57,10 +52,10 @@ abstract class TDocumentService<
   // 🧩 DEPENDENCIES -------------------------------------------------------------------------- \\
 
   /// The Firestore collection definition that this service manages.
-  final COLLECTION collection;
+  final TFirestoreCollection<WRITEABLE> collection;
 
   /// Optional builder function to create the Firestore API instance. If not provided, the API will be created using the collection's `api()` method.
-  final TFirestoreApi<WRITEABLE> Function(COLLECTION collection)? _apiBuilder;
+  final TFirestoreApi<WRITEABLE> Function(TFirestoreCollection<WRITEABLE> collection)? _apiBuilder;
 
   // 🎬 INIT & DISPOSE ------------------------------------------------------------------------ \\
 
