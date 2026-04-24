@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:turbo_firestore_api/apis/t_firestore_api.dart';
 import 'package:turbo_firestore_api/extensions/t_list_extension.dart';
+import 'package:turbo_firestore_api/models/t_firestore_collection.dart';
 import 'package:turbo_firestore_api/services/t_collection_service.dart';
 import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
 
@@ -10,16 +11,17 @@ import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
 /// the local state is updated with new data from Firestore.
 ///
 /// Type Parameters:
-/// - [T] - The document type, must extend [TWriteableId]
-/// - [API] - The Firestore API type, must extend [TFirestoreApi]
+/// - [WRITEABLE] - The document type, must extend [TWriteableId]
+/// - [COLLECTION] - The Firestore collection type, must extend [TFirestoreCollection] with the same [WRITEABLE] type
 abstract class TPreCollectionService<
-  T extends TWriteableId,
-  API extends TFirestoreApi<T>
+  WRITEABLE extends TWriteableId,
+  COLLECTION extends TFirestoreCollection<WRITEABLE>
 >
-    extends TCollectionService<T, API> {
+    extends TCollectionService<WRITEABLE, COLLECTION> {
   /// Creates a new [TPreCollectionService] instance.
   TPreCollectionService({
-    required super.api,
+    required super.collection,
+    super.apiBuilder,
     super.initialiseStream = true,
   });
 
@@ -30,7 +32,7 @@ abstract class TPreCollectionService<
   ///
   /// Parameters:
   /// - [docs] - The new documents from Firestore
-  Future<void> beforeSyncNotifyUpdate(List<T> docs);
+  Future<void> beforeSyncNotifyUpdate(List<WRITEABLE> docs);
 
   /// Handles incoming data updates from Firestore with pre-sync notification.
   ///
@@ -48,7 +50,7 @@ abstract class TPreCollectionService<
   /// - [value] - The new document values from Firestore
   /// - [user] - The current Firebase user
   @override
-  Future<void> Function(List<T>? value, User? user) get onData {
+  Future<void> Function(List<WRITEABLE>? value, User? user) get onData {
     return (value, user) async {
       final docs = value ?? [];
       if (user != null) {

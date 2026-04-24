@@ -9,6 +9,7 @@ import 'package:turbo_firestore_api/exceptions/t_firestore_exception.dart';
 import 'package:turbo_firestore_api/extensions/completer_extension.dart';
 import 'package:turbo_firestore_api/extensions/t_list_extension.dart';
 import 'package:turbo_firestore_api/models/t_auth_vars.dart';
+import 'package:turbo_firestore_api/models/t_firestore_collection.dart';
 import 'package:turbo_firestore_api/services/t_auth_sync_service.dart';
 import 'package:turbo_firestore_api/typedefs/create_doc_def.dart';
 import 'package:turbo_firestore_api/typedefs/update_doc_def.dart';
@@ -31,8 +32,8 @@ import 'package:turbolytics/turbolytics.dart';
 /// - Automatic user authentication state sync
 ///
 /// Type Parameters:
-/// - [T] - The document type, must extend [TWriteableId]
-/// - [API] - The Firestore API type, must extend [TFirestoreApi]
+/// - [WRITEABLE] - The document type, must extend [TWriteableId]
+/// - [COLLECTION] - The Firestore collection definition, must extend [TFirestoreCollection]
 ///
 /// Example:
 /// ```dart
@@ -55,23 +56,30 @@ import 'package:turbolytics/turbolytics.dart';
 /// - Automatic stream update blocking during mutations
 /// - Error handling and logging
 /// - User authentication state synchronization
-abstract class TCollectionService<T extends TWriteableId, API extends TFirestoreApi<T>>
-    extends TAuthSyncService<List<T>>
+abstract class TCollectionService<
+  WRITEABLE extends TWriteableId,
+  COLLECTION extends TFirestoreCollection<WRITEABLE>
+>
+    extends TAuthSyncService<List<WRITEABLE>>
     with Turbolytics {
   /// Creates a new [TCollectionService] instance.
   ///
   /// Parameters:
   /// - [api] - The Firestore API instance for remote operations
   TCollectionService({
-    required this.api,
+    required this.collection,
+    TFirestoreApi<WRITEABLE> Function(COLLECTION collection)? apiBuilder,
     super.initialiseStream = true,
-  });
+  }) : _apiBuilder = apiBuilder;
 
   // 📍 LOCATOR ------------------------------------------------------------------------------- \\
   // 🧩 DEPENDENCIES -------------------------------------------------------------------------- \\
 
-  /// The Firestore API instance used for remote operations.
-  final API api;
+  /// The Firestore collection definition that this service manages.
+  final COLLECTION collection;
+
+  /// Optional builder function to create the Firestore API instance. If not provided, the API will be created using the collection's `api()` method.
+  final TFirestoreApi<WRITEABLE> Function(COLLECTION collection)? _apiBuilder;
 
   // 🎬 INIT & DISPOSE ------------------------------------------------------------------------ \\
 
@@ -97,7 +105,7 @@ abstract class TCollectionService<T extends TWriteableId, API extends TFirestore
   /// Updates the local state when new data arrives from Firestore.
   /// If [user] is null, clears the local state.
   @override
-  Future<void> Function(List<T>? value, User? user) get onData {
+  Future<void> Function(List<WRITEABLE>? value, User? user) get onData {
     return (value, user) async {
       final docs = value ?? [];
       if (user != null) {
@@ -148,9 +156,12 @@ abstract class TCollectionService<T extends TWriteableId, API extends TFirestore
 
   // 🎩 STATE --------------------------------------------------------------------------------- \\
 
+  /// The Firestore API instance for remote operations.
+  late final TFirestoreApi<WRITEABLE> api = _apiBuilder?.call(collection) ?? collection.api();
+
   /// Local state for documents, indexed by their IDs.
   @protected
-  final docsPerIdNotifier = TNotifier<Map<String, T>>({}, forceUpdate: true);
+  final docsPerIdNotifier = TNotifier<Map<String, WRITEABLE>>({}, forceUpdate: true);
 
   /// Completer that resolves when the service is ready.
   final _isReady = Completer<void>();
@@ -168,7 +179,7 @@ abstract class TCollectionService<T extends TWriteableId, API extends TFirestore
           as V;
 
   /// Value listenable for the document collection state.
-  ValueListenable<Map<String, T>> get docsPerId => docsPerIdNotifier;
+  ValueListenable<Map<String, WRITEABLE>> get docsPerId => docsPerIdNotifier;
 
   /// Whether the collection has any documents.
   bool get hasDocs => docsPerIdNotifier.value.isNotEmpty;
@@ -177,10 +188,10 @@ abstract class TCollectionService<T extends TWriteableId, API extends TFirestore
   bool exists(String id) => docsPerIdNotifier.value.containsKey(id);
 
   /// Finds a document by its ID. Throws if not found.
-  T findById(String id) => docsPerIdNotifier.value[id]!;
+  WRITEABLE findById(String id) => docsPerIdNotifier.value[id]!;
 
   /// Finds a document by its ID. Returns null if not found.
-  T? tryFindById(String? id) => docsPerIdNotifier.value[id];
+  WRITEABLE? tryFindById(String? id) => docsPerIdNotifier.value[id];
 
   /// Future that completes when the service is ready to use.
   Future<void> get isReady => _isReady.future;
@@ -244,9 +255,9 @@ abstract class TCollectionService<T extends TWriteableId, API extends TFirestore
   /// - [doc] - The definition of how to update the document
   /// - [doNotifyListeners] - Whether to notify listeners of the change
   @protected
-  T updateLocalDoc({
+  WRITEABLE updateLocalDoc({
     required String id,
-    required UpdateDocDef<T> doc,
+    required UpdateDocDef<WRITEABLE> doc,
     bool doNotifyListeners = true,
   }) {
     log.debug('Updating local doc with id: $id');
@@ -272,8 +283,8 @@ abstract class TCollectionService<T extends TWriteableId, API extends TFirestore
   /// - [doc] - The definition of how to create the document
   /// - [doNotifyListeners] - Whether to notify listeners of the change
   @protected
-  T createLocalDoc({
-    required CreateDocDef<T> doc,
+  WRITEABLE createLocalDoc({
+    required CreateDocDef<WRITEABLE> doc,
     bool doNotifyListeners = true,
   }) {
     final pDoc = doc(
@@ -294,13 +305,13 @@ abstract class TCollectionService<T extends TWriteableId, API extends TFirestore
   /// - [doc] - The definition of how to update the documents
   /// - [doNotifyListeners] - Whether to notify listeners of the changes
   @protected
-  List<T> updateLocalDocs({
+  List<WRITEABLE> updateLocalDocs({
     required List<String> ids,
-    required UpdateDocDef<T> doc,
+    required UpdateDocDef<WRITEABLE> doc,
     bool doNotifyListeners = true,
   }) {
     log.debug('Updating ${ids.length} local docs');
-    final pDocs = <T>[];
+    final pDocs = <WRITEABLE>[];
     for (final id in ids) {
       final pDoc = updateLocalDoc(id: id, doc: doc, doNotifyListeners: false);
       pDocs.add(pDoc);
@@ -316,12 +327,12 @@ abstract class TCollectionService<T extends TWriteableId, API extends TFirestore
   /// - [docs] - The definition of how to create the documents
   /// - [doNotifyListeners] - Whether to notify listeners of the changes
   @protected
-  List<T> createLocalDocs({
-    required List<CreateDocDef<T>> docs,
+  List<WRITEABLE> createLocalDocs({
+    required List<CreateDocDef<WRITEABLE>> docs,
     bool doNotifyListeners = true,
   }) {
     log.debug('Creating ${docs.length} local docs');
-    final pDocs = <T>[];
+    final pDocs = <WRITEABLE>[];
     for (final doc in docs) {
       final pDoc = createLocalDoc(doc: doc, doNotifyListeners: false);
       pDocs.add(pDoc);
@@ -343,13 +354,13 @@ abstract class TCollectionService<T extends TWriteableId, API extends TFirestore
   ///
   /// Returns the list of upserted documents
   @protected
-  List<T> upsertLocalDocs({
+  List<WRITEABLE> upsertLocalDocs({
     required List<String> ids,
-    required UpsertDocDef<T> doc,
+    required UpsertDocDef<WRITEABLE> doc,
     bool doNotifyListeners = true,
   }) {
     log.debug('Upserting ${ids.length} local docs');
-    final pDocs = <T>[];
+    final pDocs = <WRITEABLE>[];
     for (final id in ids) {
       final pDoc = upsertLocalDoc(
         id: id,
@@ -375,9 +386,9 @@ abstract class TCollectionService<T extends TWriteableId, API extends TFirestore
   ///
   /// Returns the upserted document
   @protected
-  T upsertLocalDoc({
+  WRITEABLE upsertLocalDoc({
     required String id,
-    required UpsertDocDef<T> doc,
+    required UpsertDocDef<WRITEABLE> doc,
     bool doNotifyListeners = true,
   }) {
     log.debug('Upserting local doc with id: $id');
@@ -408,11 +419,11 @@ abstract class TCollectionService<T extends TWriteableId, API extends TFirestore
   ///
   /// Returns a [TurboResponse] with the upserted document reference
   @protected
-  Future<TurboResponse<T>> upsertDoc({
+  Future<TurboResponse<WRITEABLE>> upsertDoc({
     Transaction? transaction,
     required String id,
-    required UpsertDocDef<T> doc,
-    TSerializable Function(T doc)? remoteUpdateRequestBuilder,
+    required UpsertDocDef<WRITEABLE> doc,
+    TSerializable Function(WRITEABLE doc)? remoteUpdateRequestBuilder,
     bool doNotifyListeners = true,
   }) async {
     try {
@@ -461,11 +472,11 @@ abstract class TCollectionService<T extends TWriteableId, API extends TFirestore
   ///
   /// Returns a [TurboResponse] with the updated document reference
   @protected
-  Future<TurboResponse<T>> updateDoc({
+  Future<TurboResponse<WRITEABLE>> updateDoc({
     Transaction? transaction,
     required String id,
-    required UpdateDocDef<T> doc,
-    TWriteableId Function(T doc)? remoteUpdateRequestBuilder,
+    required UpdateDocDef<WRITEABLE> doc,
+    TWriteableId Function(WRITEABLE doc)? remoteUpdateRequestBuilder,
     bool doNotifyListeners = true,
   }) async {
     try {
@@ -510,9 +521,9 @@ abstract class TCollectionService<T extends TWriteableId, API extends TFirestore
   ///
   /// Returns a [TurboResponse] with the created document reference
   @protected
-  Future<TurboResponse<T>> createDoc({
+  Future<TurboResponse<WRITEABLE>> createDoc({
     Transaction? transaction,
-    required CreateDocDef<T> doc,
+    required CreateDocDef<WRITEABLE> doc,
     bool doNotifyListeners = true,
   }) async {
     try {
@@ -556,10 +567,10 @@ abstract class TCollectionService<T extends TWriteableId, API extends TFirestore
   ///
   /// Returns a [TurboResponse] indicating success or failure
   @protected
-  Future<TurboResponse<List<T>>> updateDocs({
+  Future<TurboResponse<List<WRITEABLE>>> updateDocs({
     Transaction? transaction,
     required List<String> ids,
-    required UpdateDocDef<T> doc,
+    required UpdateDocDef<WRITEABLE> doc,
     bool doNotifyListeners = true,
   }) async {
     try {
@@ -616,9 +627,9 @@ abstract class TCollectionService<T extends TWriteableId, API extends TFirestore
   ///
   /// Returns a [TurboResponse] indicating success or failure
   @protected
-  Future<TurboResponse<List<T>>> createDocs({
+  Future<TurboResponse<List<WRITEABLE>>> createDocs({
     Transaction? transaction,
-    required List<CreateDocDef<T>> docs,
+    required List<CreateDocDef<WRITEABLE>> docs,
     bool doNotifyListeners = true,
   }) async {
     try {
@@ -777,10 +788,10 @@ abstract class TCollectionService<T extends TWriteableId, API extends TFirestore
   ///
   /// Returns a [TurboResponse] with the list of upserted documents
   @protected
-  Future<TurboResponse<List<T>>> upsertDocs({
+  Future<TurboResponse<List<WRITEABLE>>> upsertDocs({
     Transaction? transaction,
     required List<String> ids,
-    required UpsertDocDef<T> doc,
+    required UpsertDocDef<WRITEABLE> doc,
     bool doNotifyListeners = true,
   }) async {
     try {

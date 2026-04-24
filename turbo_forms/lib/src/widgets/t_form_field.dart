@@ -14,7 +14,7 @@ class TFormField<T> extends StatelessWidget {
     super.key,
     required this.builder,
     required this.formFieldConfig,
-    required this.errorTextStyle,
+    this.errorTextStyle,
     this.child,
     this.errorPadding,
     this.label,
@@ -35,7 +35,7 @@ class TFormField<T> extends StatelessWidget {
   final Widget? child;
   final EdgeInsets? errorPadding;
   final double? horizontalPadding;
-  final TextStyle errorTextStyle;
+  final TextStyle? errorTextStyle;
   final double disabledOpacity;
   final Duration animationDuration;
 
@@ -99,7 +99,7 @@ class StatelessTFormField extends StatelessWidget {
   final bool isReadOnly;
   final Widget formFieldContent;
   final double? horizontalPadding;
-  final TextStyle errorTextStyle;
+  final TextStyle? errorTextStyle;
   final double disabledOpacity;
   final Duration animationDuration;
 

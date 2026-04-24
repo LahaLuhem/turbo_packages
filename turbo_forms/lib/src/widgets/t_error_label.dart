@@ -7,7 +7,7 @@ class TErrorLabel extends StatelessWidget {
   const TErrorLabel({
     required String? errorText,
     required bool shouldValidate,
-    required this.errorTextStyle,
+    this.errorTextStyle,
     this.padding,
     super.key,
   }) : _errorText = errorText,
@@ -15,7 +15,7 @@ class TErrorLabel extends StatelessWidget {
 
   final String? _errorText;
   final bool _shouldValidate;
-  final TextStyle errorTextStyle;
+  final TextStyle? errorTextStyle;
   final EdgeInsets? padding;
 
   @override

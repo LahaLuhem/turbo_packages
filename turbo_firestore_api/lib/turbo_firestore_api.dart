@@ -39,7 +39,7 @@
 /// See the individual components for detailed documentation:
 library;
 
-export 'abstracts/t_firestore_collection.dart';
+export 'models/t_firestore_collection.dart';
 
 /// Abstracts
 export 'abstracts/t_vars.dart';

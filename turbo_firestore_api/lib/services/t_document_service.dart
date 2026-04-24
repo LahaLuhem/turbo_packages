@@ -7,6 +7,7 @@ import 'package:turbo_firestore_api/apis/t_firestore_api.dart';
 import 'package:turbo_firestore_api/constants/t_values.dart';
 import 'package:turbo_firestore_api/exceptions/t_firestore_exception.dart';
 import 'package:turbo_firestore_api/models/t_auth_vars.dart';
+import 'package:turbo_firestore_api/models/t_firestore_collection.dart';
 import 'package:turbo_firestore_api/services/t_auth_sync_service.dart';
 import 'package:turbo_firestore_api/typedefs/create_doc_def.dart';
 import 'package:turbo_firestore_api/typedefs/t_locator_def.dart';
@@ -32,27 +33,34 @@ import '../extensions/completer_extension.dart';
 /// - Before/after update notifications
 ///
 /// Type Parameters:
-/// - [T] - The document type, must extend [TWriteableId]
-/// - [API] - The Firestore API type, must extend [TFirestoreApi]
+/// - [WRITEABLE] - The document type, must extend [TWriteableId]
+/// - [COLLECTION] - The Firestore collection type, must extend [TFirestoreCollection] with the same [WRITEABLE] type
 abstract class TDocumentService<
-  T extends TWriteableId,
-  API extends TFirestoreApi<T>
+  WRITEABLE extends TWriteableId,
+  COLLECTION extends TFirestoreCollection<WRITEABLE>
 >
-    extends TAuthSyncService<T?>
+    extends TAuthSyncService<WRITEABLE?>
     with Turbolytics {
   /// Creates a new [TDocumentService] instance.
   ///
   /// Parameters:
-  /// - [api] - The Firestore API instance for remote operations
+  /// - [collection] - The Firestore collection definition that this service manages
+  /// - [apiBuilder] - Optional builder function to create the Firestore API instance
+  /// - [initialiseStream] - Whether to automatically initialize the Firestore stream on service
   TDocumentService({
-    required this.api,
-  });
+    TFirestoreApi<WRITEABLE> Function(COLLECTION collection)? apiBuilder,
+    required this.collection,
+    super.initialiseStream = true,
+  }) : _apiBuilder = apiBuilder;
 
   // 📍 LOCATOR ------------------------------------------------------------------------------- \\
   // 🧩 DEPENDENCIES -------------------------------------------------------------------------- \\
 
-  /// The Firestore API instance used for remote operations.
-  final API api;
+  /// The Firestore collection definition that this service manages.
+  final COLLECTION collection;
+
+  /// Optional builder function to create the Firestore API instance. If not provided, the API will be created using the collection's `api()` method.
+  final TFirestoreApi<WRITEABLE> Function(COLLECTION collection)? _apiBuilder;
 
   // 🎬 INIT & DISPOSE ------------------------------------------------------------------------ \\
 
@@ -94,7 +102,7 @@ abstract class TDocumentService<
   /// - [value] - The new document value from Firestore
   /// - [user] - The current Firebase user
   @override
-  Future<void> Function(T? value, User? user) get onData {
+  Future<void> Function(WRITEABLE? value, User? user) get onData {
     return (value, user) async {
       if (user != null) {
         log.debug('Updating doc for user ${user.uid}');
@@ -143,8 +151,11 @@ abstract class TDocumentService<
 
   // 🎩 STATE --------------------------------------------------------------------------------- \\
 
+  /// The Firestore API instance for remote operations.
+  late final TFirestoreApi<WRITEABLE> api = _apiBuilder?.call(collection) ?? collection.api();
+
   /// Local state for the document.
-  late final _doc = TNotifier<T?>(
+  late final _doc = TNotifier<WRITEABLE?>(
     initialValueLocator?.call() ?? defaultValueLocator?.call(),
     forceUpdate: true,
   );
@@ -166,16 +177,16 @@ abstract class TDocumentService<
   }
 
   /// Function to provide initial document value.
-  TLocatorDef<T>? initialValueLocator;
+  TLocatorDef<WRITEABLE>? initialValueLocator;
 
   /// Function to provide default document value.
-  TLocatorDef<T>? defaultValueLocator;
+  TLocatorDef<WRITEABLE>? defaultValueLocator;
 
   /// Called before local state is updated.
-  ValueChanged<T?>? beforeLocalNotifyUpdate;
+  ValueChanged<WRITEABLE?>? beforeLocalNotifyUpdate;
 
   /// Called after local state is updated.
-  ValueChanged<T?>? afterLocalNotifyUpdate;
+  ValueChanged<WRITEABLE?>? afterLocalNotifyUpdate;
 
   /// Future that completes when the service is ready.
   Future<void> get isReady => _isReady.future;
@@ -184,7 +195,7 @@ abstract class TDocumentService<
   Listenable get listenable => _doc;
 
   /// Value listenable for the document state.
-  ValueListenable<T?> get doc => _doc;
+  ValueListenable<WRITEABLE?> get doc => _doc;
 
   /// Whether a document exists in local state.
 
@@ -235,8 +246,8 @@ abstract class TDocumentService<
   /// - [doc] - The document to create
   /// - [doNotifyListeners] - Whether to notify listeners of the change
   @protected
-  T createLocalDoc({
-    required CreateDocDef<T> doc,
+  WRITEABLE createLocalDoc({
+    required CreateDocDef<WRITEABLE> doc,
     bool doNotifyListeners = true,
   }) {
     final pDoc = doc(turboVars());
@@ -258,9 +269,9 @@ abstract class TDocumentService<
   /// - [doc] - The document update function
   /// - [doNotifyListeners] - Whether to notify listeners of the change
   @protected
-  T updateLocalDoc({
+  WRITEABLE updateLocalDoc({
     required String id,
-    required UpdateDocDef<T> doc,
+    required UpdateDocDef<WRITEABLE> doc,
     bool doNotifyListeners = true,
   }) {
     if (_doc.value == null) {
@@ -291,9 +302,9 @@ abstract class TDocumentService<
   ///
   /// Returns the upserted document
   @protected
-  T upsertLocalDoc({
+  WRITEABLE upsertLocalDoc({
     required String id,
-    required UpsertDocDef<T> doc,
+    required UpsertDocDef<WRITEABLE> doc,
     bool doNotifyListeners = true,
   }) {
     final pDoc = doc(_doc.value, turboVars(id: id));
@@ -373,11 +384,11 @@ abstract class TDocumentService<
   ///
   /// Returns a [TurboResponse] with the updated document reference
   @protected
-  Future<TurboResponse<T>> updateDoc({
+  Future<TurboResponse<WRITEABLE>> updateDoc({
     Transaction? transaction,
     required String id,
-    required UpdateDocDef<T> doc,
-    TWriteable Function(T doc)? remoteUpdateRequestBuilder,
+    required UpdateDocDef<WRITEABLE> doc,
+    TWriteable Function(WRITEABLE doc)? remoteUpdateRequestBuilder,
     bool doNotifyListeners = true,
   }) async {
     try {
@@ -422,9 +433,9 @@ abstract class TDocumentService<
   ///
   /// Returns a [TurboResponse] with the created document reference
   @protected
-  Future<TurboResponse<T>> createDoc({
+  Future<TurboResponse<WRITEABLE>> createDoc({
     Transaction? transaction,
-    required CreateDocDef<T> doc,
+    required CreateDocDef<WRITEABLE> doc,
     bool doNotifyListeners = true,
   }) async {
     try {
@@ -473,11 +484,11 @@ abstract class TDocumentService<
   ///
   /// Returns a [TurboResponse] with the upserted document reference
   @protected
-  Future<TurboResponse<T>> upsertDoc({
+  Future<TurboResponse<WRITEABLE>> upsertDoc({
     Transaction? transaction,
     required String id,
-    required UpsertDocDef<T> doc,
-    TWriteableId Function(T doc)? remoteUpdateRequestBuilder,
+    required UpsertDocDef<WRITEABLE> doc,
+    TWriteableId Function(WRITEABLE doc)? remoteUpdateRequestBuilder,
     bool doNotifyListeners = true,
   }) async {
     try {
@@ -488,8 +499,7 @@ abstract class TDocumentService<
         doNotifyListeners: doNotifyListeners,
       );
       final future = api.createDoc(
-        writeable:
-            remoteUpdateRequestBuilder?.call(pDoc) ?? pDoc as TWriteableId,
+        writeable: remoteUpdateRequestBuilder?.call(pDoc) ?? pDoc as TWriteableId,
         id: id,
         transaction: transaction,
         merge: true,

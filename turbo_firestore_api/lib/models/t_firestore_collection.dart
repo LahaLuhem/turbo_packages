@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:turbo_firestore_api/turbo_firestore_api.dart';
 import 'package:turbo_serializable/abstracts/t_writeable.dart';
 
-abstract class TFirestoreCollection<DTO extends TWriteable> {
+class TFirestoreCollection<DTO extends TWriteable> {
   const TFirestoreCollection({
     required this.apiName,
     required this.collectionName,
@@ -53,6 +53,4 @@ abstract class TFirestoreCollection<DTO extends TWriteable> {
     tryAddLocalId: tryAddLocalId,
     updatedAtFieldName: updatedAtFieldName,
   );
-
-
 }

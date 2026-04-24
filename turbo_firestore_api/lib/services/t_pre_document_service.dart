@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:turbo_firestore_api/apis/t_firestore_api.dart';
+import 'package:turbo_firestore_api/models/t_firestore_collection.dart';
 import 'package:turbo_firestore_api/services/t_document_service.dart';
 import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
 
@@ -9,15 +10,19 @@ import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
 /// the local state is updated with new data from Firestore.
 ///
 /// Type Parameters:
-/// - [T] - The document type, must extend [TWriteableId]
-/// - [API] - The Firestore API type, must extend [TFirestoreApi]
+/// - [WRITEABLE] - The document type, must extend [TWriteableId]
+/// - [COLLECTION] - The Firestore collection type, must extend [TFirestoreCollection] with the same [WRITEABLE] type
 abstract class TPreDocumentService<
-  T extends TWriteableId,
-  API extends TFirestoreApi<T>
+  WRITEABLE extends TWriteableId,
+  COLLECTION extends TFirestoreCollection<WRITEABLE>
 >
-    extends TDocumentService<T, API> {
+    extends TDocumentService<WRITEABLE, COLLECTION> {
   /// Creates a new [TPreDocumentService] instance.
-  TPreDocumentService({required super.api});
+  TPreDocumentService({
+    required super.collection,
+    super.apiBuilder,
+    super.initialiseStream = true,
+  });
 
   /// Called before the local state is updated with new data.
   ///
@@ -26,7 +31,7 @@ abstract class TPreDocumentService<
   ///
   /// Parameters:
   /// - [doc] - The new document from Firestore
-  Future<void> beforeSyncNotifyUpdate(T? doc);
+  Future<void> beforeSyncNotifyUpdate(WRITEABLE? doc);
 
   /// Handles incoming data updates from Firestore with pre-sync notification.
   ///
@@ -44,7 +49,7 @@ abstract class TPreDocumentService<
   /// - [value] - The new document value from Firestore
   /// - [user] - The current Firebase user
   @override
-  Future<void> Function(T? value, User? user) get onData {
+  Future<void> Function(WRITEABLE? value, User? user) get onData {
     return (value, user) async {
       if (user != null) {
         log.debug('Updating doc for user ${user.uid}');
