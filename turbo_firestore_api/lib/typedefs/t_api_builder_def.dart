@@ -1,8 +1,20 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:turbo_firestore_api/apis/t_firestore_api.dart';
-import 'package:turbo_firestore_api/models/t_firestore_collection.dart';
+import 'package:turbo_firestore_api/factories/t_api_factory.dart';
+import 'package:turbo_firestore_api/services/t_collection_service.dart';
+import 'package:turbo_firestore_api/services/t_doc_service.dart';
 import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
 
-typedef TApiBuilderDef<WRITEABLE extends TWriteableId> =
+typedef TCollectionApiBuilderDef<WRITEABLE extends TWriteableId> =
     TFirestoreApi<WRITEABLE> Function(
-      TFirestoreCollection<WRITEABLE> collection,
+      User? user,
+      TApiFactory<WRITEABLE> factory,
+      TCollectionService<WRITEABLE> service,
+    );
+
+typedef TDocApiBuilderDef<WRITEABLE extends TWriteableId> =
+    TFirestoreApi<WRITEABLE> Function(
+      User? user,
+      TApiFactory<WRITEABLE> collection,
+      TDocService<WRITEABLE> service,
     );
