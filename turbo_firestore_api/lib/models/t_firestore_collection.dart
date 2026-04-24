@@ -32,7 +32,7 @@ class TFirestoreCollection<WRITEABLE extends TWriteableId> {
   final String unknownIdFallback;
   final String updatedAtFieldName;
   final String userIdFieldName;
-  final TValueBuilder<WRITEABLE> defaultValue;
+  final WRITEABLE defaultValue;
   final WRITEABLE Function(Map<String, dynamic> json) fromJson;
   final WRITEABLE Function(Map<String, dynamic> json)? fromJsonError;
   final bool isCollectionGroup;
@@ -47,7 +47,7 @@ class TFirestoreCollection<WRITEABLE extends TWriteableId> {
     bool? isCollectionGroup,
     TValueBuilder<WRITEABLE>? defaultValue,
   }) => TFirestoreApi<WRITEABLE>(
-    defaultValue: defaultValue ?? this.defaultValue,
+    defaultValue: defaultValue ?? (_) => this.defaultValue,
     userIdFieldName: userIdFieldName,
     defaultId: defaultId,
     unknownIdFallback: unknownIdFallback,
