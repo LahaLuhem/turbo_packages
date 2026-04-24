@@ -161,7 +161,7 @@ void main() {
       () async {
         final api = _createApi(seed: 42);
 
-        final stream = api.streamDocByIdWithConverter(id: 'x');
+        final stream = api.streamByDocIdWithConverter(id: 'x');
         expect(stream.isBroadcast, isTrue);
 
         final entity = await stream.first;
@@ -238,7 +238,7 @@ void main() {
       () async {
         final api = _createApi(seed: 42);
 
-        final stream = api.streamDocByIdWithConverter(id: 'y');
+        final stream = api.streamByDocIdWithConverter(id: 'y');
         final events = <_SimpleDto?>[];
         final firstEvent = Completer<void>();
         final secondEvent = Completer<void>();

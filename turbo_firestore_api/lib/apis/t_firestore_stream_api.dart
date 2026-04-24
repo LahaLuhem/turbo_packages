@@ -345,7 +345,7 @@ mixin TurboFirestoreStreamApi<T> on _TFirestoreApiBase<T> {
   /// ```
   ///
   /// See also:
-  /// [streamDocByIdWithConverter] type-safe document streaming
+  /// [streamByDocIdWithConverter] type-safe document streaming
   /// [streamAll] collection streaming
   Stream<DocumentSnapshot<Map<String, dynamic>>> streamByDocId({
     required String id,
@@ -421,7 +421,7 @@ mixin TurboFirestoreStreamApi<T> on _TFirestoreApiBase<T> {
   /// See also:
   /// [streamByDocId] raw data document streaming
   /// [streamAllWithConverter] collection type-safe streaming
-  Stream<T?> streamDocByIdWithConverter({
+  Stream<T?> streamByDocIdWithConverter({
     required String id,
     String? collectionPathOverride,
   }) {

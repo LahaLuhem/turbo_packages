@@ -33,30 +33,34 @@ class TDocService<WRITEABLE extends TWriteableId> extends TAuthSyncService<WRITE
   /// - [apiBuilder] - Optional builder function to create the Firestore API instance
   /// - [initialiseStream] - Whether to automatically initialize the Firestore stream on service
   TDocService({
-    TDocApiBuilderDef<WRITEABLE>? apiBuilder,
-    TDocStreamBuilderDef<WRITEABLE>? streamBuilder,
+    this.apiBuilder,
+    this.streamBuilder,
     required this.collection,
     super.initialiseStream = true,
     this.initialValue,
     required this.defaultValue,
-  }) : _streamBuilder = streamBuilder,
-       _apiBuilder = apiBuilder;
+  });
 
   // 📍 LOCATOR ------------------------------------------------------------------------------- \\
   // 🧩 DEPENDENCIES -------------------------------------------------------------------------- \\
 
+  @protected
   /// The Firestore collection definition that this service manages.
   final TFirestoreCollection<WRITEABLE> collection;
 
+  @protected
   /// Optional builder function to create the Firestore API instance. If not provided, the API will be created using the collection's `api()` method.
-  final TDocApiBuilderDef<WRITEABLE>? _apiBuilder;
+  final TDocApiBuilderDef<WRITEABLE>? apiBuilder;
 
+  @protected
   /// Optional builder function to create the Firestore stream. If not provided, the stream will be created using the API's `streamAllWithConverter()` method.
-  final TDocStreamBuilderDef<WRITEABLE>? _streamBuilder;
+  final TDocStreamBuilderDef<WRITEABLE>? streamBuilder;
 
+  @protected
   /// Function to provide initial document value.
   final TDocValueBuilderDef<WRITEABLE>? initialValue;
 
+  @protected
   /// Function to provide default document value.
   final TDocValueBuilderDef<WRITEABLE> defaultValue;
 
@@ -88,7 +92,7 @@ class TDocService<WRITEABLE extends TWriteableId> extends TAuthSyncService<WRITE
   @override
   Stream<WRITEABLE?> Function(User user) get stream =>
       (user) =>
-          _streamBuilder?.call(user, api, this) ?? api.streamDocByIdWithConverter(id: user.uid);
+          streamBuilder?.call(user, api, this) ?? api.streamByDocIdWithConverter(id: user.uid);
 
   /// Handles incoming data updates from Firestore.
   ///
@@ -156,7 +160,7 @@ class TDocService<WRITEABLE extends TWriteableId> extends TAuthSyncService<WRITE
 
   /// The Firestore API instance for remote operations.
   late final TFirestoreApi<WRITEABLE> api =
-      _apiBuilder?.call(user, TApiFactory<WRITEABLE>(collection: collection), this) ??
+      apiBuilder?.call(user, TApiFactory<WRITEABLE>(collection: collection), this) ??
       collection.api();
 
   /// Local state for the document.

@@ -946,7 +946,7 @@ class TDummyFirestoreApi<T extends TWriteable> extends TFirestoreApi<T> {
   }) => throw UnimplementedError(_dummyStreamGuidance);
 
   @override
-  Stream<T?> streamDocByIdWithConverter({
+  Stream<T?> streamByDocIdWithConverter({
     required String id,
     String? collectionPathOverride,
   }) {
@@ -964,7 +964,7 @@ class TDummyFirestoreApi<T extends TWriteable> extends TFirestoreApi<T> {
   /// [_docControllers].
   ///
   /// When [autoCreate] is true (default), missing documents are generated
-  /// and stored on first emission — matching [streamDocByIdWithConverter]
+  /// and stored on first emission — matching [streamByDocIdWithConverter]
   /// behaviour. When false, missing documents emit `null` — suitable for
   /// [_TDummyDocumentReference.snapshots] where non-existent docs should
   /// report `exists == false`.

@@ -39,6 +39,7 @@ abstract class _TFirestoreApiBase<T> {
     String createdAtFieldName = TFirestoreApiDefaults.createdAtFieldName,
     String updatedAtFieldName = TFirestoreApiDefaults.updatedAtFieldName,
     String idFieldName = TFirestoreApiDefaults.idFieldName,
+    this.userIdFieldName = TFirestoreApiDefaults.userIdFieldName,
     String documentReferenceFieldName = TFirestoreApiDefaults.documentReferenceFieldName,
     bool isCollectionGroup = TFirestoreApiDefaults.isCollectionGroup,
     bool tryAddLocalDocumentReference = TFirestoreApiDefaults.tryAddLocalDocumentReference,
@@ -114,6 +115,9 @@ abstract class _TFirestoreApiBase<T> {
   ///
   /// May also be used to provide an id field to your data from Firestore when fetching data.
   final String _idFieldName;
+
+  /// Used to provide a userId field to your create/update methods if necessary.
+  final String userIdFieldName;
 
   /// Used to provide a reference field to your create/update methods if necessary.
   ///
@@ -465,5 +469,6 @@ class TFirestoreApi<T extends TWriteable> extends _TFirestoreApiBase<T>
     super.isCollectionGroup,
     super.tryAddLocalDocumentReference,
     super.getOptions,
+    super.userIdFieldName,
   });
 }

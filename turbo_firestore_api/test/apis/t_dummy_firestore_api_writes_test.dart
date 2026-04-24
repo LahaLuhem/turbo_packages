@@ -273,7 +273,7 @@ void main() {
         // Open a doc stream and capture events.
         final events = <_SimpleDto?>[];
         final initialEvent = Completer<void>();
-        final sub = api.streamDocByIdWithConverter(id: 'doc-1').listen((data) {
+        final sub = api.streamByDocIdWithConverter(id: 'doc-1').listen((data) {
           events.add(data);
           if (!initialEvent.isCompleted) initialEvent.complete();
         });
