@@ -11,11 +11,14 @@ import 'package:turbo_firestore_api/models/t_auth_vars.dart';
 import 'package:turbo_firestore_api/models/t_firestore_collection.dart';
 import 'package:turbo_firestore_api/services/t_auth_sync_service.dart';
 import 'package:turbo_firestore_api/typedefs/create_doc_def.dart';
+import 'package:turbo_firestore_api/typedefs/t_api_builder_def.dart';
+import 'package:turbo_firestore_api/typedefs/t_doc_stream_builder_def.dart';
 import 'package:turbo_firestore_api/typedefs/t_locator_def.dart';
 import 'package:turbo_firestore_api/typedefs/update_doc_def.dart';
 import 'package:turbo_firestore_api/typedefs/upsert_doc_def.dart';
 import 'package:turbo_notifiers/turbo_notifiers.dart';
 import 'package:turbo_response/turbo_response.dart';
+import 'package:turbo_serializable/abstracts/t_writeable.dart';
 import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
 import 'package:turbolytics/turbolytics.dart';
 
@@ -41,10 +44,14 @@ abstract class TDocumentService<WRITEABLE extends TWriteableId> extends TAuthSyn
   /// - [apiBuilder] - Optional builder function to create the Firestore API instance
   /// - [initialiseStream] - Whether to automatically initialize the Firestore stream on service
   TDocumentService({
-    TFirestoreApi<WRITEABLE> Function(TFirestoreCollection<WRITEABLE> collection)? apiBuilder,
+    TApiBuilderDef<WRITEABLE>? apiBuilder,
+    TDocStreamBuilderDef<WRITEABLE>? streamBuilder,
     required this.collection,
     super.initialiseStream = true,
-  }) : _apiBuilder = apiBuilder;
+    this.initialValue,
+    required this.defaultValue,
+  }) : _streamBuilder = streamBuilder,
+       _apiBuilder = apiBuilder;
 
   // 📍 LOCATOR ------------------------------------------------------------------------------- \\
   // 🧩 DEPENDENCIES -------------------------------------------------------------------------- \\
@@ -53,7 +60,16 @@ abstract class TDocumentService<WRITEABLE extends TWriteableId> extends TAuthSyn
   final TFirestoreCollection<WRITEABLE> collection;
 
   /// Optional builder function to create the Firestore API instance. If not provided, the API will be created using the collection's `api()` method.
-  final TFirestoreApi<WRITEABLE> Function(TFirestoreCollection<WRITEABLE> collection)? _apiBuilder;
+  final TApiBuilderDef<WRITEABLE>? _apiBuilder;
+
+  /// Optional builder function to create the Firestore stream. If not provided, the stream will be created using the API's `streamAllWithConverter()` method.
+  final TDocStreamBuilderDef<WRITEABLE>? _streamBuilder;
+
+  /// Function to provide initial document value.
+  final TLocatorDef<WRITEABLE>? initialValue;
+
+  /// Function to provide default document value.
+  final TLocatorDef<WRITEABLE> defaultValue;
 
   // 🎬 INIT & DISPOSE ------------------------------------------------------------------------ \\
 
@@ -80,6 +96,11 @@ abstract class TDocumentService<WRITEABLE extends TWriteableId> extends TAuthSyn
   // 👂 LISTENERS ----------------------------------------------------------------------------- \\
   // ⚡️ OVERRIDES ----------------------------------------------------------------------------- \\
 
+  @override
+  Stream<WRITEABLE?> Function(User user) get stream =>
+      (user) =>
+          _streamBuilder?.call(user, api, this) ?? api.streamDocByIdWithConverter(id: user.uid);
+
   /// Handles incoming data updates from Firestore.
   ///
   /// This callback is triggered when:
@@ -105,13 +126,13 @@ abstract class TDocumentService<WRITEABLE extends TWriteableId> extends TAuthSyn
             doc: (current, _) => value,
           );
         } else {
-          _doc.update(null);
+          _doc.update(defaultValue.call());
         }
         _isReady.completeIfNotComplete();
         log.debug('Updated doc');
       } else {
         log.debug('User is null, clearing doc');
-        _doc.update(null);
+        _doc.update(defaultValue.call());
       }
     };
   }
@@ -148,8 +169,8 @@ abstract class TDocumentService<WRITEABLE extends TWriteableId> extends TAuthSyn
   late final TFirestoreApi<WRITEABLE> api = _apiBuilder?.call(collection) ?? collection.api();
 
   /// Local state for the document.
-  late final _doc = TNotifier<WRITEABLE?>(
-    initialValueLocator?.call() ?? defaultValueLocator?.call(),
+  late final _doc = TNotifier<WRITEABLE>(
+    initialValue?.call() ?? defaultValue.call(),
     forceUpdate: true,
   );
 
@@ -169,12 +190,6 @@ abstract class TDocumentService<WRITEABLE extends TWriteableId> extends TAuthSyn
         as V;
   }
 
-  /// Function to provide initial document value.
-  TLocatorDef<WRITEABLE>? initialValueLocator;
-
-  /// Function to provide default document value.
-  TLocatorDef<WRITEABLE>? defaultValueLocator;
-
   /// Called before local state is updated.
   ValueChanged<WRITEABLE?>? beforeLocalNotifyUpdate;
 
@@ -193,7 +208,7 @@ abstract class TDocumentService<WRITEABLE extends TWriteableId> extends TAuthSyn
   /// Whether a document exists in local state.
 
   /// The document ID.
-  String? get id => _doc.value?.id;
+  String get id => _doc.value.id;
 
   // 🏗️ HELPERS ------------------------------------------------------------------------------- \\
   // ⚙️ LOCAL MUTATORS ------------------------------------------------------------------------ \\
@@ -204,7 +219,7 @@ abstract class TDocumentService<WRITEABLE extends TWriteableId> extends TAuthSyn
     if (doNotifyListeners) {
       beforeLocalNotifyUpdate?.call(null);
     }
-    _doc.update(null, doNotifyListeners: doNotifyListeners);
+    _doc.update(defaultValue(), doNotifyListeners: doNotifyListeners);
     if (doNotifyListeners) {
       afterLocalNotifyUpdate?.call(null);
     }
@@ -227,7 +242,7 @@ abstract class TDocumentService<WRITEABLE extends TWriteableId> extends TAuthSyn
     if (doNotifyListeners) {
       beforeLocalNotifyUpdate?.call(null);
     }
-    _doc.update(null, doNotifyListeners: doNotifyListeners);
+    _doc.update(defaultValue(), doNotifyListeners: doNotifyListeners);
     if (doNotifyListeners) {
       afterLocalNotifyUpdate?.call(null);
     }
@@ -267,10 +282,7 @@ abstract class TDocumentService<WRITEABLE extends TWriteableId> extends TAuthSyn
     required UpdateDocDef<WRITEABLE> doc,
     bool doNotifyListeners = true,
   }) {
-    if (_doc.value == null) {
-      throw StateError('Cannot update non-existent document');
-    }
-    final pDoc = doc(_doc.value!, turboVars(id: id));
+    final pDoc = doc(_doc.value, turboVars(id: id));
     log.debug('Updating local doc with id: ${pDoc.id}');
     if (doNotifyListeners) {
       beforeLocalNotifyUpdate?.call(pDoc);
@@ -334,10 +346,6 @@ abstract class TDocumentService<WRITEABLE extends TWriteableId> extends TAuthSyn
   }) async {
     try {
       log.debug('Deleting doc with id: $id');
-      final doc = _doc.value;
-      if (doc == null) {
-        throw StateError('Document not found');
-      }
       deleteLocalDoc(
         id: id,
         doNotifyListeners: doNotifyListeners,
@@ -381,7 +389,7 @@ abstract class TDocumentService<WRITEABLE extends TWriteableId> extends TAuthSyn
     Transaction? transaction,
     required String id,
     required UpdateDocDef<WRITEABLE> doc,
-    WRITEABLE Function(WRITEABLE doc)? remoteUpdateRequestBuilder,
+    TWriteable Function(WRITEABLE doc)? remoteUpdateRequestBuilder,
     bool doNotifyListeners = true,
   }) async {
     try {
@@ -392,7 +400,7 @@ abstract class TDocumentService<WRITEABLE extends TWriteableId> extends TAuthSyn
         doNotifyListeners: doNotifyListeners,
       );
       final future = api.updateDoc(
-        writeable: remoteUpdateRequestBuilder?.call(pDoc) ?? pDoc,
+        writeable: remoteUpdateRequestBuilder?.call(pDoc) ?? pDoc as TWriteable,
         id: id,
         transaction: transaction,
       );
@@ -481,7 +489,7 @@ abstract class TDocumentService<WRITEABLE extends TWriteableId> extends TAuthSyn
     Transaction? transaction,
     required String id,
     required UpsertDocDef<WRITEABLE> doc,
-    WRITEABLE Function(WRITEABLE doc)? remoteUpdateRequestBuilder,
+    TWriteableId Function(WRITEABLE doc)? remoteUpdateRequestBuilder,
     bool doNotifyListeners = true,
   }) async {
     try {
@@ -492,7 +500,7 @@ abstract class TDocumentService<WRITEABLE extends TWriteableId> extends TAuthSyn
         doNotifyListeners: doNotifyListeners,
       );
       final future = api.createDoc(
-        writeable: remoteUpdateRequestBuilder?.call(pDoc) ?? pDoc,
+        writeable: remoteUpdateRequestBuilder?.call(pDoc) ?? pDoc as TWriteableId,
         id: id,
         transaction: transaction,
         merge: true,

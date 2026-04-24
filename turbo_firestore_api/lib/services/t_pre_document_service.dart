@@ -14,8 +14,11 @@ abstract class TPreDocumentService<WRITEABLE extends TWriteableId>
   /// Creates a new [TPreDocumentService] instance.
   TPreDocumentService({
     required super.collection,
+    required super.defaultValue,
     super.apiBuilder,
+    super.initialValue,
     super.initialiseStream = true,
+    super.streamBuilder,
   });
 
   /// Called before the local state is updated with new data.

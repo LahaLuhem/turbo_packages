@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:turbo_firestore_api/models/t_sensitive_data.dart';
 import 'package:turbolytics/turbolytics.dart';
 
@@ -22,7 +23,7 @@ class TFirestoreLogger {
   /// The prefix parameters customize the prefix text for each log type.
   TFirestoreLogger({
     TLog? log,
-    this.showSensitiveData = true,
+    this.showSensitiveData = kDebugMode,
   }) : _log = log ?? TLog(location: 'TurboFirestoreApi');
 
   final TLog _log;

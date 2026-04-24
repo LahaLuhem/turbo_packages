@@ -12,6 +12,9 @@ import 'package:turbo_firestore_api/models/t_auth_vars.dart';
 import 'package:turbo_firestore_api/models/t_firestore_collection.dart';
 import 'package:turbo_firestore_api/services/t_auth_sync_service.dart';
 import 'package:turbo_firestore_api/typedefs/create_doc_def.dart';
+import 'package:turbo_firestore_api/typedefs/t_api_builder_def.dart';
+import 'package:turbo_firestore_api/typedefs/t_locator_def.dart';
+import 'package:turbo_firestore_api/typedefs/t_stream_builder_def.dart';
 import 'package:turbo_firestore_api/typedefs/update_doc_def.dart';
 import 'package:turbo_firestore_api/typedefs/upsert_doc_def.dart';
 import 'package:turbo_notifiers/turbo_notifiers.dart';
@@ -64,9 +67,13 @@ abstract class TCollectionService<WRITEABLE extends TWriteableId>
   /// - [api] - The Firestore API instance for remote operations
   TCollectionService({
     required this.collection,
-    TFirestoreApi<WRITEABLE> Function(TFirestoreCollection<WRITEABLE> collection)? apiBuilder,
+    TApiBuilderDef<WRITEABLE>? apiBuilder,
+    TCollectionStreamBuilderDef<WRITEABLE>? streamBuilder,
+    this.initialValue,
+    this.defaultValue,
     super.initialiseStream = true,
-  }) : _apiBuilder = apiBuilder;
+  }) : _streamBuilder = streamBuilder,
+       _apiBuilder = apiBuilder;
 
   // 📍 LOCATOR ------------------------------------------------------------------------------- \\
   // 🧩 DEPENDENCIES -------------------------------------------------------------------------- \\
@@ -75,7 +82,16 @@ abstract class TCollectionService<WRITEABLE extends TWriteableId>
   final TFirestoreCollection<WRITEABLE> collection;
 
   /// Optional builder function to create the Firestore API instance. If not provided, the API will be created using the collection's `api()` method.
-  final TFirestoreApi<WRITEABLE> Function(TFirestoreCollection<WRITEABLE> collection)? _apiBuilder;
+  final TApiBuilderDef<WRITEABLE>? _apiBuilder;
+
+  /// Optional builder function to create the Firestore stream. If not provided, the stream will be created using the API's `streamAllWithConverter()` method.
+  final TCollectionStreamBuilderDef<WRITEABLE>? _streamBuilder;
+
+  /// Function to provide initial document value.
+  final TLocatorDef<List<WRITEABLE>>? initialValue;
+
+  /// Function to provide default document value.
+  final TLocatorDef<List<WRITEABLE>>? defaultValue;
 
   // 🎬 INIT & DISPOSE ------------------------------------------------------------------------ \\
 
@@ -96,6 +112,10 @@ abstract class TCollectionService<WRITEABLE extends TWriteableId>
   // 👂 LISTENERS ----------------------------------------------------------------------------- \\
   // ⚡️ OVERRIDES ----------------------------------------------------------------------------- \\
 
+  @override
+  Stream<List<WRITEABLE>> Function(User user) get stream =>
+      (user) => _streamBuilder?.call(user, api, this) ?? api.streamAllWithConverter();
+
   /// Handles data updates from the Firestore stream.
   ///
   /// Updates the local state when new data arrives from Firestore.
@@ -114,7 +134,7 @@ abstract class TCollectionService<WRITEABLE extends TWriteableId>
       } else {
         log.debug('User is null, clearing docs');
         docsPerIdNotifier.update(
-          {},
+          (defaultValue?.call() ?? []).toIdMap((element) => element.id),
         );
       }
     };
@@ -157,7 +177,12 @@ abstract class TCollectionService<WRITEABLE extends TWriteableId>
 
   /// Local state for documents, indexed by their IDs.
   @protected
-  final docsPerIdNotifier = TNotifier<Map<String, WRITEABLE>>({}, forceUpdate: true);
+  late final docsPerIdNotifier = TNotifier<Map<String, WRITEABLE>>(
+    ((initialValue?.call() ?? defaultValue?.call()) ?? []).toIdMap(
+      (element) => element.id,
+    ),
+    forceUpdate: true,
+  );
 
   /// Completer that resolves when the service is ready.
   final _isReady = Completer<void>();
@@ -472,7 +497,7 @@ abstract class TCollectionService<WRITEABLE extends TWriteableId>
     Transaction? transaction,
     required String id,
     required UpdateDocDef<WRITEABLE> doc,
-    WRITEABLE Function(WRITEABLE doc)? remoteUpdateRequestBuilder,
+    TWriteableId Function(WRITEABLE doc)? remoteUpdateRequestBuilder,
     bool doNotifyListeners = true,
   }) async {
     try {
@@ -483,7 +508,7 @@ abstract class TCollectionService<WRITEABLE extends TWriteableId>
         doNotifyListeners: doNotifyListeners,
       );
       final future = api.updateDoc(
-        writeable: remoteUpdateRequestBuilder?.call(pDoc) ?? pDoc,
+        writeable: remoteUpdateRequestBuilder?.call(pDoc) ?? pDoc as TWriteableId,
         id: id,
         transaction: transaction,
       );
@@ -581,7 +606,7 @@ abstract class TCollectionService<WRITEABLE extends TWriteableId>
           (await api.updateDoc(
             id: pDoc.id,
             transaction: transaction,
-            writeable: pDoc,
+            writeable: pDoc as TWriteableId,
           )).throwWhenFail();
         }
         return TurboResponse.success(result: pDocs);
@@ -591,7 +616,7 @@ abstract class TCollectionService<WRITEABLE extends TWriteableId>
           await api.updateDocInBatch(
             id: pDoc.id,
             writeBatch: batch,
-            writeable: pDoc,
+            writeable: pDoc as TWriteableId,
           );
         }
         final future = batch.commit();

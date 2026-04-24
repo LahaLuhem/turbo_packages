@@ -14,8 +14,11 @@ abstract class TPostDocumentService<WRITEABLE extends TWriteableId>
   /// Creates a new [TPostDocumentService] instance.
   TPostDocumentService({
     required super.collection,
+    required super.defaultValue,
     super.apiBuilder,
+    super.initialValue,
     super.initialiseStream = true,
+    super.streamBuilder,
   });
 
   /// Called after the local state has been updated with new data.

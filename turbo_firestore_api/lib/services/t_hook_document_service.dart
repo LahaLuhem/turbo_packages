@@ -14,8 +14,11 @@ abstract class THookDocumentService<WRITEABLE extends TWriteableId>
   /// Creates a new [THookDocumentService] instance.
   THookDocumentService({
     required super.collection,
+    required super.defaultValue,
     super.apiBuilder,
-    super.initialiseStream,
+    super.initialValue,
+    super.initialiseStream = true,
+    super.streamBuilder,
   });
 
   /// Called before the local state is updated with new data.

@@ -141,7 +141,7 @@ abstract class TAuthSyncService<StreamValue> with TExceptionHandler {
   @mustCallSuper
   Future<void> dispose() async {
     _log.warning('Disposing TurboAuthSyncService!');
-    await _resetStream();
+    await _clearStream();
     _resetRetryTimer();
     _clearTokenCache();
     _nrOfRetry = 0;
@@ -316,7 +316,7 @@ abstract class TAuthSyncService<StreamValue> with TExceptionHandler {
 
   /// Resets and reinitialized the stream.
   Future<void> resetAndTryInitialiseStream() async {
-    await _resetStream();
+    await _clearStream();
     await tryInitialiseStream();
   }
 
@@ -328,7 +328,7 @@ abstract class TAuthSyncService<StreamValue> with TExceptionHandler {
   // 🏗️ HELPERS ------------------------------------------------------------------------------- \\
 
   /// Resets the stream subscriptions.
-  Future<void> _resetStream() async {
+  Future<void> _clearStream() async {
     await _userSubscription?.cancel();
     _userSubscription = null;
     await _subscription?.cancel();
@@ -355,13 +355,13 @@ abstract class TAuthSyncService<StreamValue> with TExceptionHandler {
         const Duration(seconds: 10),
         () {
           _nrOfRetry++;
-          _resetStream();
+          _clearStream();
           tryInitialiseStream();
           _retryTimer = null;
         },
       );
     } else {
-      _resetStream();
+      _clearStream();
     }
   }
 
