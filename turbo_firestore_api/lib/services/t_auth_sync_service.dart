@@ -55,15 +55,14 @@ abstract class TAuthSyncService<StreamValue> with TExceptionHandler {
     try {
       _userSubscription ??= FirebaseAuth.instance.userChanges().listen(
         (user) async {
-          final userId = user?.uid;
-          if (userId != null) {
-            cachedUserId = userId;
-            await onAuth?.call(user!);
+          if (user != null) {
+            this.user = user;
+            await onAuth?.call(user);
 
             // Ensure auth token is ready and cached before starting Firestore stream
             // This ensures Firestore security rules have access to request.auth
             try {
-              await _ensureAuthTokenReady(user!);
+              await _ensureAuthTokenReady(user);
             } catch (error, stackTrace) {
               _log.error(
                 'Failed to ensure auth token ready, proceeding anyway',
@@ -78,7 +77,7 @@ abstract class TAuthSyncService<StreamValue> with TExceptionHandler {
             await _subscription?.cancel();
             _subscription = null;
 
-            _subscription = (await stream(user!)).listen(
+            _subscription = (await stream(user)).listen(
               (value) async {
                 await onData(value, user);
               },
@@ -106,7 +105,7 @@ abstract class TAuthSyncService<StreamValue> with TExceptionHandler {
               onDone: () => onDone(_nrOfRetry, _maxNrOfRetry),
             );
           } else {
-            cachedUserId = null;
+            this.user = null;
             _clearTokenCache();
             await _subscription?.cancel();
             _subscription = null;
@@ -152,7 +151,10 @@ abstract class TAuthSyncService<StreamValue> with TExceptionHandler {
   // 🎩 STATE --------------------------------------------------------------------------------- \\
 
   /// The ID of the currently authenticated user.
-  String? cachedUserId;
+  String? get userId => user?.uid;
+
+  /// The currently authenticated Firebase user.
+  User? user;
 
   /// Cached token result with claims for the current user.
   IdTokenResult? _cachedTokenResult;

@@ -1,25 +1,23 @@
-import 'package:turbo_firestore_api/models/t_api_vars.dart';
-
 /// An abstract class that defines the core variables required for Turbo Firestore documents.
 ///
 /// [id] - The unique identifier for the document
 /// [now] - The timestamp when the document was created/updated
 /// [userId] - The ID of the user who owns/created the document
-class TAuthVars extends TApiVars {
-  const TAuthVars({
-    required super.id,
-    required super.now,
+class TVars {
+  const TVars({
+    required this.id,
+    required this.now,
     required this.userId,
   });
 
-  final String userId;
+  final String? userId;
+  final String id;
+  final DateTime now;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is TAuthVars &&
-          runtimeType == other.runtimeType &&
-          userId == other.userId;
+      other is TVars && runtimeType == other.runtimeType && userId == other.userId;
 
   @override
   int get hashCode => userId.hashCode;

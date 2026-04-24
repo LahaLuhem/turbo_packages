@@ -3,20 +3,8 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart' hide Type;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
-import 'package:turbo_firestore_api/apis/t_firestore_api.dart';
-import 'package:turbo_firestore_api/constants/t_values.dart';
-import 'package:turbo_firestore_api/exceptions/t_firestore_exception.dart';
-import 'package:turbo_firestore_api/extensions/completer_extension.dart';
-import 'package:turbo_firestore_api/extensions/t_list_extension.dart';
-import 'package:turbo_firestore_api/models/t_auth_vars.dart';
-import 'package:turbo_firestore_api/models/t_firestore_collection.dart';
-import 'package:turbo_firestore_api/services/t_auth_sync_service.dart';
-import 'package:turbo_firestore_api/typedefs/create_doc_def.dart';
-import 'package:turbo_firestore_api/typedefs/t_api_builder_def.dart';
-import 'package:turbo_firestore_api/typedefs/t_locator_def.dart';
-import 'package:turbo_firestore_api/typedefs/t_stream_builder_def.dart';
-import 'package:turbo_firestore_api/typedefs/update_doc_def.dart';
-import 'package:turbo_firestore_api/typedefs/upsert_doc_def.dart';
+import 'package:turbo_firestore_api/factories/t_api_factory.dart';
+import 'package:turbo_firestore_api/turbo_firestore_api.dart';
 import 'package:turbo_notifiers/turbo_notifiers.dart';
 import 'package:turbo_response/turbo_response.dart';
 import 'package:turbo_serializable/abstracts/t_serializable.dart';
@@ -58,8 +46,7 @@ import 'package:turbolytics/turbolytics.dart';
 /// - Automatic stream update blocking during mutations
 /// - Error handling and logging
 /// - User authentication state synchronization
-abstract class TCollectionService<WRITEABLE extends TWriteableId>
-    extends TAuthSyncService<List<WRITEABLE>>
+class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncService<List<WRITEABLE>>
     with Turbolytics {
   /// Creates a new [TCollectionService] instance.
   ///
@@ -67,7 +54,7 @@ abstract class TCollectionService<WRITEABLE extends TWriteableId>
   /// - [api] - The Firestore API instance for remote operations
   TCollectionService({
     required this.collection,
-    TApiBuilderDef<WRITEABLE>? apiBuilder,
+    TCollectionApiBuilderDef<WRITEABLE>? apiBuilder,
     TCollectionStreamBuilderDef<WRITEABLE>? streamBuilder,
     this.initialValue,
     this.defaultValue,
@@ -82,16 +69,16 @@ abstract class TCollectionService<WRITEABLE extends TWriteableId>
   final TFirestoreCollection<WRITEABLE> collection;
 
   /// Optional builder function to create the Firestore API instance. If not provided, the API will be created using the collection's `api()` method.
-  final TApiBuilderDef<WRITEABLE>? _apiBuilder;
+  final TCollectionApiBuilderDef<WRITEABLE>? _apiBuilder;
 
   /// Optional builder function to create the Firestore stream. If not provided, the stream will be created using the API's `streamAllWithConverter()` method.
   final TCollectionStreamBuilderDef<WRITEABLE>? _streamBuilder;
 
   /// Function to provide initial document value.
-  final TLocatorDef<List<WRITEABLE>>? initialValue;
+  final TCollectionValueBuilderDef<WRITEABLE>? initialValue;
 
   /// Function to provide default document value.
-  final TLocatorDef<List<WRITEABLE>>? defaultValue;
+  final TCollectionValueBuilderDef<WRITEABLE>? defaultValue;
 
   // 🎬 INIT & DISPOSE ------------------------------------------------------------------------ \\
 
@@ -134,7 +121,7 @@ abstract class TCollectionService<WRITEABLE extends TWriteableId>
       } else {
         log.debug('User is null, clearing docs');
         docsPerIdNotifier.update(
-          (defaultValue?.call() ?? []).toIdMap((element) => element.id),
+          (defaultValue?.call(vars(), collection, this) ?? []).toIdMap((element) => element.id),
         );
       }
     };
@@ -173,14 +160,19 @@ abstract class TCollectionService<WRITEABLE extends TWriteableId>
   // 🎩 STATE --------------------------------------------------------------------------------- \\
 
   /// The Firestore API instance for remote operations.
-  late final TFirestoreApi<WRITEABLE> api = _apiBuilder?.call(collection) ?? collection.api();
+  late final TFirestoreApi<WRITEABLE> api =
+      _apiBuilder?.call(user, TApiFactory<WRITEABLE>(collection: collection), this) ??
+      collection.api();
 
   /// Local state for documents, indexed by their IDs.
   @protected
   late final docsPerIdNotifier = TNotifier<Map<String, WRITEABLE>>(
-    ((initialValue?.call() ?? defaultValue?.call()) ?? []).toIdMap(
-      (element) => element.id,
-    ),
+    ((initialValue?.call(vars(), collection, this) ??
+                defaultValue?.call(vars(), collection, this)) ??
+            [])
+        .toIdMap(
+          (element) => element.id,
+        ),
     forceUpdate: true,
   );
 
@@ -191,11 +183,11 @@ abstract class TCollectionService<WRITEABLE extends TWriteableId>
   // 🧲 FETCHERS ------------------------------------------------------------------------------ \\
 
   /// Returns a new instance of [V] with basic variables filled in.
-  V turboVars<V extends TAuthVars>({String? id}) =>
-      TAuthVars(
+  V vars<V extends TVars>({String? id}) =>
+      TVars(
             id: id ?? api.genId,
             now: DateTime.now(),
-            userId: cachedUserId ?? TValues.unknownId,
+            userId: userId ?? TValues.unknownId,
           )
           as V;
 
@@ -284,7 +276,7 @@ abstract class TCollectionService<WRITEABLE extends TWriteableId>
     log.debug('Updating local doc with id: $id');
     final pDoc = doc(
       findById(id),
-      turboVars(id: id),
+      vars(id: id),
     );
     docsPerIdNotifier.updateCurrent(
       (value) => value
@@ -309,7 +301,7 @@ abstract class TCollectionService<WRITEABLE extends TWriteableId>
     bool doNotifyListeners = true,
   }) {
     final pDoc = doc(
-      turboVars(),
+      vars(),
     );
     log.debug('Creating local doc with id: ${pDoc.id}');
     docsPerIdNotifier.updateCurrent(
@@ -413,7 +405,7 @@ abstract class TCollectionService<WRITEABLE extends TWriteableId>
     bool doNotifyListeners = true,
   }) {
     log.debug('Upserting local doc with id: $id');
-    final pDoc = doc(tryFindById(id), turboVars(id: id));
+    final pDoc = doc(tryFindById(id), vars(id: id));
     docsPerIdNotifier.updateCurrent(
       (value) => value..[pDoc.id] = pDoc,
       doNotifyListeners: doNotifyListeners,

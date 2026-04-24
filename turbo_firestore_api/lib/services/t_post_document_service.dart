@@ -1,16 +1,16 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:turbo_firestore_api/services/t_document_service.dart';
+import 'package:turbo_firestore_api/services/t_doc_service.dart';
 import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
 
 /// A document service that allows notification after synchronizing data.
 ///
-/// Extends [TDocumentService] to provide a hook for notifying after
+/// Extends [TDocService] to provide a hook for notifying after
 /// the local state has been updated with new data from Firestore.
 ///
 /// Type Parameters:
 /// - [WRITEABLE] - The document type, must extend [TWriteableId]
 abstract class TPostDocumentService<WRITEABLE extends TWriteableId>
-    extends TDocumentService<WRITEABLE> {
+    extends TDocService<WRITEABLE> {
   /// Creates a new [TPostDocumentService] instance.
   TPostDocumentService({
     required super.collection,

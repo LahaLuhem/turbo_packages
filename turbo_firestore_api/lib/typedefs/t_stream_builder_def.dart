@@ -8,3 +8,10 @@ typedef TCollectionStreamBuilderDef<T extends TWriteableId> =
       TFirestoreApi<T> api,
       TCollectionService<T> service,
     );
+
+typedef TDocStreamBuilderDef<T extends TWriteableId> =
+    Stream<T?> Function(
+      User user,
+      TFirestoreApi<T> api,
+      TDocService<T> service,
+    );

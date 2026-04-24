@@ -8,7 +8,6 @@ import 'package:turbo_firestore_api/enums/t_timestamp_type.dart';
 import 'package:turbo_firestore_api/exceptions/invalid_json_exception.dart';
 import 'package:turbo_firestore_api/exceptions/t_firestore_exception.dart';
 import 'package:turbo_firestore_api/extensions/t_map_extension.dart';
-import 'package:turbo_firestore_api/models/t_api_vars.dart';
 import 'package:turbo_firestore_api/models/t_sensitive_data.dart';
 import 'package:turbo_firestore_api/models/t_write_batch_with_reference.dart';
 import 'package:turbo_firestore_api/typedefs/collection_reference_def.dart';
@@ -133,15 +132,6 @@ abstract class _TFirestoreApiBase<T> {
   // 🎩 STATE --------------------------------------------------------------------------------- \\
   // 🛠 UTIL ---------------------------------------------------------------------------------- \\
   // 🧲 FETCHERS ------------------------------------------------------------------------------ \\
-
-  /// Returns a new instance of [V] with basic variables filled in.
-  V turboVars<V extends TApiVars>() {
-    return TApiVars(
-          id: genId,
-          now: DateTime.now(),
-        )
-        as V;
-  }
 
   /// Helper method to fetch a [WriteBatch] from [_firebaseFirestore]..
   WriteBatch get writeBatch => _firebaseFirestore.batch();
