@@ -8,9 +8,12 @@ import 'package:turbo_firestore_api/enums/t_timestamp_type.dart';
 import 'package:turbo_firestore_api/exceptions/invalid_json_exception.dart';
 import 'package:turbo_firestore_api/exceptions/t_firestore_exception.dart';
 import 'package:turbo_firestore_api/extensions/t_map_extension.dart';
+import 'package:turbo_firestore_api/models/t_firestore_collection.dart';
 import 'package:turbo_firestore_api/models/t_sensitive_data.dart';
+import 'package:turbo_firestore_api/models/t_vars.dart';
 import 'package:turbo_firestore_api/models/t_write_batch_with_reference.dart';
 import 'package:turbo_firestore_api/typedefs/collection_reference_def.dart';
+import 'package:turbo_firestore_api/typedefs/t_value_builder_def.dart';
 import 'package:turbo_firestore_api/util/t_firestore_logger.dart';
 import 'package:turbo_response/turbo_response.dart';
 import 'package:turbo_serializable/abstracts/t_writeable.dart';
@@ -31,6 +34,7 @@ abstract class _TFirestoreApiBase<T> {
   _TFirestoreApiBase({
     required FirebaseFirestore firebaseFirestore,
     required String Function() collectionPath,
+    required this.defaultValueBuilder,
     Map<String, dynamic> Function(T value)? toJson,
     T Function(Map<String, dynamic> json)? fromJson,
     T Function(Map<String, dynamic> json)? fromJsonError,
@@ -73,6 +77,9 @@ abstract class _TFirestoreApiBase<T> {
 
   /// Used to deserialize your data to JSON when using 'WithConverter' methods.
   final T Function(Map<String, dynamic> json)? _fromJson;
+
+  /// Used to provide a default value.
+  final TValueBuilder<T> defaultValueBuilder;
 
   /// Used to deserialize your data to JSON when using 'WithConverter' methods and a data error occurs.
   ///
@@ -457,6 +464,7 @@ class TFirestoreApi<T extends TWriteable> extends _TFirestoreApiBase<T>
   TFirestoreApi({
     required super.firebaseFirestore,
     required super.collectionPath,
+    required super.defaultValueBuilder,
     super.toJson,
     super.fromJson,
     super.fromJsonError,

@@ -18,3 +18,5 @@ typedef TDocValueBuilderDef<WRITEABLE extends TWriteableId> =
       TFirestoreCollection<WRITEABLE> collection,
       TDocService<WRITEABLE> service,
     );
+
+typedef TValueBuilder<T> = T Function(TVars vars);

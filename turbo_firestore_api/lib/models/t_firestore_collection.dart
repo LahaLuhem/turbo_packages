@@ -8,6 +8,7 @@ class TFirestoreCollection<WRITEABLE extends TWriteableId> {
     required this.collectionName,
     required this.fromJson,
     required this.toJson,
+    required this.defaultValueBuilder,
     this.createdAtFieldName = TFirestoreApiDefaults.createdAtFieldName,
     this.documentReferenceFieldName = TFirestoreApiDefaults.documentReferenceFieldName,
     this.fromJsonError,
@@ -30,6 +31,7 @@ class TFirestoreCollection<WRITEABLE extends TWriteableId> {
   final bool isCollectionGroup;
   final bool tryAddLocalDocumentReference;
   final bool tryAddLocalId;
+  final TValueBuilder<WRITEABLE> defaultValueBuilder;
 
   TFirestoreApi<WRITEABLE> api({
     FirebaseFirestore? firebaseFirestore,
@@ -38,6 +40,7 @@ class TFirestoreCollection<WRITEABLE extends TWriteableId> {
     TFirestoreLogger? logger,
     bool? isCollectionGroup,
   }) => TFirestoreApi<WRITEABLE>(
+    defaultValueBuilder: defaultValueBuilder,
     collectionPath: () => path?.call(collectionName) ?? collectionName,
     createdAtFieldName: createdAtFieldName,
     documentReferenceFieldName: documentReferenceFieldName,
@@ -70,7 +73,7 @@ class TFirestoreCollection<WRITEABLE extends TWriteableId> {
   );
 
   TDocService<WRITEABLE> docService({
-    required TDocValueBuilderDef<WRITEABLE> defaultValue,
+    TDocValueBuilderDef<WRITEABLE>? defaultValue,
     TDocApiBuilderDef<WRITEABLE>? apiBuilder,
     TDocStreamBuilderDef<WRITEABLE>? streamBuilder,
     TDocValueBuilderDef<WRITEABLE>? initialValue,

@@ -4,7 +4,6 @@ import 'package:turbo_serializable/abstracts/t_writeable.dart';
 ///
 /// This abstract class extends [TWriteable] and adds a requirement for a
 /// string-based unique identifier. It provides a simpler alternative to
-/// [TWriteableCustomId] when you only need string IDs.
 ///
 /// Example:
 /// ```dart

@@ -41,7 +41,6 @@ library;
 
 /// Abstracts
 /// Main API class and extensions
-export 'apis/t_dummy_firestore_api.dart';
 export 'apis/t_firestore_api.dart';
 /// Constants
 export 'constants/t_auth_errors.dart';
