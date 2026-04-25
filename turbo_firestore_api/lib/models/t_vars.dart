@@ -9,14 +9,14 @@ class TVars {
     required this.now,
     required this.userId,
     required this.defaultId,
-    required this.unknownIdFallback,
+    required this.unknownId,
   });
 
   final String? userId;
   final String id;
   final DateTime now;
   final String defaultId;
-  final String unknownIdFallback;
+  final String unknownId;
 
   @override
   bool operator ==(Object other) =>

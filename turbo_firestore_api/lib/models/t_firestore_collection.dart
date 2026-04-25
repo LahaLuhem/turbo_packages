@@ -46,7 +46,7 @@ class TFirestoreCollection<WRITEABLE extends TWriteableId> {
   }) => TFirestoreApi<WRITEABLE>(
     userIdFieldName: userIdFieldName,
     defaultId: defaultId,
-    unknownIdFallback: unknownIdFallback,
+    unknownId: unknownIdFallback,
     collectionPath: () => path?.call(collectionName) ?? collectionName,
     createdAtFieldName: createdAtFieldName,
     documentReferenceFieldName: documentReferenceFieldName,

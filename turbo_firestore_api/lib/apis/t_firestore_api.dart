@@ -44,7 +44,7 @@ abstract class _TFirestoreApiBase<T> {
     bool isCollectionGroup = TFirestoreApiDefaults.isCollectionGroup,
     bool tryAddLocalDocumentReference = TFirestoreApiDefaults.tryAddLocalDocumentReference,
     GetOptions? getOptions,
-    this.unknownIdFallback = TFirestoreApiDefaults.unknownIdFallback,
+    this.unknownId = TFirestoreApiDefaults.unknownIdFallback,
     this.defaultId = TFirestoreApiDefaults.defaultId,
   }) : _firebaseFirestore = firebaseFirestore,
        _collectionPath = collectionPath,
@@ -122,7 +122,7 @@ abstract class _TFirestoreApiBase<T> {
   final String userIdFieldName;
 
   /// Used to provide an unknown id for unknown objects.
-  final String unknownIdFallback;
+  final String unknownId;
 
   /// Used to provide a default id for default objects.
   final String defaultId;
@@ -479,6 +479,6 @@ class TFirestoreApi<T extends TWriteable> extends _TFirestoreApiBase<T>
     super.getOptions,
     super.userIdFieldName,
     super.defaultId,
-    super.unknownIdFallback,
+    super.unknownId,
   });
 }
