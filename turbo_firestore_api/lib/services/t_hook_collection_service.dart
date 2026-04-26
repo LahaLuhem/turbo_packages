@@ -60,7 +60,7 @@ abstract class THookCollectionService<WRITEABLE extends TWriteableId>
       if (user != null) {
         log.debug('Updating docs for user ${user.uid}');
         await beforeSyncNotifyUpdate(docs);
-        this.docs.update(TIdDocs(docs));
+        docsNotifier.update(TIdDocs(docs));
         markAsReady();
         await afterSyncNotifyUpdate(docs);
         log.debug('Updated ${docs.length} docs');

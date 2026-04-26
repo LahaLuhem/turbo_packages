@@ -9,10 +9,10 @@ import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
 ///
 /// Type Parameters:
 /// - [WRITEABLE] - The document type, must extend [TWriteableId]
-abstract class TPreDocumentService<WRITEABLE extends TWriteableId>
+abstract class TPreDocService<WRITEABLE extends TWriteableId>
     extends TDocService<WRITEABLE> {
-  /// Creates a new [TPreDocumentService] instance.
-  TPreDocumentService({
+  /// Creates a new [TPreDocService] instance.
+  TPreDocService({
     required super.collection,
     required super.defaultValue,
     super.apiBuilder,

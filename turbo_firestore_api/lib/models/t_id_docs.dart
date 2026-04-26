@@ -1,6 +1,7 @@
 import 'package:turbo_firestore_api/extensions/t_list_extension.dart';
 import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
 
+// TODO(brian): Add option to create several lists with indexes, sort and filter options per list and to dispose them - always keeping all data in sync | 26/04/2026
 class TIdDocs<T extends TWriteableId> {
   TIdDocs(this.values) : _idMap = values.toIdIndexMap();
 
@@ -41,4 +42,6 @@ class TIdDocs<T extends TWriteableId> {
     values[index] = newValue;
     return newValue;
   }
+
+  int get length => values.length;
 }

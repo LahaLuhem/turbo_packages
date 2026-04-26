@@ -76,7 +76,7 @@ export 'services/t_collection_service.dart';
 export 'services/t_doc_service.dart';
 export 'services/t_hook_collection_service.dart';
 export 'services/t_post_collection_service.dart';
-export 'services/t_post_document_service.dart';
+export 'services/t_post_doc_service.dart';
 export 'services/t_pre_collection_service.dart';
 export 'services/t_pre_document_service.dart';
 /// Type definitions

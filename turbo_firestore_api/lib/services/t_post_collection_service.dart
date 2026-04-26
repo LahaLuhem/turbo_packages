@@ -50,7 +50,7 @@ abstract class TPostCollectionService<WRITEABLE extends TWriteableId>
       final docs = value ?? defaultValues();
       if (user != null) {
         log.debug('Updating docs for user ${user.uid}');
-        this.docs.update(TIdDocs(docs));
+        docsNotifier.update(TIdDocs(docs));
         markAsReady();
         await afterSyncNotifyUpdate(docs);
         log.debug('Updated ${docs.length} docs');

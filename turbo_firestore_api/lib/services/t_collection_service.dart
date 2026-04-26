@@ -93,7 +93,7 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
   /// if not already completed. Then calls the parent dispose method.
   @override
   Future<void> dispose() {
-    docs.dispose();
+    docsNotifier.dispose();
     _isReady.completeIfNotComplete();
     return super.dispose();
   }
@@ -118,9 +118,9 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
       final docs = value ?? defaultValues();
       if (user != null) {
         log.debug('Updating docs for user ${user.uid}');
-        this.docs.update(TIdDocs(docs));
+        docsNotifier.update(TIdDocs(docs));
         _isReady.completeIfNotComplete();
-        log.debug('Updated ${docs.length} docs');
+        log.debug('Updated ${docsNotifier.value.length} docs');
       } else {
         log.debug('User is null, clearing docs');
         resetLocalDocs();
@@ -167,7 +167,7 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
 
   /// Local state for documents, indexed by their IDs.
   @protected
-  late final docs = TNotifier<TIdDocs<WRITEABLE>>(
+  late final docsNotifier = TNotifier<TIdDocs<WRITEABLE>>(
     initialDocs(),
     forceUpdate: true,
   );
@@ -189,20 +189,23 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
           )
           as V;
 
-  /// Value listenable for the document collection state.
-  ValueListenable<TIdDocs<WRITEABLE>> get docsPerId => docs;
+  @Deprecated('Use TCollectionService.docs')
+  ValueListenable<TIdDocs<WRITEABLE>> get docsPerId => docsNotifier;
+
+  /// A listenable that provides the current documents indexed by their IDs.
+  ValueListenable<TIdDocs<WRITEABLE>> get docs => docsNotifier;
 
   /// Whether the collection has any documents.
-  bool get hasDocs => docs.value.isNotEmpty;
+  bool get hasDocs => docsNotifier.value.isNotEmpty;
 
   /// Whether a document with the given ID exists.
-  bool exists(String id) => docs.value.exists(id);
+  bool exists(String id) => docsNotifier.value.exists(id);
 
   /// Finds a document by its ID. Throws if not found.
-  WRITEABLE findById(String id) => docs.value.get(id)!;
+  WRITEABLE findById(String id) => docsNotifier.value.get(id)!;
 
   /// Finds a document by its ID. Returns null if not found.
-  WRITEABLE? tryFindById(String? id) => docs.value.get(id);
+  WRITEABLE? tryFindById(String? id) => docsNotifier.value.get(id);
 
   /// Future that completes when the service is ready to use.
   Future<void> get isReady => _isReady.future;
@@ -228,7 +231,7 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
   /// Resets the local documents to their initial value.
   void resetLocalDocs({bool doNotifyListeners = true}) {
     log.debug('Resetting local docs to initial value');
-    docs.update(
+    docsNotifier.update(
       initialDocs(),
       doNotifyListeners: doNotifyListeners,
     );
@@ -237,14 +240,14 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
   /// Clears all documents from local state.
   void clearLocalDocs({bool doNotifyListeners = true}) {
     log.debug('Clearing all local docs');
-    docs.update(
+    docsNotifier.update(
       TIdDocs.empty(),
       doNotifyListeners: doNotifyListeners,
     );
   }
 
   /// Forces a rebuild of the local state.
-  void rebuild() => docs.rebuild();
+  void rebuild() => docsNotifier.rebuild();
 
   /// Deletes a document from local state.
   ///
@@ -257,7 +260,7 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
     bool doNotifyListeners = true,
   }) {
     log.debug('Deleting local doc with id: $id');
-    docs.updateCurrent(
+    docsNotifier.updateCurrent(
       (value) => value..remove(id),
       doNotifyListeners: doNotifyListeners,
     );
@@ -277,7 +280,7 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
     for (final id in ids) {
       deleteLocalDoc(id: id, doNotifyListeners: false);
     }
-    if (doNotifyListeners) docs.rebuild();
+    if (doNotifyListeners) docsNotifier.rebuild();
   }
 
   /// Updates an existing document in local state.
@@ -297,7 +300,7 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
       findById(id),
       vars(id: id),
     );
-    docs.updateCurrent(
+    docsNotifier.updateCurrent(
       (value) => value
         ..update(
           pDoc,
@@ -322,7 +325,7 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
       vars(),
     );
     log.debug('Creating local doc with id: ${pDoc.id}');
-    docs.updateCurrent(
+    docsNotifier.updateCurrent(
       (value) => value..update(pDoc),
       doNotifyListeners: doNotifyListeners,
     );
@@ -347,7 +350,7 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
       final pDoc = updateLocalDoc(id: id, doc: doc, doNotifyListeners: false);
       pDocs.add(pDoc);
     }
-    if (doNotifyListeners) docs.rebuild();
+    if (doNotifyListeners) docsNotifier.rebuild();
     return pDocs;
   }
 
@@ -362,13 +365,13 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
     required List<CreateDocDef<WRITEABLE>> docs,
     bool doNotifyListeners = true,
   }) {
-    log.debug('Creating ${docs.length} local docs');
+    log.debug('Creating ${docsNotifier.value.length} local docs');
     final pDocs = <WRITEABLE>[];
     for (final doc in docs) {
       final pDoc = createLocalDoc(doc: doc, doNotifyListeners: false);
       pDocs.add(pDoc);
     }
-    if (doNotifyListeners) this.docs.rebuild();
+    if (doNotifyListeners) docsNotifier.rebuild();
     return pDocs;
   }
 
@@ -400,7 +403,7 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
       );
       pDocs.add(pDoc);
     }
-    if (doNotifyListeners) docs.rebuild();
+    if (doNotifyListeners) docsNotifier.rebuild();
     return pDocs;
   }
 
@@ -424,7 +427,7 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
   }) {
     log.debug('Upserting local doc with id: $id');
     final pDoc = doc(tryFindById(id), vars(id: id));
-    docs.updateCurrent(
+    docsNotifier.updateCurrent(
       (value) => value..update(pDoc),
       doNotifyListeners: doNotifyListeners,
     );
