@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart' hide Type;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:turbo_firestore_api/factories/t_api_factory.dart';
+import 'package:turbo_firestore_api/models/t_id_docs.dart';
 import 'package:turbo_firestore_api/turbo_firestore_api.dart';
 import 'package:turbo_notifiers/turbo_notifiers.dart';
 import 'package:turbo_response/turbo_response.dart';
@@ -88,11 +89,11 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
 
   /// Disposes of the service by cleaning up resources.
   ///
-  /// Disposes the [docsPerIdNotifier] TNotifier and completes the [_isReady] completer
+  /// Disposes the [docs] TNotifier and completes the [_isReady] completer
   /// if not already completed. Then calls the parent dispose method.
   @override
   Future<void> dispose() {
-    docsPerIdNotifier.dispose();
+    docs.dispose();
     _isReady.completeIfNotComplete();
     return super.dispose();
   }
@@ -114,19 +115,15 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
   @override
   Future<void> Function(List<WRITEABLE>? value, User? user) get onData {
     return (value, user) async {
-      final docs = value ?? [];
+      final docs = value ?? defaultValues();
       if (user != null) {
         log.debug('Updating docs for user ${user.uid}');
-        docsPerIdNotifier.update(
-          docs.toIdMap((element) => element.id),
-        );
+        this.docs.update(TIdDocs(docs));
         _isReady.completeIfNotComplete();
         log.debug('Updated ${docs.length} docs');
       } else {
         log.debug('User is null, clearing docs');
-        docsPerIdNotifier.update(
-          (defaultValue?.call(vars(), collection, this) ?? []).toIdMap((element) => element.id),
-        );
+        resetLocalDocs();
       }
     };
   }
@@ -170,13 +167,8 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
 
   /// Local state for documents, indexed by their IDs.
   @protected
-  late final docsPerIdNotifier = TNotifier<Map<String, WRITEABLE>>(
-    ((initialValue?.call(vars(), collection, this) ??
-                defaultValue?.call(vars(), collection, this)) ??
-            [])
-        .toIdMap(
-          (element) => element.id,
-        ),
+  late final docs = TNotifier<TIdDocs<WRITEABLE>>(
+    initialDocs(),
     forceUpdate: true,
   );
 
@@ -198,40 +190,61 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
           as V;
 
   /// Value listenable for the document collection state.
-  ValueListenable<Map<String, WRITEABLE>> get docsPerId => docsPerIdNotifier;
+  ValueListenable<TIdDocs<WRITEABLE>> get docsPerId => docs;
 
   /// Whether the collection has any documents.
-  bool get hasDocs => docsPerIdNotifier.value.isNotEmpty;
+  bool get hasDocs => docs.value.isNotEmpty;
 
   /// Whether a document with the given ID exists.
-  bool exists(String id) => docsPerIdNotifier.value.containsKey(id);
+  bool exists(String id) => docs.value.exists(id);
 
   /// Finds a document by its ID. Throws if not found.
-  WRITEABLE findById(String id) => docsPerIdNotifier.value[id]!;
+  WRITEABLE findById(String id) => docs.value.get(id)!;
 
   /// Finds a document by its ID. Returns null if not found.
-  WRITEABLE? tryFindById(String? id) => docsPerIdNotifier.value[id];
+  WRITEABLE? tryFindById(String? id) => docs.value.get(id);
 
   /// Future that completes when the service is ready to use.
   Future<void> get isReady => _isReady.future;
 
   /// Listenable for the document collection state.
-  Listenable get listenable => docsPerIdNotifier;
+  Listenable get listenable => docs;
 
   // 🏗️ HELPERS ------------------------------------------------------------------------------- \\
+
+  @protected
+  TIdDocs<WRITEABLE> initialDocs() => TIdDocs(
+    initialValues() ?? defaultValues(),
+  );
+
+  @protected
+  List<WRITEABLE>? initialValues() => initialValue?.call(vars(), collection, this);
+
+  @protected
+  List<WRITEABLE> defaultValues() => defaultValue?.call(vars(), collection, this) ?? [];
+
   // ⚙️ LOCAL MUTATORS ------------------------------------------------------------------------ \\
+
+  /// Resets the local documents to their initial value.
+  void resetLocalDocs({bool doNotifyListeners = true}) {
+    log.debug('Resetting local docs to initial value');
+    docs.update(
+      initialDocs(),
+      doNotifyListeners: doNotifyListeners,
+    );
+  }
 
   /// Clears all documents from local state.
   void clearLocalDocs({bool doNotifyListeners = true}) {
     log.debug('Clearing all local docs');
-    docsPerIdNotifier.update(
-      {},
+    docs.update(
+      TIdDocs.empty(),
       doNotifyListeners: doNotifyListeners,
     );
   }
 
   /// Forces a rebuild of the local state.
-  void rebuild() => docsPerIdNotifier.rebuild();
+  void rebuild() => docs.rebuild();
 
   /// Deletes a document from local state.
   ///
@@ -244,7 +257,7 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
     bool doNotifyListeners = true,
   }) {
     log.debug('Deleting local doc with id: $id');
-    docsPerIdNotifier.updateCurrent(
+    docs.updateCurrent(
       (value) => value..remove(id),
       doNotifyListeners: doNotifyListeners,
     );
@@ -264,7 +277,7 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
     for (final id in ids) {
       deleteLocalDoc(id: id, doNotifyListeners: false);
     }
-    if (doNotifyListeners) docsPerIdNotifier.rebuild();
+    if (doNotifyListeners) docs.rebuild();
   }
 
   /// Updates an existing document in local state.
@@ -284,11 +297,10 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
       findById(id),
       vars(id: id),
     );
-    docsPerIdNotifier.updateCurrent(
+    docs.updateCurrent(
       (value) => value
         ..update(
-          pDoc.id,
-          (_) => pDoc,
+          pDoc,
         ),
       doNotifyListeners: doNotifyListeners,
     );
@@ -310,8 +322,8 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
       vars(),
     );
     log.debug('Creating local doc with id: ${pDoc.id}');
-    docsPerIdNotifier.updateCurrent(
-      (value) => value..[pDoc.id] = pDoc,
+    docs.updateCurrent(
+      (value) => value..update(pDoc),
       doNotifyListeners: doNotifyListeners,
     );
     return pDoc;
@@ -335,7 +347,7 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
       final pDoc = updateLocalDoc(id: id, doc: doc, doNotifyListeners: false);
       pDocs.add(pDoc);
     }
-    if (doNotifyListeners) docsPerIdNotifier.rebuild();
+    if (doNotifyListeners) docs.rebuild();
     return pDocs;
   }
 
@@ -356,7 +368,7 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
       final pDoc = createLocalDoc(doc: doc, doNotifyListeners: false);
       pDocs.add(pDoc);
     }
-    if (doNotifyListeners) docsPerIdNotifier.rebuild();
+    if (doNotifyListeners) this.docs.rebuild();
     return pDocs;
   }
 
@@ -388,7 +400,7 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
       );
       pDocs.add(pDoc);
     }
-    if (doNotifyListeners) docsPerIdNotifier.rebuild();
+    if (doNotifyListeners) docs.rebuild();
     return pDocs;
   }
 
@@ -412,8 +424,8 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
   }) {
     log.debug('Upserting local doc with id: $id');
     final pDoc = doc(tryFindById(id), vars(id: id));
-    docsPerIdNotifier.updateCurrent(
-      (value) => value..[pDoc.id] = pDoc,
+    docs.updateCurrent(
+      (value) => value..update(pDoc),
       doNotifyListeners: doNotifyListeners,
     );
     return pDoc;

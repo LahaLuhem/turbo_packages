@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:turbo_firestore_api/extensions/t_list_extension.dart';
+import 'package:turbo_firestore_api/models/t_id_docs.dart';
 import 'package:turbo_firestore_api/services/t_collection_service.dart';
 import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
 
@@ -46,20 +47,16 @@ abstract class TPostCollectionService<WRITEABLE extends TWriteableId>
   @override
   Future<void> Function(List<WRITEABLE>? value, User? user) get onData {
     return (value, user) async {
-      final docs = value ?? [];
+      final docs = value ?? defaultValues();
       if (user != null) {
         log.debug('Updating docs for user ${user.uid}');
-        docsPerIdNotifier.update(
-          docs.toIdMap((element) => element.id),
-        );
+        this.docs.update(TIdDocs(docs));
         markAsReady();
         await afterSyncNotifyUpdate(docs);
         log.debug('Updated ${docs.length} docs');
       } else {
         log.debug('User is null, clearing docs');
-        docsPerIdNotifier.update(
-          {},
-        );
+        resetLocalDocs();
         await afterSyncNotifyUpdate([]);
       }
     };
