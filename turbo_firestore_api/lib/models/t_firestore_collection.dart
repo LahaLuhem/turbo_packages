@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:turbo_firestore_api/abstracts/t_firestore_cache_service.dart';
 import 'package:turbo_firestore_api/turbo_firestore_api.dart';
 import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
 
@@ -19,6 +20,7 @@ class TFirestoreCollection<WRITEABLE extends TWriteableId> {
     this.defaultId = TFirestoreApiDefaults.defaultId,
     this.unknownIdFallback = TFirestoreApiDefaults.unknownIdFallback,
     this.userIdFieldName = TFirestoreApiDefaults.userIdFieldName,
+    this.firestoreCacheService,
   });
 
   final Map<String, dynamic> Function(WRITEABLE value) toJson;
@@ -36,6 +38,7 @@ class TFirestoreCollection<WRITEABLE extends TWriteableId> {
   final bool isCollectionGroup;
   final bool tryAddLocalDocumentReference;
   final bool tryAddLocalId;
+  final TFirestoreCacheService? firestoreCacheService;
 
   TFirestoreApi<WRITEABLE> api({
     FirebaseFirestore? firebaseFirestore,
@@ -44,6 +47,7 @@ class TFirestoreCollection<WRITEABLE extends TWriteableId> {
     TFirestoreLogger? logger,
     bool? isCollectionGroup,
   }) => TFirestoreApi<WRITEABLE>(
+    firestoreCache: firestoreCacheService != null ? TFirestoreCache(firestoreCacheService: firestoreCacheService!) : null,
     userIdFieldName: userIdFieldName,
     defaultId: defaultId,
     unknownId: unknownIdFallback,

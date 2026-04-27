@@ -490,5 +490,6 @@ class TFirestoreApi<T extends TWriteable> extends _TFirestoreApiBase<T>
     super.userIdFieldName,
     super.defaultId,
     super.unknownId,
+    super.firestoreCache,
   });
 }
