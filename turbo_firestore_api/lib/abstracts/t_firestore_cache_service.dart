@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:turbo_firestore_api/dtos/t_cached_query.dart';
 import 'package:turbo_firestore_api/extensions/completer_extension.dart';
 import 'package:turbo_firestore_api/models/t_firestore_collection.dart';
+import 'package:turbo_response/turbo_response.dart';
 import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
 import 'package:turbolytics/turbolytics.dart';
 
@@ -56,7 +57,7 @@ class TFirestoreCache<
     required String id,
   }) async {
     await _firestoreCacheService.isReady;
-    final cachedQuery = await _firestoreCacheService.getCachedQuery(id + '@' + path);
+    final cachedQuery = await _firestoreCacheService.getCachedQuery(_genId(id, path));
     if (cachedQuery == null) return null;
     if (cachedQuery.docIds.isEmpty) {
       TLog(location: 'TFirestoreCache').warning(
@@ -94,14 +95,14 @@ class TFirestoreCache<
   }
 
   FutureOr<void> _deleteCachedDoc(String id, String path) =>
-      _firestoreCacheService.delete(id + '@' + path);
+      _firestoreCacheService.delete(_genId(id, path));
 
   Future<List<WRITEABLE>?> list({
     required String path,
     required String query,
   }) async {
     await _firestoreCacheService.isReady;
-    final cachedQuery = await _firestoreCacheService.getCachedQuery(query + '@' + path);
+    final cachedQuery = await _firestoreCacheService.getCachedQuery(_genId(query, path));
     if (cachedQuery == null) return null;
     if (cachedQuery.docIds.isEmpty) {
       TLog(location: 'TFirestoreCache').warning(
@@ -129,6 +130,41 @@ class TFirestoreCache<
     }
     return results;
   }
+
+  Future<TurboResponse> saveDoc({
+    required String id,
+    required String path,
+    required WRITEABLE doc,
+  }) => saveQuery(
+    query: id,
+    path: path,
+    docs: [doc],
+  );
+
+  Future<TurboResponse> saveQuery({
+    required String query,
+    required String path,
+    required List<WRITEABLE> docs,
+  }) async {
+    await _firestoreCacheService.isReady;
+    final docIds = <String>{};
+    for (final doc in docs) {
+      final id = doc.id;
+      await _firestoreCacheService.write(id, collection.toJson(doc));
+      docIds.add(id);
+    }
+    final now = DateTime.now();
+    final cachedQuery = TCachedQuery(
+      query: _genId(query, path),
+      docIds: docIds,
+      createdAt: now,
+      updatedAt: now,
+    );
+    await _firestoreCacheService.writeCachedQuery(cachedQuery: cachedQuery);
+    return const TurboResponse.successAsBool();
+  }
+
+  String _genId(String id, String path) => id + '@' + path;
 }
 
 abstract class TFirestoreCacheService {
