@@ -63,7 +63,7 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
     this.initialValue,
     this.defaultValue,
     super.initialiseStream = true,
-    this.cacheService,
+    this.firestoreCacheService,
   });
 
   // 📍 LOCATOR ------------------------------------------------------------------------------- \\
@@ -91,7 +91,7 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
 
   @protected
   /// Optional Firestore cache service for caching document data locally.
-  final IFirestoreCacheService? cacheService;
+  final IFirestoreCacheService? firestoreCacheService;
 
   // 🎬 INIT & DISPOSE ------------------------------------------------------------------------ \\
 
@@ -170,8 +170,16 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
 
   /// The Firestore API instance for remote operations.
   late final TFirestoreApi<WRITEABLE> api =
-      apiBuilder?.call(user, TApiFactory<WRITEABLE>(collection: collection), this) ??
-      collection.api();
+      apiBuilder?.call(
+        user,
+        TApiFactory<WRITEABLE>(collection: collection),
+        this,
+        firestoreCacheService,
+      ) ??
+      collection.api(
+        firestoreCacheService: firestoreCacheService,
+        isCollectionGroup: collection.isCollectionGroup,
+      );
 
   /// Local state for documents, indexed by their IDs.
   @protected

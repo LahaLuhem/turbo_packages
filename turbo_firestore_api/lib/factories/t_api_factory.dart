@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:turbo_firestore_api/abstracts/i_firestore_cache_service.dart';
 import 'package:turbo_firestore_api/apis/t_firestore_api.dart';
 import 'package:turbo_firestore_api/models/t_firestore_collection.dart';
 import 'package:turbo_firestore_api/util/t_firestore_logger.dart';
@@ -15,8 +16,10 @@ class TApiFactory<WRITEABLE extends TWriteableId> {
     String Function(String collectionName)? path,
     TFirestoreLogger? logger,
     bool? isCollectionGroup,
+    IFirestoreCacheService? firestoreCacheService,
   }) => _collection.api(
     firebaseFirestore: firebaseFirestore,
+    firestoreCacheService: firestoreCacheService,
     getOptions: getOptions,
     isCollectionGroup: isCollectionGroup,
     logger: logger,

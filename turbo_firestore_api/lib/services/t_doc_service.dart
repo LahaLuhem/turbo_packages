@@ -40,7 +40,7 @@ class TDocService<WRITEABLE extends TWriteableId> extends TAuthSyncService<WRITE
     required this.collection,
     super.initialiseStream = true,
     this.initialValue,
-    this.cacheService,
+    this.firestoreCacheService,
     this.afterLocalNotifyUpdate,
     this.beforeLocalNotifyUpdate,
   });
@@ -70,7 +70,7 @@ class TDocService<WRITEABLE extends TWriteableId> extends TAuthSyncService<WRITE
 
   @protected
   /// Optional Firestore cache service for caching document data locally.
-  final IFirestoreCacheService? cacheService;
+  final IFirestoreCacheService? firestoreCacheService;
 
   // 🎬 INIT & DISPOSE ------------------------------------------------------------------------ \\
 
@@ -172,8 +172,16 @@ class TDocService<WRITEABLE extends TWriteableId> extends TAuthSyncService<WRITE
 
   /// The Firestore API instance for remote operations.
   late final TFirestoreApi<WRITEABLE> api =
-      apiBuilder?.call(user, TApiFactory<WRITEABLE>(collection: collection), this) ??
-      collection.api();
+      apiBuilder?.call(
+        user,
+        TApiFactory<WRITEABLE>(collection: collection),
+        this,
+        firestoreCacheService,
+      ) ??
+      collection.api(
+        firestoreCacheService: firestoreCacheService,
+        isCollectionGroup: collection.isCollectionGroup,
+      );
 
   /// Local state for the document.
   late final _doc = TNotifier<WRITEABLE>(
