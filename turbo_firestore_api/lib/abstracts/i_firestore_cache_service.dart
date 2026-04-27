@@ -172,8 +172,8 @@ abstract class IFirestoreCacheService {
   FutureOr<Map<String, dynamic>?> read(String id);
   FutureOr<void> delete(String id);
 
-  Future<void> Function()? get onInit;
-  Future<void> Function()? get onDispose;
+  Future<void> Function()? get onInit => null;
+  Future<void> Function()? get onDispose => null;
 
   // 🎩 STATE --------------------------------------------------------------------------------- \\
 
