@@ -155,13 +155,13 @@ abstract class IFirestoreCacheService {
 
   @mustCallSuper
   Future<void> initialise() async {
-    await onInit();
+    await onInit?.call();
     _isReady.completeIfNotComplete();
   }
 
   @mustCallSuper
   Future<void> dispose() async {
-    await onDispose();
+    await onDispose?.call();
     _isReady = Completer();
   }
 
@@ -172,8 +172,8 @@ abstract class IFirestoreCacheService {
   FutureOr<Map<String, dynamic>?> read(String id);
   FutureOr<void> delete(String id);
 
-  Future<void> onInit();
-  Future<void> onDispose();
+  Future<void> Function()? get onInit;
+  Future<void> Function()? get onDispose;
 
   // 🎩 STATE --------------------------------------------------------------------------------- \\
 
