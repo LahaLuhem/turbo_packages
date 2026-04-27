@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart' hide Type;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
+import 'package:turbo_firestore_api/abstracts/i_firestore_cache_service.dart';
 import 'package:turbo_firestore_api/factories/t_api_factory.dart';
 import 'package:turbo_firestore_api/models/t_id_docs.dart';
 import 'package:turbo_firestore_api/turbo_firestore_api.dart';
@@ -62,6 +63,7 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
     this.initialValue,
     this.defaultValue,
     super.initialiseStream = true,
+    this.cacheService,
   });
 
   // 📍 LOCATOR ------------------------------------------------------------------------------- \\
@@ -86,6 +88,10 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
   @protected
   /// Function to provide default document value.
   final TCollectionValueBuilderDef<WRITEABLE>? defaultValue;
+
+  @protected
+  /// Optional Firestore cache service for caching document data locally.
+  final IFirestoreCacheService? cacheService;
 
   // 🎬 INIT & DISPOSE ------------------------------------------------------------------------ \\
 

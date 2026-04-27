@@ -20,7 +20,7 @@ class TFirestoreCollection<WRITEABLE extends TWriteableId> {
     this.defaultId = TFirestoreApiDefaults.defaultId,
     this.unknownIdFallback = TFirestoreApiDefaults.unknownIdFallback,
     this.userIdFieldName = TFirestoreApiDefaults.userIdFieldName,
-    this.firestoreCacheService,
+    this.tryCache = false,
   });
 
   final Map<String, dynamic> Function(WRITEABLE value) toJson;
@@ -38,7 +38,7 @@ class TFirestoreCollection<WRITEABLE extends TWriteableId> {
   final bool isCollectionGroup;
   final bool tryAddLocalDocumentReference;
   final bool tryAddLocalId;
-  final IFirestoreCacheService? firestoreCacheService;
+  final bool tryCache;
 
   TFirestoreApi<WRITEABLE> api({
     FirebaseFirestore? firebaseFirestore,
@@ -46,6 +46,7 @@ class TFirestoreCollection<WRITEABLE extends TWriteableId> {
     String Function(String collectionName)? path,
     TFirestoreLogger? logger,
     bool? isCollectionGroup,
+    IFirestoreCacheService? firestoreCacheService,
   }) => TFirestoreApi<WRITEABLE>(
     firestoreCache: firestoreCacheService != null ? TFirestoreCache(firestoreCacheService: firestoreCacheService!) : null,
     userIdFieldName: userIdFieldName,
