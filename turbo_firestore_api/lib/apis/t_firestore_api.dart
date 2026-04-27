@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart' hide Type;
-import 'package:flutter/material.dart';
+import 'package:turbo_firestore_api/abstracts/t_firestore_cache_service.dart';
 import 'package:turbo_firestore_api/constants/t_firestore_api_defaults.dart';
 import 'package:turbo_firestore_api/enums/t_operation_type.dart';
 import 'package:turbo_firestore_api/enums/t_search_term_type.dart';
@@ -15,6 +15,7 @@ import 'package:turbo_firestore_api/typedefs/collection_reference_def.dart';
 import 'package:turbo_firestore_api/util/t_firestore_logger.dart';
 import 'package:turbo_response/turbo_response.dart';
 import 'package:turbo_serializable/abstracts/t_writeable.dart';
+import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
 
 part 't_firestore_create_api.dart';
 part 't_firestore_delete_api.dart';
@@ -47,7 +48,9 @@ abstract class _TFirestoreApiBase<T> {
     GetOptions? getOptions,
     this.unknownId = TFirestoreApiDefaults.unknownIdFallback,
     this.defaultId = TFirestoreApiDefaults.defaultId,
-  }) : _firebaseFirestore = firebaseFirestore,
+    TFirestoreCache? firestoreCache,
+  }) : _firestoreCache = firestoreCache,
+       _firebaseFirestore = firebaseFirestore,
        _collectionPath = collectionPath,
        _toJson = toJson,
        _fromJson = fromJson,
@@ -158,6 +161,9 @@ abstract class _TFirestoreApiBase<T> {
   /// Generates a new document ID without creating the document
   String get genId => doc.id;
 
+  /// Used to cache Firestore documents and queries for faster access and offline support.
+  final TFirestoreCache? _firestoreCache;
+
   /// Used to determined if a document exists based on given [id].
   Future<bool> docExists({
     required String id,
@@ -208,6 +214,9 @@ abstract class _TFirestoreApiBase<T> {
     }
     return path;
   }
+
+  /// Helper method to get the effective collection path, considering overrides.
+  String _pPath(String? collectionPathOverride) => collectionPathOverride ?? _collectionPath();
 
   /// Creates a TFirestoreException with extracted context.
   ///

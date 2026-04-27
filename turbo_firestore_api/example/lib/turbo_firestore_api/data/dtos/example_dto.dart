@@ -1,13 +1,16 @@
 import 'package:turbo_serializable/abstracts/t_writeable.dart';
 import 'package:turbo_response/turbo_response.dart';
+import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
 
-class ExampleDTO extends TWriteable {
+class ExampleDTO extends TWriteableId {
   ExampleDTO({
     required this.thisIsAString,
     required this.thisIsANumber,
     required this.thisIsABoolean,
+    required this.id,
   });
 
+  final String id;
   final String thisIsAString;
   final double thisIsANumber;
   final bool thisIsABoolean;
@@ -39,6 +42,7 @@ class ExampleDTO extends TWriteable {
   };
 
   factory ExampleDTO.fromJson(Map<String, dynamic> json) => ExampleDTO(
+    id: json["id"] as String,
     thisIsAString: json["thisIsAString"] as String,
     thisIsANumber: json["thisIsANumber"] as double,
     thisIsABoolean: json["thisIsABoolean"] as bool,

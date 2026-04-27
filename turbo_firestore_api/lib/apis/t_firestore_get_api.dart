@@ -57,6 +57,7 @@ mixin TurboFirestoreGetApi<T> on _TFirestoreApiBase<T> {
   Future<TurboResponse<Map<String, dynamic>>> getById({
     required String id,
     String? collectionPathOverride,
+    bool tryCache = true,
   }) async {
     assert(
       _isCollectionGroup == (collectionPathOverride != null),
@@ -68,10 +69,24 @@ mixin TurboFirestoreGetApi<T> on _TFirestoreApiBase<T> {
       _log.debug(
         message: 'Finding without converter..',
         sensitiveData: TSensitiveData(
-          path: collectionPathOverride ?? _collectionPath(),
+          path: _pPath(collectionPathOverride),
           id: id,
         ),
       );
+
+      if (tryCache) {
+        final cachedResult = await _firestoreCache?.get(
+          path: _pPath(collectionPathOverride),
+          id: id,
+        );
+        if (cachedResult != null) {
+          _log.info(
+            message: 'Found item in cache!',
+          );
+          return TurboResponse.success(result: cachedResult);
+        }
+      }
+
       final result = (await getDocRefById(
         id: id,
         collectionPathOverride: collectionPathOverride,
@@ -81,6 +96,15 @@ mixin TurboFirestoreGetApi<T> on _TFirestoreApiBase<T> {
           message: 'Found item!',
           sensitiveData: null,
         );
+        if (_firestoreCache != null) {
+          unawaited(
+            _firestoreCache.saveDoc(
+              docId: id,
+              path: _pPath(collectionPathOverride),
+              doc: result,
+            ),
+          );
+        }
         return TurboResponse.success(result: result);
       } else {
         _log.warning(
@@ -94,7 +118,7 @@ mixin TurboFirestoreGetApi<T> on _TFirestoreApiBase<T> {
         );
       }
     } catch (error, stackTrace) {
-      final path = collectionPathOverride ?? _collectionPath();
+      final path = _pPath(collectionPathOverride);
       final fullPath = _buildFullPath(path, id);
 
       final exception = _createException(
@@ -158,6 +182,7 @@ mixin TurboFirestoreGetApi<T> on _TFirestoreApiBase<T> {
   Future<TurboResponse<T>> getByIdWithConverter({
     required String id,
     String? collectionPathOverride,
+    bool tryCache = true,
   }) async {
     assert(
       _isCollectionGroup == (collectionPathOverride != null),
@@ -169,10 +194,27 @@ mixin TurboFirestoreGetApi<T> on _TFirestoreApiBase<T> {
       _log.debug(
         message: 'Finding with converter..',
         sensitiveData: TSensitiveData(
-          path: collectionPathOverride ?? _collectionPath(),
+          path: _pPath(collectionPathOverride),
           id: id,
         ),
       );
+
+      if (tryCache && _fromJson != null) {
+        final cachedResult = await _firestoreCache?.get(
+          path: _pPath(collectionPathOverride),
+          id: id,
+        );
+        if (cachedResult != null) {
+          final parsedCachedResult = _fromJson.call(cachedResult);
+          if (parsedCachedResult != null) {
+            _log.info(
+              message: 'Found item in cache!',
+            );
+            return TurboResponse.success(result: parsedCachedResult);
+          }
+        }
+      }
+
       final result = (await getDocRefByIdWithConverter(
         id: id,
         collectionPathOverride: collectionPathOverride,
@@ -182,6 +224,16 @@ mixin TurboFirestoreGetApi<T> on _TFirestoreApiBase<T> {
           message: 'Found item!',
           sensitiveData: null,
         );
+        // #FEEDBACK #TODO 2026-04-27T17:38:39.013+02:00 | Remove withConverter methods and convert self - saving cache before the convertion
+        if (_firestoreCache != null && _toJson != null) {
+          unawaited(
+            _firestoreCache.saveDoc(
+              doc: _toJson(result),
+              docId: id,
+              path: _pPath(collectionPathOverride),
+            ),
+          );
+        }
         return TurboResponse.success(result: result);
       } else {
         _log.warning(
@@ -195,7 +247,7 @@ mixin TurboFirestoreGetApi<T> on _TFirestoreApiBase<T> {
         );
       }
     } catch (error, stackTrace) {
-      final path = collectionPathOverride ?? _collectionPath();
+      final path = _pPath(collectionPathOverride);
       final fullPath = _buildFullPath(path, id);
 
       final exception = _createException(
@@ -264,12 +316,12 @@ mixin TurboFirestoreGetApi<T> on _TFirestoreApiBase<T> {
     _log.debug(
       message: 'Finding document..',
       sensitiveData: TSensitiveData(
-        path: collectionPathOverride ?? _collectionPath(),
+        path: _pPath(collectionPathOverride),
         id: id,
       ),
     );
     return _firebaseFirestore
-        .doc('${collectionPathOverride ?? _collectionPath()}/$id')
+        .doc('${_pPath(collectionPathOverride)}/$id')
         .withConverter<Map<String, dynamic>>(
           fromFirestore: (snapshot, _) {
             final data = snapshot.data() ?? {};
@@ -287,10 +339,9 @@ mixin TurboFirestoreGetApi<T> on _TFirestoreApiBase<T> {
                   );
             } catch (error) {
               _log.error(
-                message:
-                    'Unexpected error caught while adding local id and document reference',
+                message: 'Unexpected error caught while adding local id and document reference',
                 sensitiveData: TSensitiveData(
-                  path: collectionPathOverride ?? _collectionPath(),
+                  path: _pPath(collectionPathOverride),
                   id: snapshot.id,
                   data: data,
                 ),
@@ -307,15 +358,13 @@ mixin TurboFirestoreGetApi<T> on _TFirestoreApiBase<T> {
                   )
                   .tryRemoveLocalDocumentReference(
                     referenceFieldName: _documentReferenceFieldName,
-                    tryRemoveLocalDocumentReference:
-                        _tryAddLocalDocumentReference,
+                    tryRemoveLocalDocumentReference: _tryAddLocalDocumentReference,
                   );
             } catch (error) {
               _log.error(
-                message:
-                    'Unexpected error caught while removing local id and document reference',
+                message: 'Unexpected error caught while removing local id and document reference',
                 sensitiveData: TSensitiveData(
-                  path: collectionPathOverride ?? _collectionPath(),
+                  path: _pPath(collectionPathOverride),
                   id: id,
                   data: data,
                 ),
@@ -368,12 +417,12 @@ mixin TurboFirestoreGetApi<T> on _TFirestoreApiBase<T> {
     _log.debug(
       message: 'Finding document with converter..',
       sensitiveData: TSensitiveData(
-        path: collectionPathOverride ?? _collectionPath(),
+        path: _pPath(collectionPathOverride),
         id: id,
       ),
     );
     return _firebaseFirestore
-        .doc('${collectionPathOverride ?? _collectionPath()}/$id')
+        .doc('${_pPath(collectionPathOverride)}/$id')
         .withConverter<T>(
           fromFirestore: (snapshot, _) {
             final data = snapshot.data() ?? {};
@@ -388,16 +437,14 @@ mixin TurboFirestoreGetApi<T> on _TFirestoreApiBase<T> {
                     .tryAddLocalDocumentReference(
                       snapshot.reference,
                       referenceFieldName: _documentReferenceFieldName,
-                      tryAddLocalDocumentReference:
-                          _tryAddLocalDocumentReference,
+                      tryAddLocalDocumentReference: _tryAddLocalDocumentReference,
                     ),
               );
             } catch (error, stackTrace) {
               _log.error(
-                message:
-                    'Unexpected error caught while adding local id and document reference',
+                message: 'Unexpected error caught while adding local id and document reference',
                 sensitiveData: TSensitiveData(
-                  path: collectionPathOverride ?? _collectionPath(),
+                  path: _pPath(collectionPathOverride),
                   id: snapshot.id,
                   data: data,
                 ),
@@ -420,16 +467,14 @@ mixin TurboFirestoreGetApi<T> on _TFirestoreApiBase<T> {
                       .tryAddLocalDocumentReference(
                         snapshot.reference,
                         referenceFieldName: _documentReferenceFieldName,
-                        tryAddLocalDocumentReference:
-                            _tryAddLocalDocumentReference,
+                        tryAddLocalDocumentReference: _tryAddLocalDocumentReference,
                       ),
                 );
               } catch (error, stackTrace) {
                 _log.error(
-                  message:
-                      'Unexpected error caught while adding local id and document reference',
+                  message: 'Unexpected error caught while adding local id and document reference',
                   sensitiveData: TSensitiveData(
-                    path: collectionPathOverride ?? _collectionPath(),
+                    path: _pPath(collectionPathOverride),
                     id: snapshot.id,
                     data: data,
                   ),
@@ -449,15 +494,13 @@ mixin TurboFirestoreGetApi<T> on _TFirestoreApiBase<T> {
                   )
                   .tryRemoveLocalDocumentReference(
                     referenceFieldName: _documentReferenceFieldName,
-                    tryRemoveLocalDocumentReference:
-                        _tryAddLocalDocumentReference,
+                    tryRemoveLocalDocumentReference: _tryAddLocalDocumentReference,
                   );
             } catch (error) {
               _log.error(
-                message:
-                    'Unexpected error caught while removing local id and document reference',
+                message: 'Unexpected error caught while removing local id and document reference',
                 sensitiveData: TSensitiveData(
-                  path: collectionPathOverride ?? _collectionPath(),
+                  path: _pPath(collectionPathOverride),
                   id: id,
                   data: data,
                 ),
@@ -512,7 +555,7 @@ mixin TurboFirestoreGetApi<T> on _TFirestoreApiBase<T> {
     _log.debug(
       message: 'Finding document snapshot..',
       sensitiveData: TSensitiveData(
-        path: collectionPathOverride ?? _collectionPath(),
+        path: _pPath(collectionPathOverride),
         id: id,
       ),
     );
@@ -564,7 +607,7 @@ mixin TurboFirestoreGetApi<T> on _TFirestoreApiBase<T> {
     _log.debug(
       message: 'Finding doc snapshot with converter..',
       sensitiveData: TSensitiveData(
-        path: collectionPathOverride ?? _collectionPath(),
+        path: _pPath(collectionPathOverride),
         id: id,
       ),
     );

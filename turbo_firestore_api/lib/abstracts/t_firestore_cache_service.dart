@@ -3,25 +3,18 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:turbo_firestore_api/dtos/t_cached_query.dart';
 import 'package:turbo_firestore_api/extensions/completer_extension.dart';
-import 'package:turbo_firestore_api/models/t_firestore_collection.dart';
 import 'package:turbo_response/turbo_response.dart';
-import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
 import 'package:turbolytics/turbolytics.dart';
 
-class TFirestoreCache<
-  WRITEABLE extends TWriteableId,
-  COLLECTION extends TFirestoreCollection<WRITEABLE>
-> {
+class TFirestoreCache {
   const TFirestoreCache({
     required TFirestoreCacheService firestoreCacheService,
-    required this.collection,
     this.cacheInvalidationTime = const TimeOfDay(hour: 4, minute: 0),
     this.cacheInvalidationDuration,
     this.cacheInvalidationWeekday = DateTime.monday,
   }) : _firestoreCacheService = firestoreCacheService;
 
   final TFirestoreCacheService _firestoreCacheService;
-  final COLLECTION collection;
   final TimeOfDay cacheInvalidationTime;
   final Duration? cacheInvalidationDuration;
   final int cacheInvalidationWeekday;
@@ -44,7 +37,7 @@ class TFirestoreCache<
     return cachedAt.isAfter(nextInvalidation);
   }
 
-  TCachedQuery? validate({required DateTime now, required TCachedQuery cachedQuery}) {
+  TCachedQuery? _validateCacheEntry({required DateTime now, required TCachedQuery cachedQuery}) {
     if (isValid(now: now, cachedAt: cachedQuery.createdAt)) {
       return cachedQuery;
     }
@@ -52,111 +45,96 @@ class TFirestoreCache<
     return null;
   }
 
-  Future<WRITEABLE?> get({
+  Future<Map<String, dynamic>?> get({
     required String path,
     required String id,
   }) async {
     await _firestoreCacheService.isReady;
     final cachedQuery = await _firestoreCacheService.getCachedQuery(_genId(id, path));
     if (cachedQuery == null) return null;
-    if (cachedQuery.docIds.isEmpty) {
+    final doc = cachedQuery.doc;
+    if (doc == null) {
       TLog(location: 'TFirestoreCache').warning(
-        'Cached query for $id at $path has no docIds, deleting cache entry',
+        'Cached query for $id at $path has no doc, deleting cache entry',
       );
       await _deleteCachedDoc(id, path);
       return null;
     }
-    if (cachedQuery.docIds.length != 1) {
-      TLog(location: 'TFirestoreCache').warning(
-        'Cached query for $id at $path has multiple docIds, expected 1. Deleting cache entry.',
-      );
-      await _deleteCachedDoc(id, path);
-    }
-    final validatedCache = validate(
+    final validatedCacheEntry = _validateCacheEntry(
       now: DateTime.now(),
       cachedQuery: cachedQuery,
     );
-    if (validatedCache == null) {
+    if (validatedCacheEntry == null) {
       TLog(location: 'TFirestoreCache').info(
         'Cached query for $id at $path is invalid, deleting cache entry.',
       );
       await _deleteCachedDoc(id, path);
       return null;
     }
-    final result = await _firestoreCacheService.read(validatedCache.docIds.first);
-    if (result == null) {
-      TLog(location: 'TFirestoreCache').warning(
-        'Cached query for $id at $path has docId ${validatedCache.docIds.first} but no cached doc found. Deleting cache entry.',
-      );
-      await _deleteCachedDoc(id, path);
-      return null;
-    }
-    return collection.fromJson(result);
+    return doc;
   }
 
   FutureOr<void> _deleteCachedDoc(String id, String path) =>
       _firestoreCacheService.delete(_genId(id, path));
 
-  Future<List<WRITEABLE>?> list({
+  Future<List<Map<String, dynamic>>?> list({
     required String path,
     required String query,
   }) async {
     await _firestoreCacheService.isReady;
     final cachedQuery = await _firestoreCacheService.getCachedQuery(_genId(query, path));
     if (cachedQuery == null) return null;
-    if (cachedQuery.docIds.isEmpty) {
+    final docs = cachedQuery.docs;
+    if (docs == null || docs.isEmpty) {
       TLog(location: 'TFirestoreCache').warning(
-        'Cached query for $query at $path has no docIds, deleting cache entry',
+        'Cached query for $query at $path has no docs, deleting cache entry',
       );
       await _deleteCachedDoc(query, path);
       return null;
     }
-    final validatedCache = validate(
+    final validatedCacheEntry = _validateCacheEntry(
       now: DateTime.now(),
       cachedQuery: cachedQuery,
     );
-    if (validatedCache == null) {
+    if (validatedCacheEntry == null) {
       TLog(location: 'TFirestoreCache').info(
         'Cached query for $query at $path is invalid, deleting cache entry.',
       );
       await _deleteCachedDoc(query, path);
       return null;
     }
-    final results = <WRITEABLE>[];
-    for (final docId in cachedQuery.docIds) {
-      final result = await _firestoreCacheService.read(docId);
-      if (result == null) continue;
-      results.add(collection.fromJson(result));
-    }
-    return results;
+    return docs;
   }
 
   Future<TurboResponse> saveDoc({
-    required String id,
+    required String docId,
     required String path,
-    required WRITEABLE doc,
-  }) => saveQuery(
-    query: id,
-    path: path,
-    docs: [doc],
-  );
-
-  Future<TurboResponse> saveQuery({
-    required String query,
-    required String path,
-    required List<WRITEABLE> docs,
+    required Map<String, dynamic> doc,
   }) async {
     await _firestoreCacheService.isReady;
-    final docIds = <String>{};
-    for (final doc in docs) {
-      final id = doc.id;
-      await _firestoreCacheService.write(id, collection.toJson(doc));
-      docIds.add(id);
-    }
+    final now = DateTime.now();
+    final cachedQuery = TCachedQuery(
+      query: _genId(docId, path),
+      doc: doc,
+      docs: null,
+      createdAt: now,
+      updatedAt: now,
+    );
+    await _firestoreCacheService.writeCachedQuery(cachedQuery: cachedQuery);
+    return const TurboResponse.successAsBool();
+  }
+
+  Future<TurboResponse> saveDocs({
+    required String query,
+    required String path,
+    required List<Map<String, dynamic>> docs,
+  }) async {
+    await _firestoreCacheService.isReady;
     final now = DateTime.now();
     final cachedQuery = TCachedQuery(
       query: _genId(query, path),
-      docIds: docIds,
+      doc: null,
+      docs: docs,
       createdAt: now,
       updatedAt: now,
     );

@@ -57,9 +57,9 @@ mixin TurboFirestoreListApi<T> on _TFirestoreApiBase<T> {
   /// [listByQueryWithConverter] type-safe queries
   /// [listAll] retrieve all documents
   Future<TurboResponse<List<Map<String, dynamic>>>> listByQuery({
-    required CollectionReferenceDef<Map<String, dynamic>>
-    collectionReferenceQuery,
+    required CollectionReferenceDef<Map<String, dynamic>> collectionReferenceQuery,
     required String whereDescription,
+    bool tryCache = true,
   }) async {
     try {
       _log.debug(
@@ -69,6 +69,20 @@ mixin TurboFirestoreListApi<T> on _TFirestoreApiBase<T> {
           whereDescription: whereDescription,
         ),
       );
+
+      if (tryCache) {
+        final cachedResults = await _firestoreCache?.list(
+          path: _collectionPath(),
+          query: whereDescription,
+        );
+        if (cachedResults != null) {
+          _log.info(
+            message: 'Found items in cache!',
+          );
+          return TurboResponse.success(result: cachedResults);
+        }
+      }
+
       final result =
           (await collectionReferenceQuery(
                 listCollectionReference(),
@@ -77,6 +91,17 @@ mixin TurboFirestoreListApi<T> on _TFirestoreApiBase<T> {
                 (e) => e.data(),
               )
               .toList();
+
+      if (result.isNotEmpty && _firestoreCache != null) {
+        unawaited(
+          _firestoreCache.saveDocs(
+            query: whereDescription,
+            path: _collectionPath(),
+            docs: result,
+          ),
+        );
+      }
+
       _logResultLength(result);
       return TurboResponse.success(result: result);
     } catch (error, stackTrace) {
@@ -143,6 +168,7 @@ mixin TurboFirestoreListApi<T> on _TFirestoreApiBase<T> {
   Future<TurboResponse<List<T>>> listByQueryWithConverter({
     required CollectionReferenceDef<T> collectionReferenceQuery,
     required String whereDescription,
+    bool tryCache = true,
   }) async {
     try {
       _log.debug(
@@ -152,9 +178,38 @@ mixin TurboFirestoreListApi<T> on _TFirestoreApiBase<T> {
           whereDescription: whereDescription,
         ),
       );
+
+      if (tryCache && _fromJson != null) {
+        final cachedResults = await _firestoreCache?.list(
+          path: _collectionPath(),
+          query: whereDescription,
+        );
+        if (cachedResults != null) {
+          _log.info(
+            message: 'Found items in cache!',
+          );
+          final parsedResults = <T>[];
+          for (final doc in cachedResults) {
+            parsedResults.add(_fromJson.call(doc));
+            return TurboResponse.success(result: parsedResults);
+          }
+        }
+      }
+
       final result = (await collectionReferenceQuery(
         listCollectionReferenceWithConverter(),
       ).get(_getOptions)).docs.map((e) => e.data()).toList();
+
+      if (_firestoreCache != null && _toJson != null) {
+        unawaited(
+          _firestoreCache.saveDocs(
+            query: whereDescription,
+            path: _collectionPath(),
+            docs: result.map((e) => _toJson(e)).toList(),
+          ),
+        );
+      }
+
       _logResultLength(result);
       return TurboResponse.success(result: result);
     } catch (error, stackTrace) {
@@ -210,7 +265,9 @@ mixin TurboFirestoreListApi<T> on _TFirestoreApiBase<T> {
   /// See also:
   /// [listAllWithConverter] type-safe retrieval
   /// [listByQuery] filtered queries
-  Future<TurboResponse<List<Map<String, dynamic>>>> listAll() async {
+  Future<TurboResponse<List<Map<String, dynamic>>>> listAll({
+    bool tryCache = true,
+  }) async {
     try {
       _log.debug(
         message: 'Finding all documents without converter..',
@@ -218,11 +275,36 @@ mixin TurboFirestoreListApi<T> on _TFirestoreApiBase<T> {
           path: _collectionPath(),
         ),
       );
+
+      if (tryCache) {
+        final cachedResults = await _firestoreCache?.list(
+          path: _collectionPath(),
+          query: 'all',
+        );
+        if (cachedResults != null) {
+          _log.info(
+            message: 'Found items in cache!',
+          );
+          return TurboResponse.success(result: cachedResults);
+        }
+      }
+
       final result = (await listCollectionReference().get(_getOptions)).docs
           .map(
             (e) => e.data(),
           )
           .toList();
+
+      if (result.isNotEmpty && _firestoreCache != null) {
+        unawaited(
+          _firestoreCache.saveDocs(
+            query: 'all',
+            path: _collectionPath(),
+            docs: result,
+          ),
+        );
+      }
+
       _logResultLength(result);
       return TurboResponse.success(result: result);
     } catch (error, stackTrace) {
@@ -277,7 +359,9 @@ mixin TurboFirestoreListApi<T> on _TFirestoreApiBase<T> {
   /// See also:
   /// [listAll] raw data access
   /// [listByQueryWithConverter] filtered type-safe queries
-  Future<TurboResponse<List<T>>> listAllWithConverter() async {
+  Future<TurboResponse<List<T>>> listAllWithConverter({
+    bool tryCache = true,
+  }) async {
     try {
       _log.debug(
         message: 'Finding all documents with converter..',
@@ -285,9 +369,37 @@ mixin TurboFirestoreListApi<T> on _TFirestoreApiBase<T> {
           path: _collectionPath(),
         ),
       );
+
+      if (tryCache) {
+        final cachedResults = await _firestoreCache?.list(
+          path: _collectionPath(),
+          query: 'all',
+        );
+        if (cachedResults != null && _fromJson != null) {
+          _log.info(
+            message: 'Found items in cache!',
+          );
+          return TurboResponse.success(
+            result: cachedResults.map((e) => _fromJson.call(e)).toList(),
+          );
+        }
+      }
+
       final result = (await listCollectionReferenceWithConverter().get(
         _getOptions,
       )).docs.map((e) => e.data()).toList();
+
+
+      if (result.isNotEmpty && _firestoreCache != null && _toJson != null) {
+        unawaited(
+          _firestoreCache.saveDocs(
+            query: 'all',
+            path: _collectionPath(),
+            docs: result.map((e) => _toJson(e)).toList(),
+          ),
+        );
+      }
+
       _logResultLength(result);
       return TurboResponse.success(result: result);
     } catch (error, stackTrace) {
@@ -364,8 +476,7 @@ mixin TurboFirestoreListApi<T> on _TFirestoreApiBase<T> {
                   );
             } catch (error) {
               _log.error(
-                message:
-                    'Unexpected error caught while adding local id and document reference',
+                message: 'Unexpected error caught while adding local id and document reference',
                 sensitiveData: TSensitiveData(
                   path: _collectionPath(),
                   id: snapshot.id,
@@ -384,8 +495,7 @@ mixin TurboFirestoreListApi<T> on _TFirestoreApiBase<T> {
                   )
                   .tryRemoveLocalDocumentReference<String, dynamic>(
                     referenceFieldName: _documentReferenceFieldName,
-                    tryRemoveLocalDocumentReference:
-                        _tryAddLocalDocumentReference,
+                    tryRemoveLocalDocumentReference: _tryAddLocalDocumentReference,
                   );
             } catch (error) {
               _log.error(
@@ -448,14 +558,12 @@ mixin TurboFirestoreListApi<T> on _TFirestoreApiBase<T> {
                     .tryAddLocalDocumentReference<String, dynamic>(
                       snapshot.reference,
                       referenceFieldName: _documentReferenceFieldName,
-                      tryAddLocalDocumentReference:
-                          _tryAddLocalDocumentReference,
+                      tryAddLocalDocumentReference: _tryAddLocalDocumentReference,
                     ),
               );
             } catch (error, stackTrace) {
               _log.error(
-                message:
-                    'Unexpected error caught while adding local id and document reference',
+                message: 'Unexpected error caught while adding local id and document reference',
                 sensitiveData: TSensitiveData(
                   path: _collectionPath(),
                   id: snapshot.id,
@@ -484,14 +592,12 @@ mixin TurboFirestoreListApi<T> on _TFirestoreApiBase<T> {
                       .tryAddLocalDocumentReference<String, dynamic>(
                         snapshot.reference,
                         referenceFieldName: _documentReferenceFieldName,
-                        tryAddLocalDocumentReference:
-                            _tryAddLocalDocumentReference,
+                        tryAddLocalDocumentReference: _tryAddLocalDocumentReference,
                       ),
                 );
               } catch (error, stackTrace) {
                 _log.error(
-                  message:
-                      'Unexpected error caught while adding local id and document reference',
+                  message: 'Unexpected error caught while adding local id and document reference',
                   sensitiveData: TSensitiveData(
                     path: _collectionPath(),
                     id: snapshot.id,
@@ -513,13 +619,11 @@ mixin TurboFirestoreListApi<T> on _TFirestoreApiBase<T> {
                   )
                   .tryRemoveLocalDocumentReference<String, dynamic>(
                     referenceFieldName: _documentReferenceFieldName,
-                    tryRemoveLocalDocumentReference:
-                        _tryAddLocalDocumentReference,
+                    tryRemoveLocalDocumentReference: _tryAddLocalDocumentReference,
                   );
             } catch (error) {
               _log.error(
-                message:
-                    'Unexpected error caught while removing local id and document reference',
+                message: 'Unexpected error caught while removing local id and document reference',
                 sensitiveData: TSensitiveData(
                   path: _collectionPath(),
                   data: data,

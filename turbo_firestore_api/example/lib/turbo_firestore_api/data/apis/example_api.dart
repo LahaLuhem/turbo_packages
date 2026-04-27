@@ -18,6 +18,7 @@ class ExampleAPI extends TFirestoreApi<ExampleDTO> {
   Future<TurboResponse<DocumentReference>> createExample() {
     final random = Random();
     final dto = ExampleDTO(
+      id: 'id',
       thisIsAString: ['yes', 'maybe'][random.nextInt(2)],
       thisIsANumber: random.nextDouble(),
       thisIsABoolean: random.nextBool(),
