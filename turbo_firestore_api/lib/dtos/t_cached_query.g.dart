@@ -8,7 +8,10 @@ part of 't_cached_query.dart';
 
 TCachedQuery _$TCachedQueryFromJson(Map<String, dynamic> json) => TCachedQuery(
   query: json['query'] as String,
-  docIds: (json['docIds'] as List<dynamic>).map((e) => e as String).toSet(),
+  docs: (json['docs'] as List<dynamic>?)
+      ?.map((e) => e as Map<String, dynamic>)
+      .toList(),
+  doc: json['doc'] as Map<String, dynamic>?,
   createdAt: DateTime.parse(json['createdAt'] as String),
   updatedAt: DateTime.parse(json['updatedAt'] as String),
 );
@@ -16,7 +19,8 @@ TCachedQuery _$TCachedQueryFromJson(Map<String, dynamic> json) => TCachedQuery(
 Map<String, dynamic> _$TCachedQueryToJson(TCachedQuery instance) =>
     <String, dynamic>{
       'query': instance.query,
-      'docIds': instance.docIds.toList(),
+      'docs': instance.docs,
+      'doc': instance.doc,
       'createdAt': instance.createdAt.toIso8601String(),
       'updatedAt': instance.updatedAt.toIso8601String(),
     };
