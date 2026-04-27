@@ -113,6 +113,7 @@ class StatelessTFormField extends StatelessWidget {
       child: IgnorePointer(
         ignoring: !isEnabled || isReadOnly,
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             if (label != null || subLabel != null || labelTrailing != null) ...[

@@ -12,6 +12,8 @@ import 'package:turbo_serializable/abstracts/t_serializable.dart';
 import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
 import 'package:turbolytics/turbolytics.dart';
 
+// TODO(brian): Add local caching with local storage interface allowing user to use hive ro other prefered local caching and save the jsons locally on device ith an invalidation trigger | 26/04/2026
+
 /// A service for managing a collection of Firestore documents with synchronized local state.
 ///
 /// The [TCollectionService] provides a robust foundation for managing collections of documents

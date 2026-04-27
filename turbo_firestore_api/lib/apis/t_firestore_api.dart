@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart' hide Type;
+import 'package:flutter/material.dart';
 import 'package:turbo_firestore_api/constants/t_firestore_api_defaults.dart';
 import 'package:turbo_firestore_api/enums/t_operation_type.dart';
 import 'package:turbo_firestore_api/enums/t_search_term_type.dart';
