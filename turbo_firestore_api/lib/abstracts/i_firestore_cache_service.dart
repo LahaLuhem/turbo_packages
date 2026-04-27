@@ -8,13 +8,13 @@ import 'package:turbolytics/turbolytics.dart';
 
 class TFirestoreCache {
   const TFirestoreCache({
-    required TFirestoreCacheService firestoreCacheService,
+    required IFirestoreCacheService firestoreCacheService,
     this.cacheInvalidationTime = const TimeOfDay(hour: 4, minute: 0),
     this.cacheInvalidationDuration,
     this.cacheInvalidationWeekday = DateTime.monday,
   }) : _firestoreCacheService = firestoreCacheService;
 
-  final TFirestoreCacheService _firestoreCacheService;
+  final IFirestoreCacheService _firestoreCacheService;
   final TimeOfDay cacheInvalidationTime;
   final Duration? cacheInvalidationDuration;
   final int cacheInvalidationWeekday;
@@ -145,8 +145,8 @@ class TFirestoreCache {
   String _genId(String id, String path) => id + '@' + path;
 }
 
-abstract class TFirestoreCacheService {
-  TFirestoreCacheService() {
+abstract class IFirestoreCacheService {
+  IFirestoreCacheService() {
     initialise();
   }
 
