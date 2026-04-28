@@ -7,6 +7,7 @@ import 'package:turbo_firestore_api/abstracts/i_firestore_cache_service.dart';
 import 'package:turbo_firestore_api/abstracts/t_model.dart';
 import 'package:turbo_firestore_api/factories/t_api_factory.dart';
 import 'package:turbo_firestore_api/models/t_model_docs.dart';
+import 'package:turbo_firestore_api/models/t_sort_filtered_list.dart';
 import 'package:turbo_firestore_api/turbo_firestore_api.dart';
 import 'package:turbo_firestore_api/typedefs/t_model_builder_def.dart';
 import 'package:turbo_firestore_api/typedefs/t_model_docs_builder_def.dart';
@@ -282,6 +283,18 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
   List<DTO> defaultValues() => defaultValue?.call(vars(), collection, this) ?? [];
 
   // ⚙️ LOCAL MUTATORS ------------------------------------------------------------------------ \\
+
+  void addList(String id, TSortFilteredList<DTO, MODEL> list) => docsNotifier.updateCurrent(
+    (value) => value
+      ..addList(
+        id: id,
+        sortFilteredList: list,
+      ),
+  );
+
+  void removeList(String id) => docsNotifier.updateCurrent(
+    (value) => value..removeList(id),
+  );
 
   /// Resets the local documents to their initial value.
   void resetLocalDocs({bool doNotifyListeners = true}) {

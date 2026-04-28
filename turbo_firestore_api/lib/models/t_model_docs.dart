@@ -87,5 +87,7 @@ class TModelDocs<DTO extends TWriteableId, MODEL extends TModel<DTO>> {
     return sortFilteredList.values;
   }
 
+  List<MODEL> removeList(String id) => _sortFilteredListsMap.remove(id)?.values ?? [];
+
   int get length => _idMap.length;
 }
