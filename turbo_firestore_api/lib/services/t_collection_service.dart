@@ -284,9 +284,9 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
 
   // ⚙️ LOCAL MUTATORS ------------------------------------------------------------------------ \\
 
-  List<MODEL> getList(String id) => docsNotifier.value.getList(id);
-  
-  void addList(String id, TSortFilteredList<DTO, MODEL> list) => docsNotifier.updateCurrent(
+  List<MODEL> getList(Object id) => docsNotifier.value.getList(id);
+
+  void addList(Object id, TSortFilteredList<DTO, MODEL> list) => docsNotifier.updateCurrent(
     (value) => value
       ..addList(
         id: id,
@@ -294,7 +294,7 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
       ),
   );
 
-  void removeList(String id) => docsNotifier.updateCurrent(
+  void removeList(Object id) => docsNotifier.updateCurrent(
     (value) => value..removeList(id),
   );
 

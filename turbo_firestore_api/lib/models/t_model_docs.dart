@@ -60,7 +60,7 @@ class TModelDocs<DTO extends TWriteableId, MODEL extends TModel<DTO>> {
   MODEL? remove(String id) => _idMap.remove(id);
   Iterable<String> get ids => _idMap.keys;
   Iterable<MODEL> get values => _idMap.values;
-  List<MODEL> getList(String id) => _sortFilteredListsMap[id]?.values ?? [];
+  List<MODEL> getList(Object id) => _sortFilteredListsMap[id]?.values ?? [];
 
   DTO updateDto(DTO newValue) {
     final model = update(modelBuilder(newValue));
@@ -76,7 +76,7 @@ class TModelDocs<DTO extends TWriteableId, MODEL extends TModel<DTO>> {
   }
 
   List<MODEL> addList({
-    required String id,
+    required Object id,
     required TSortFilteredList<DTO, MODEL> sortFilteredList,
     bool doInitialApply = true,
   }) {
@@ -87,7 +87,7 @@ class TModelDocs<DTO extends TWriteableId, MODEL extends TModel<DTO>> {
     return sortFilteredList.values;
   }
 
-  List<MODEL> removeList(String id) => _sortFilteredListsMap.remove(id)?.values ?? [];
+  List<MODEL> removeList(Object id) => _sortFilteredListsMap.remove(id)?.values ?? [];
 
   int get length => _idMap.length;
 }
