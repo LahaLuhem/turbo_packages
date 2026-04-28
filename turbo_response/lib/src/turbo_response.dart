@@ -195,26 +195,26 @@ sealed class TurboResponse<T> {
   /// ```
   void throwWhenFail() => switch (this) {
     Fail(
-      error: final e,
-      stackTrace: final st,
-      title: final t,
-      message: final m,
+    error: final e,
+    stackTrace: final st,
+    title: final t,
+    message: final m,
     ) =>
-      throw TurboException(
-        error: e,
-        stackTrace: st,
-        title: t,
-        message: m,
-      ),
+    throw TurboException(
+      error: e,
+      stackTrace: st,
+      title: t,
+      message: m,
+    ),
     _ => null,
   };
 
   @override
   String toString() => switch (this) {
     Success(result: final r, title: final t, message: final m) =>
-      'Success(result: $r, title: $t, message: $m)',
+    'Success(result: $r, title: $t, message: $m)',
     Fail(error: final e, title: final t, message: final m) =>
-      'Fail(error: $e, title: $t, message: $m)',
+    'Fail(error: $e, title: $t, message: $m)',
   };
 
   /// Pattern matches on the response state and returns a value based on the state.
@@ -287,7 +287,7 @@ final class Success<T> extends TurboResponse<T> {
     this.title,
     this.message,
   }) : result = const _BoolResult(isSuccess: true) as T,
-       super._();
+        super._();
 
   @override
   final T result;
@@ -297,7 +297,7 @@ final class Success<T> extends TurboResponse<T> {
   final String? message;
 
   /// Creates a copy of this Success with the given fields replaced with new values.
-  TurboResponse<T> copyWith<T>({
+  Success<T> copyWith({
     T? result,
     String? title,
     String? message,
@@ -350,15 +350,15 @@ final class Fail<T> extends TurboResponse<T> {
     this.title,
     this.message,
   }) : error = error ?? const TurboException(error: 'Operation failed'),
-       super._();
+        super._();
 
   /// Creates a fail state with a default error.
   const Fail.asBool({
     this.title,
     this.message,
   }) : error = const TurboException(error: 'Operation failed'),
-       stackTrace = null,
-       super._();
+        stackTrace = null,
+        super._();
 
   @override
   final Object error;
@@ -369,7 +369,7 @@ final class Fail<T> extends TurboResponse<T> {
   final String? message;
 
   /// Creates a copy of this Fail with the given fields replaced with new values.
-  TurboResponse<T> copyWith<T>({
+  Fail<T> copyWith({
     Object? error,
     StackTrace? stackTrace,
     String? title,
@@ -456,11 +456,11 @@ extension TurboResponseX<T> on TurboResponse<T> {
     FutureOr<R> Function(Fail<T> response)? fail,
   }) async => switch (this) {
     Success<T>() =>
-      await success?.call(this as Success<T>) ??
-          (throw StateError('No handler provided for Success state')),
+    await success?.call(this as Success<T>) ??
+        (throw StateError('No handler provided for Success state')),
     Fail<T>() =>
-      await fail?.call(this as Fail<T>) ??
-          (throw StateError('No handler provided for Fail state')),
+    await fail?.call(this as Fail<T>) ??
+        (throw StateError('No handler provided for Fail state')),
   };
 
   /// Handles a successful response, returning a value.
@@ -475,8 +475,8 @@ extension TurboResponseX<T> on TurboResponse<T> {
   /// );
   /// ```
   FutureOr<R?> whenSuccess<R>(
-    FutureOr<R> Function(Success<T> response) success,
-  ) async => isSuccess ? await success(this as Success<T>) : null;
+      FutureOr<R> Function(Success<T> response) success,
+      ) async => isSuccess ? await success(this as Success<T>) : null;
 
   /// Handles a failed response, returning a value.
   /// Returns null if the response is a success.
@@ -521,17 +521,17 @@ extension TurboResponseX<T> on TurboResponse<T> {
   /// );
   /// ```
   FutureOr<TurboResponse<R>> mapSuccess<R>(
-    FutureOr<R> Function(T value) transform,
-  ) async => switch (this) {
+      FutureOr<R> Function(T value) transform,
+      ) async => switch (this) {
     Success<T>(result: final value, title: final t, message: final m) =>
-      Success<R>(result: await transform(value), title: t, message: m),
+        Success<R>(result: await transform(value), title: t, message: m),
     Fail<T>(
-      error: final e,
-      stackTrace: final st,
-      title: final t,
-      message: final m,
+    error: final e,
+    stackTrace: final st,
+    title: final t,
+    message: final m,
     ) =>
-      Fail<R>(error: e, stackTrace: st, title: t, message: m),
+        Fail<R>(error: e, stackTrace: st, title: t, message: m),
   };
 
   /// Chains this response with another operation that returns a TurboResponse.
@@ -547,16 +547,16 @@ extension TurboResponseX<T> on TurboResponse<T> {
   /// );
   /// ```
   FutureOr<TurboResponse<R>> andThen<R>(
-    FutureOr<TurboResponse<R>> Function(T value) transform,
-  ) async => switch (this) {
+      FutureOr<TurboResponse<R>> Function(T value) transform,
+      ) async => switch (this) {
     Success<T>(result: final value) => await transform(value),
     Fail<T>(
-      error: final e,
-      stackTrace: final st,
-      title: final t,
-      message: final m,
+    error: final e,
+    stackTrace: final st,
+    title: final t,
+    message: final m,
     ) =>
-      Fail<R>(error: e, stackTrace: st, title: t, message: m),
+        Fail<R>(error: e, stackTrace: st, title: t, message: m),
   };
 
   /// Transforms the failure value while preserving the success state.
@@ -571,8 +571,8 @@ extension TurboResponseX<T> on TurboResponse<T> {
   /// );
   /// ```
   FutureOr<TurboResponse<T>> mapFail(
-    FutureOr<Object> Function(Object) transform,
-  ) async => await when(
+      FutureOr<Object> Function(Object) transform,
+      ) async => await when(
     success: (s) => TurboResponse.success(
       result: s.result,
       title: s.title,
@@ -648,8 +648,8 @@ extension TurboResponseX<T> on TurboResponse<T> {
   /// );
   /// ```
   FutureOr<TurboResponse<T>> recover(
-    FutureOr<T> Function(Object error) transform,
-  ) async => await when(
+      FutureOr<T> Function(Object error) transform,
+      ) async => await when(
     success: (s) => TurboResponse.success(
       result: s.result,
       title: s.title,
@@ -766,22 +766,22 @@ extension TurboResponseX<T> on TurboResponse<T> {
   /// );
   /// ```
   TurboResponse<T> ensure(
-    bool Function(T value) condition, {
-    Object? error,
-    String? title,
-    String? message,
-  }) {
+      bool Function(T value) condition, {
+        Object? error,
+        String? title,
+        String? message,
+      }) {
     if (this is Success<T>) {
       final success = this as Success<T>;
       return condition(success.result)
           ? this
           : TurboResponse.fail(
-              error: error ?? Exception('Validation failed'),
-              title: title ?? 'Validation Error',
-              message:
-                  message ??
-                  'The success value did not meet the required condition',
-            );
+        error: error ?? Exception('Validation failed'),
+        title: title ?? 'Validation Error',
+        message:
+        message ??
+            'The success value did not meet the required condition',
+      );
     }
     return this;
   }
@@ -799,9 +799,9 @@ extension TurboResponseX<T> on TurboResponse<T> {
   /// );
   /// ```
   static Future<TurboResponse<List<R>>> traverse<T, R>(
-    List<T> items,
-    Future<TurboResponse<R>> Function(T item) operation,
-  ) async {
+      List<T> items,
+      Future<TurboResponse<R>> Function(T item) operation,
+      ) async {
     final results = <R>[];
     for (final item in items) {
       final result = await operation(item);
@@ -830,8 +830,8 @@ extension TurboResponseX<T> on TurboResponse<T> {
   /// final combined = TurboResponseX.sequence(responses);
   /// ```
   static TurboResponse<List<T>> sequence<T>(
-    List<TurboResponse<T>> responses,
-  ) {
+      List<TurboResponse<T>> responses,
+      ) {
     final results = <T>[];
     for (final response in responses) {
       if (response case Fail(:final error, :final title, :final message)) {

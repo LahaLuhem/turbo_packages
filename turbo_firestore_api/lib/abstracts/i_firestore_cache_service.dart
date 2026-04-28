@@ -23,18 +23,19 @@ class TFirestoreCache {
     if (cacheInvalidationDuration != null) {
       return now.difference(cachedAt) < cacheInvalidationDuration!;
     }
-    final nextInvalidation = DateTime(
+    var lastInvalidation = DateTime(
       now.year,
       now.month,
       now.day,
       cacheInvalidationTime.hour,
       cacheInvalidationTime.minute,
     );
-    if (now.weekday != cacheInvalidationWeekday) {
-      final daysUntilInvalidation = (cacheInvalidationWeekday - now.weekday + 7) % 7;
-      nextInvalidation.add(Duration(days: daysUntilInvalidation));
+    final daysSinceWeekday = (now.weekday - cacheInvalidationWeekday + 7) % 7;
+    lastInvalidation = lastInvalidation.subtract(Duration(days: daysSinceWeekday));
+    if (lastInvalidation.isAfter(now)) {
+      lastInvalidation = lastInvalidation.subtract(const Duration(days: 7));
     }
-    return cachedAt.isAfter(nextInvalidation);
+    return cachedAt.isAfter(lastInvalidation);
   }
 
   TCachedQuery? _validateCacheEntry({required DateTime now, required TCachedQuery cachedQuery}) {
