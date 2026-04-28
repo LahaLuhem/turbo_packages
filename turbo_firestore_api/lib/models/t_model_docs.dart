@@ -59,7 +59,7 @@ class TModelDocs<DTO extends TWriteableId, MODEL extends TModel<DTO>> {
   MODEL? get(String? id) => _idMap[id];
   MODEL? remove(String id) => _idMap.remove(id);
   Iterable<String> get ids => _idMap.keys;
-  Iterable<MODEL> get values => _idMap.values;
+  Iterable<MODEL> get models => _idMap.values;
   List<MODEL> getList(Object id) => _sortFilteredListsMap[id]?.values ?? [];
 
   DTO updateDto(DTO newValue) {
@@ -81,7 +81,7 @@ class TModelDocs<DTO extends TWriteableId, MODEL extends TModel<DTO>> {
     bool doInitialApply = true,
   }) {
     if (doInitialApply) {
-      sortFilteredList.apply(values);
+      sortFilteredList.apply(models);
     }
     _sortFilteredListsMap[id] = sortFilteredList;
     return sortFilteredList.values;
