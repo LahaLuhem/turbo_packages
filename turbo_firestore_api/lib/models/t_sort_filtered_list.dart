@@ -4,18 +4,18 @@ import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
 
 class TSortFilteredList<DTO extends TWriteableId, MODEL extends TModel<DTO>> {
   TSortFilteredList({
-    required this.filter,
+     this.filter,
     this.sort,
   });
 
-  final TFilterPredicate<DTO, MODEL> filter;
+  final TFilterPredicate<DTO, MODEL>? filter;
   final TSortPredicate<DTO, MODEL>? sort;
 
   List<MODEL> _values = [];
   List<MODEL> get values => _values;
 
   List<MODEL> apply(Iterable<MODEL> models) {
-    final filtered = models.where(filter).toList();
+    final filtered = filter == null ? models.toList() : models.where(filter!).toList();
     if (sort != null) {
       filtered.sort(sort);
     }
@@ -24,7 +24,7 @@ class TSortFilteredList<DTO extends TWriteableId, MODEL extends TModel<DTO>> {
   }
 
   List<MODEL> add(MODEL model) {
-    if (filter(model)) {
+    if (filter?.call(model) ?? true) {
       _values.add(model);
       if (sort != null) {
         _values.sort(sort);
