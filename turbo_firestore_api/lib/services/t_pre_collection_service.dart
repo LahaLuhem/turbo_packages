@@ -62,6 +62,7 @@ abstract class TPreCollectionService<DTO extends TWriteableId, MODEL extends TMo
           TModelDocs.fromDtos(
             dtos: docs,
             modelBuilder: (dto) => modelBuilder(this, null, dto),
+            sortFilteredListsMap: initialSortFilteredListsMap?.call(),
           ),
         );
         markAsReady();

@@ -10,6 +10,7 @@ import 'package:turbo_firestore_api/models/t_model_docs.dart';
 import 'package:turbo_firestore_api/turbo_firestore_api.dart';
 import 'package:turbo_firestore_api/typedefs/t_model_builder_def.dart';
 import 'package:turbo_firestore_api/typedefs/t_model_docs_builder_def.dart';
+import 'package:turbo_firestore_api/typedefs/t_sort_filter_defs.dart';
 import 'package:turbo_notifiers/turbo_notifiers.dart';
 import 'package:turbo_response/turbo_response.dart';
 import 'package:turbo_serializable/abstracts/t_serializable.dart';
@@ -61,6 +62,7 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
   TCollectionService({
     required this.collection,
     required this.modelBuilder,
+    this.initialSortFilteredListsMap,
     this.modelDocsBuilder,
     this.apiBuilder,
     this.streamBuilder,
@@ -100,6 +102,10 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
   @protected
   /// Function to provide default document value.
   final TCollectionValueBuilderDef<DTO, MODEL>? defaultValue;
+
+  @protected
+  /// Optional map of sorting and filtering definitions for managing sorted and filtered lists of documents. This can be used to maintain multiple views of the data based on different criteria.
+  final TSortFilteredListsMap<DTO, MODEL> Function()? initialSortFilteredListsMap;
 
   @protected
   /// Optional Firestore cache service for caching document data locally.
@@ -143,6 +149,7 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
               TModelDocs.fromDtos(
                 dtos: docs,
                 modelBuilder: (dto) => modelBuilder(this, null, dto),
+                sortFilteredListsMap: initialSortFilteredListsMap?.call(),
               ),
         );
         _isReady.completeIfNotComplete();
@@ -256,6 +263,7 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
       TModelDocs.fromDtos(
         dtos: defaultValues(),
         modelBuilder: (dto) => modelBuilder(this, null, dto),
+        sortFilteredListsMap: initialSortFilteredListsMap?.call(),
       );
 
   @protected
@@ -264,6 +272,7 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
       TModelDocs.fromDtos(
         dtos: initialValues() ?? defaultValues(),
         modelBuilder: (dto) => modelBuilder(this, null, dto),
+        sortFilteredListsMap: initialSortFilteredListsMap?.call(),
       );
 
   @protected

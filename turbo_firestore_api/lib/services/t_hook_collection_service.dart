@@ -71,6 +71,7 @@ abstract class THookCollectionService<DTO extends TWriteableId, MODEL extends TM
           TModelDocs.fromDtos(
             dtos: docs,
             modelBuilder: (dto) => modelBuilder(this, null, dto),
+            sortFilteredListsMap: initialSortFilteredListsMap?.call(),
           ),
         );
         markAsReady();

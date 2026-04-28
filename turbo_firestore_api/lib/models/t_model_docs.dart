@@ -1,96 +1,91 @@
 import 'package:turbo_firestore_api/abstracts/t_model.dart';
-import 'package:turbo_firestore_api/extensions/t_list_extension.dart';
+import 'package:turbo_firestore_api/models/t_sort_filtered_list.dart';
+import 'package:turbo_firestore_api/typedefs/t_id_map_def.dart';
 import 'package:turbo_firestore_api/typedefs/t_model_builder_def.dart';
+import 'package:turbo_firestore_api/typedefs/t_sort_filter_defs.dart';
 import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
 
 // TODO(brian): Add option to create several lists with indexes, sort and filter options per list and to dispose them - always keeping all data in sync | 26/04/2026
 
 class TModelDocs<DTO extends TWriteableId, MODEL extends TModel<DTO>> {
   const TModelDocs({
-    required this.values,
-    required Map<String, int> idMap,
+    required TIdMapDef<MODEL> idMap,
+    required TSortFilteredListsMap<DTO, MODEL> sortFilteredListsMap,
     required this.modelBuilder,
-  }) : _idMap = idMap;
+  }) : _sortFilteredListsMap = sortFilteredListsMap,
+       _idMap = idMap;
 
   factory TModelDocs.empty({
     required TModelBuilderDef<DTO, MODEL> modelBuilder,
   }) => TModelDocs(
-    values: [],
     idMap: {},
     modelBuilder: modelBuilder,
+    sortFilteredListsMap: {},
   );
 
   factory TModelDocs.fromDtos({
     required List<DTO> dtos,
     required TModelBuilderDef<DTO, MODEL> modelBuilder,
+    TSortFilteredListsMap<DTO, MODEL>? sortFilteredListsMap,
   }) {
-    final (values, idMap) = dtos.toIdDocsModelsMap<MODEL>(
-      idBuilder: (dto) => dto.id,
-      modelBuilder: modelBuilder,
-    );
+    final idMap = <String, MODEL>{};
+    final models = <MODEL>[];
+    for (final dto in dtos) {
+      final model = modelBuilder(dto);
+      models.add(model);
+      idMap[model.id] = model;
+    }
+    final pSortFilteredListsMap = sortFilteredListsMap ?? <String, TSortFilteredList<DTO, MODEL>>{};
+    for (final sortFilteredList in pSortFilteredListsMap.values) {
+      sortFilteredList.apply(models);
+    }
     return TModelDocs<DTO, MODEL>(
-      values: values,
       idMap: idMap,
       modelBuilder: modelBuilder,
+      sortFilteredListsMap: pSortFilteredListsMap,
     );
   }
 
-  final List<MODEL> values;
   final TModelBuilderDef<DTO, MODEL> modelBuilder;
-  final Map<String, int> _idMap;
+  final TIdMapDef<MODEL> _idMap;
+  final TSortFilteredListsMap<DTO, MODEL> _sortFilteredListsMap;
 
   // 🧲 FETCHERS ------------------------------------------------------------------------------ \\
 
-  bool get isNotEmpty => values.isNotEmpty;
-  bool get isEmpty => values.isEmpty;
+  bool get isNotEmpty => _idMap.isNotEmpty;
+  bool get isEmpty => _idMap.isEmpty;
   bool exists(String id) => _idMap.containsKey(id);
-  DTO? getDto(String? id) {
-    final index = _idMap[id];
-    if (index == null) return null;
-    return values[index].dto;
-  }
-
-  MODEL? get(String? id) {
-    final index = _idMap[id];
-    if (index == null) return null;
-    return values[index];
-  }
-
-  bool remove(String id) {
-    final index = _idMap[id];
-    if (index == null) return false;
-    values.removeAt(index);
-    _idMap.remove(id);
-    for (int i = index; i < values.length; i++) {
-      _idMap[values[i].id] = i;
-    }
-    return true;
-  }
+  DTO? dto(String? id) => _idMap[id]?.dto;
+  MODEL? get(String? id) => _idMap[id];
+  MODEL? remove(String id) => _idMap.remove(id);
+  Iterable<String> get ids => _idMap.keys;
+  Iterable<MODEL> get values => _idMap.values;
+  List<MODEL> list(String id) => _sortFilteredListsMap[id]?.values ?? [];
 
   DTO updateDto(DTO newValue) {
-    final index = _idMap[newValue.id];
-    if (index == null) {
-      values.add(modelBuilder(newValue));
-      _idMap[newValue.id] = values.length - 1;
-      return newValue;
+    final model = update(modelBuilder(newValue));
+    for (final sortFilteredList in _sortFilteredListsMap.values) {
+      sortFilteredList.add(model);
     }
-    final model = values[index];
-    values[index] = model.copyWith(
-      dto: newValue,
-    );
-    return newValue;
+    return model.dto;
   }
 
   MODEL update(MODEL newValue) {
-    final index = _idMap[newValue.id];
-    if (index == null) {
-      values.add(newValue);
-      _idMap[newValue.id] = values.length - 1;
-      return newValue;
-    }
-    values[index] = newValue;
+    _idMap[newValue.id] = newValue;
     return newValue;
   }
 
-  int get length => values.length;
+  List<MODEL> addList({
+    required String id,
+    required TSortFilteredList<DTO, MODEL> sortFilteredList,
+    bool doInitialApply = true,
+  }) {
+    if (doInitialApply) {
+      sortFilteredList.apply(values);
+    }
+    _sortFilteredListsMap[id] = sortFilteredList;
+    return sortFilteredList.values;
+  }
+
+  int get length => _idMap.length;
 }
