@@ -284,6 +284,8 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
 
   // ⚙️ LOCAL MUTATORS ------------------------------------------------------------------------ \\
 
+  List<MODEL> getList(String id) => docsNotifier.value.getList(id);
+  
   void addList(String id, TSortFilteredList<DTO, MODEL> list) => docsNotifier.updateCurrent(
     (value) => value
       ..addList(

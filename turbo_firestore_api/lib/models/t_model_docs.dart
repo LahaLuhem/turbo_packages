@@ -60,7 +60,7 @@ class TModelDocs<DTO extends TWriteableId, MODEL extends TModel<DTO>> {
   MODEL? remove(String id) => _idMap.remove(id);
   Iterable<String> get ids => _idMap.keys;
   Iterable<MODEL> get values => _idMap.values;
-  List<MODEL> list(String id) => _sortFilteredListsMap[id]?.values ?? [];
+  List<MODEL> getList(String id) => _sortFilteredListsMap[id]?.values ?? [];
 
   DTO updateDto(DTO newValue) {
     final model = update(modelBuilder(newValue));
