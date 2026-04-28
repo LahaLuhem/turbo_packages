@@ -85,7 +85,7 @@ export 'typedefs/create_doc_def.dart';
 export 'typedefs/t_api_builder_def.dart';
 export 'typedefs/t_stream_builder_def.dart';
 export 'typedefs/t_value_builder_def.dart';
-export 'typedefs/t_writeable_id_item_builder_def.dart';
+export 'typedefs/t_writeable_item_builder_def.dart';
 export 'typedefs/update_doc_def.dart';
 export 'typedefs/upsert_doc_def.dart';
 /// Core utilities for logging, debugging and
