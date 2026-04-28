@@ -10,6 +10,7 @@ class TVars {
     required this.userId,
     required this.defaultId,
     required this.unknownId,
+    required this.unknownValue,
   });
 
   final String? userId;
@@ -17,6 +18,7 @@ class TVars {
   final DateTime now;
   final String defaultId;
   final String unknownId;
+  final String unknownValue;
 
   @override
   bool operator ==(Object other) =>

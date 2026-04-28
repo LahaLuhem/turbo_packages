@@ -201,8 +201,9 @@ class TDocService<DTO extends TWriteableId, MODEL extends TModel<DTO>> extends T
             id: id ?? api.genId,
             now: DateTime.now(),
             userId: userId,
-            defaultId: collection.defaultId,
-            unknownId: collection.unknownIdFallback,
+            defaultId: api.defaultIdValue,
+            unknownId: api.unknownValue,
+            unknownValue: api.unknownValue,
           )
           as V;
 

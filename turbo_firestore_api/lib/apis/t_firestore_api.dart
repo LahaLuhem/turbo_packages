@@ -15,7 +15,6 @@ import 'package:turbo_firestore_api/typedefs/collection_reference_def.dart';
 import 'package:turbo_firestore_api/util/t_firestore_logger.dart';
 import 'package:turbo_response/turbo_response.dart';
 import 'package:turbo_serializable/abstracts/t_writeable.dart';
-import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
 
 part 't_firestore_create_api.dart';
 part 't_firestore_delete_api.dart';
@@ -46,8 +45,9 @@ abstract class _TFirestoreApiBase<T> {
     bool isCollectionGroup = TFirestoreApiDefaults.isCollectionGroup,
     bool tryAddLocalDocumentReference = TFirestoreApiDefaults.tryAddLocalDocumentReference,
     GetOptions? getOptions,
-    this.unknownId = TFirestoreApiDefaults.unknownIdFallback,
-    this.defaultId = TFirestoreApiDefaults.defaultId,
+    this.unknownIdValue = TFirestoreApiDefaults.unknownValueValue,
+    this.defaultIdValue = TFirestoreApiDefaults.defaultId,
+    this.unknownValue = TFirestoreApiDefaults.unknownValueValue,
     TFirestoreCache? firestoreCache,
   }) : _firestoreCache = firestoreCache,
         _firebaseFirestore = firebaseFirestore,
@@ -126,10 +126,13 @@ abstract class _TFirestoreApiBase<T> {
   final String userIdFieldName;
 
   /// Used to provide an unknown id for unknown objects.
-  final String unknownId;
+  final String unknownIdValue;
+
+  /// Used to provide an unknown id for unknown objects.
+  final String unknownValue;
 
   /// Used to provide a default id for default objects.
-  final String defaultId;
+  final String defaultIdValue;
 
   /// Used to provide a reference field to your create/update methods if necessary.
   ///
@@ -488,8 +491,8 @@ class TFirestoreApi<DTO extends TWriteable> extends _TFirestoreApiBase<DTO>
     super.tryAddLocalDocumentReference,
     super.getOptions,
     super.userIdFieldName,
-    super.defaultId,
-    super.unknownId,
+    super.defaultIdValue,
     super.firestoreCache,
+    super.unknownIdValue,
   });
 }

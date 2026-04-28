@@ -21,10 +21,11 @@ class TFirestoreCollection<DTO extends TWriteableId> {
     this.tryAddLocalDocumentReference = TFirestoreApiDefaults.tryAddLocalDocumentReference,
     this.tryAddLocalId = TFirestoreApiDefaults.tryAddLocalId,
     this.updatedAtFieldName = TFirestoreApiDefaults.updatedAtFieldName,
-    this.defaultId = TFirestoreApiDefaults.defaultId,
-    this.unknownIdFallback = TFirestoreApiDefaults.unknownIdFallback,
+    this.defaultIdValue = TFirestoreApiDefaults.defaultId,
+    this.unknownIdValue = TFirestoreApiDefaults.unknownValueValue,
     this.userIdFieldName = TFirestoreApiDefaults.userIdFieldName,
     this.tryCache = false,
+    this.unknownValueValue = TFirestoreApiDefaults.unknownValueValue,
   });
 
   final DTO Function(Map<String, dynamic> json) fromJson;
@@ -33,10 +34,11 @@ class TFirestoreCollection<DTO extends TWriteableId> {
   final String apiName;
   final String collectionName;
   final String createdAtFieldName;
-  final String defaultId;
+  final String defaultIdValue;
   final String documentReferenceFieldName;
   final String idFieldName;
-  final String unknownIdFallback;
+  final String unknownIdValue;
+  final String unknownValueValue;
   final String updatedAtFieldName;
   final String userIdFieldName;
   final bool isCollectionGroup;
@@ -56,8 +58,8 @@ class TFirestoreCollection<DTO extends TWriteableId> {
         ? TFirestoreCache(firestoreCacheService: firestoreCacheService)
         : null,
     userIdFieldName: userIdFieldName,
-    defaultId: defaultId,
-    unknownId: unknownIdFallback,
+    defaultIdValue: defaultIdValue,
+    unknownIdValue: unknownIdValue,
     collectionPath: () => path?.call(collectionName) ?? collectionName,
     createdAtFieldName: createdAtFieldName,
     documentReferenceFieldName: documentReferenceFieldName,

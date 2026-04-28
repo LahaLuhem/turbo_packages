@@ -83,6 +83,7 @@ export 'services/t_pre_document_service.dart';
 export 'typedefs/collection_reference_def.dart';
 export 'typedefs/create_doc_def.dart';
 export 'typedefs/t_api_builder_def.dart';
+export 'typedefs/t_model_item_builder_def.dart';
 export 'typedefs/t_stream_builder_def.dart';
 export 'typedefs/t_value_builder_def.dart';
 export 'typedefs/t_writeable_item_builder_def.dart';
