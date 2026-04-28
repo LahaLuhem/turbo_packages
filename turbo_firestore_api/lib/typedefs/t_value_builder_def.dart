@@ -9,15 +9,13 @@ import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
 typedef TCollectionValueBuilderDef<DTO extends TWriteableId, MODEL extends TModel<DTO>> =
     List<DTO> Function(
       TVars vars,
-      TFirestoreCollection<DTO, MODEL> collection,
+      TFirestoreCollection<DTO> collection,
       TCollectionService<DTO, MODEL> service,
     );
 
 typedef TDocValueBuilderDef<DTO extends TWriteableId, MODEL extends TModel<DTO>> =
     DTO Function(
       TVars vars,
-      TFirestoreCollection<DTO, MODEL> collection,
+      TFirestoreCollection<DTO> collection,
       TDocService<DTO, MODEL> service,
     );
-
-typedef TValueBuilder<T> = T Function(TVars vars);

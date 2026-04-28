@@ -6,15 +6,19 @@ import 'package:turbo_firestore_api/turbo_firestore_api.dart';
 import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
 import 'package:turbolytics/turbolytics.dart';
 
-class TUserCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>> extends TCollectionService<DTO, MODEL>
+class TUserCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
+    extends TCollectionService<DTO, MODEL>
     with Turbolytics {
   TUserCollectionService({
     required super.collection,
+    required super.modelBuilder,
     super.apiBuilder,
     super.streamBuilder,
     super.initialValue,
     super.defaultValue,
     super.initialiseStream = true,
+    super.firestoreCacheService,
+    super.modelDocsBuilder,
   });
 
   @override

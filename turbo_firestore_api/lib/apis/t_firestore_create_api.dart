@@ -23,8 +23,7 @@ part of 't_firestore_api.dart';
 /// See also:
 /// [TFirestoreUpdateApi] document updates
 /// [TFirestoreDeleteApi] document deletion
-mixin TFirestoreCreateApi<DTO extends TWriteableId, MODEL extends TModel<DTO>>
-    on _TFirestoreApiBase<DTO, MODEL> {
+mixin TFirestoreCreateApi<DTO> on _TFirestoreApiBase<DTO> {
   /// Creates or writes a document to Firestore.
   ///
   /// This method provides a flexible way to create or update documents with various options
@@ -81,17 +80,18 @@ mixin TFirestoreCreateApi<DTO extends TWriteableId, MODEL extends TModel<DTO>>
     Transaction? transaction,
   }) async {
     assert(
-      _isCollectionGroup == (collectionPathOverride != null),
-      'Firestore does not support finding a document by id when communicating with a collection group, '
-      'therefore, you must specify the collectionPathOverride containing all parent collection and document ids '
-      'in order to make this method work.',
+    _isCollectionGroup == (collectionPathOverride != null),
+    'Firestore does not support finding a document by id when communicating with a collection group, '
+        'therefore, you must specify the collectionPathOverride containing all parent collection and document ids '
+        'in order to make this method work.',
     );
     try {
       _log.debug(
         message: 'Checking if writeable is valid..',
         sensitiveData: null,
       );
-      final TurboResponse<DocumentReference>? invalidResponse = writeable.validate();
+      final TurboResponse<DocumentReference>? invalidResponse = writeable
+          .validate();
       if (invalidResponse != null && invalidResponse.isFail) {
         _log.warning(
           message: 'TWriteable was invalid!',
@@ -140,27 +140,30 @@ mixin TFirestoreCreateApi<DTO extends TWriteableId, MODEL extends TModel<DTO>>
         );
         final documentReference = id != null
             ? getDocRefById(
-                id: id,
-                collectionPathOverride: collectionPathOverride,
-              )
-            : _firebaseFirestore.collection(collectionPathOverride ?? _collectionPath()).doc();
+          id: id,
+          collectionPathOverride: collectionPathOverride,
+        )
+            : _firebaseFirestore
+            .collection(collectionPathOverride ?? _collectionPath())
+            .doc();
         _log.debug(
           message: 'Creating JSON..',
           sensitiveData: null,
         );
         final json = writeable.toJson();
         final writeableAsJson =
-            (merge || mergeFields != null) && (await documentReference.get(_getOptions)).exists
+        (merge || mergeFields != null) &&
+            (await documentReference.get(_getOptions)).exists
             ? updateTimeStampType.add(
-                json,
-                updatedAtFieldName: _updatedAtFieldName,
-                createdAtFieldName: _createdAtFieldName,
-              )
+          json,
+          updatedAtFieldName: _updatedAtFieldName,
+          createdAtFieldName: _createdAtFieldName,
+        )
             : createTimeStampType.add(
-                json,
-                createdAtFieldName: _createdAtFieldName,
-                updatedAtFieldName: _updatedAtFieldName,
-              );
+          json,
+          createdAtFieldName: _createdAtFieldName,
+          updatedAtFieldName: _updatedAtFieldName,
+        );
         final setOptions = SetOptions(
           merge: mergeFields == null ? merge : null,
           mergeFields: mergeFields,
@@ -292,7 +295,8 @@ mixin TFirestoreCreateApi<DTO extends TWriteableId, MODEL extends TModel<DTO>>
   /// See also:
   /// - [createDoc] for single document operations
   /// - [TWriteBatchWithReference] for batch result structure
-  Future<TurboResponse<TWriteBatchWithReference<Map<String, dynamic>>>> createDocInBatch({
+  Future<TurboResponse<TWriteBatchWithReference<Map<String, dynamic>>>>
+  createDocInBatch({
     required TWriteable writeable,
     String? id,
     WriteBatch? writeBatch,
@@ -303,14 +307,14 @@ mixin TFirestoreCreateApi<DTO extends TWriteableId, MODEL extends TModel<DTO>>
     String? collectionPathOverride,
   }) async {
     assert(
-      _isCollectionGroup == (collectionPathOverride != null),
-      'Firestore does not support finding a document by id when communicating with a collection group, '
-      'therefore, you must specify the collectionPathOverride containing all parent collection and document ids '
-      'in order to make this method work.',
+    _isCollectionGroup == (collectionPathOverride != null),
+    'Firestore does not support finding a document by id when communicating with a collection group, '
+        'therefore, you must specify the collectionPathOverride containing all parent collection and document ids '
+        'in order to make this method work.',
     );
     try {
-      final TurboResponse<TWriteBatchWithReference<Map<String, dynamic>>>? invalidResponse =
-          writeable.validate();
+      final TurboResponse<TWriteBatchWithReference<Map<String, dynamic>>>?
+      invalidResponse = writeable.validate();
       if (invalidResponse != null && invalidResponse.isFail) {
         _log.warning(
           message: 'TWriteable was invalid!',
@@ -334,24 +338,27 @@ mixin TFirestoreCreateApi<DTO extends TWriteableId, MODEL extends TModel<DTO>>
       final nullSafeWriteBatch = writeBatch ?? this.writeBatch;
       final documentReference = id != null
           ? getDocRefById(
-              id: id,
-              collectionPathOverride: collectionPathOverride,
-            )
-          : _firebaseFirestore.collection(collectionPathOverride ?? _collectionPath()).doc();
+        id: id,
+        collectionPathOverride: collectionPathOverride,
+      )
+          : _firebaseFirestore
+          .collection(collectionPathOverride ?? _collectionPath())
+          .doc();
       _log.debug(message: 'Creating JSON..', sensitiveData: null);
       final json = writeable.toJson();
       final writeableAsJson =
-          (merge || mergeFields != null) && (await documentReference.get(_getOptions)).exists
+      (merge || mergeFields != null) &&
+          (await documentReference.get(_getOptions)).exists
           ? updateTimeStampType.add(
-              json,
-              updatedAtFieldName: _updatedAtFieldName,
-              createdAtFieldName: _createdAtFieldName,
-            )
+        json,
+        updatedAtFieldName: _updatedAtFieldName,
+        createdAtFieldName: _createdAtFieldName,
+      )
           : createTimeStampType.add(
-              json,
-              createdAtFieldName: _createdAtFieldName,
-              updatedAtFieldName: _updatedAtFieldName,
-            );
+        json,
+        createdAtFieldName: _createdAtFieldName,
+        updatedAtFieldName: _updatedAtFieldName,
+      );
       _log.debug(
         message: 'Setting data with writeBatch.set..',
         sensitiveData: TSensitiveData(
@@ -369,7 +376,8 @@ mixin TFirestoreCreateApi<DTO extends TWriteableId, MODEL extends TModel<DTO>>
         ),
       );
       _log.info(
-        message: 'Adding create to batch done! Returning WriteBatchWithReference..',
+        message:
+        'Adding create to batch done! Returning WriteBatchWithReference..',
         sensitiveData: null,
       );
       return TurboResponse.success(

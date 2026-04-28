@@ -8,6 +8,8 @@ import 'package:turbo_firestore_api/abstracts/t_model.dart';
 import 'package:turbo_firestore_api/factories/t_api_factory.dart';
 import 'package:turbo_firestore_api/models/t_model_docs.dart';
 import 'package:turbo_firestore_api/turbo_firestore_api.dart';
+import 'package:turbo_firestore_api/typedefs/t_model_builder_def.dart';
+import 'package:turbo_firestore_api/typedefs/t_model_docs_builder_def.dart';
 import 'package:turbo_notifiers/turbo_notifiers.dart';
 import 'package:turbo_response/turbo_response.dart';
 import 'package:turbo_serializable/abstracts/t_serializable.dart';
@@ -58,6 +60,8 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
   /// - [api] - The Firestore API instance for remote operations
   TCollectionService({
     required this.collection,
+    required this.modelBuilder,
+    this.modelDocsBuilder,
     this.apiBuilder,
     this.streamBuilder,
     this.initialValue,
@@ -71,7 +75,7 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
 
   @protected
   /// The Firestore collection definition that this service manages.
-  final TFirestoreCollection<DTO, MODEL> collection;
+  final TFirestoreCollection<DTO> collection;
 
   @protected
   /// Optional builder function to create the Firestore API instance. If not provided, the API will be created using the collection's `api()` method.
@@ -80,6 +84,14 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
   @protected
   /// Optional builder function to create the Firestore stream. If not provided, the stream will be created using the API's `streamAllWithConverter()` method.
   final TCollectionStreamBuilderDef<DTO, MODEL>? streamBuilder;
+
+  @protected
+  /// Function to convert Firestore documents into local model instances.
+  final TCollectionModelBuilderDef<DTO, MODEL> modelBuilder;
+
+  @protected
+  /// Optional builder function to create the local model documents state from a list of DTOs. If not provided, the state will be created using `TModelDocs.fromDtos()`.
+  final TModelDocsBuilderDef<DTO, MODEL>? modelDocsBuilder;
 
   @protected
   /// Function to provide initial document value.
@@ -127,10 +139,11 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
       if (user != null) {
         log.debug('Updating docs for user ${user.uid}');
         docsNotifier.update(
-          TModelDocs.fromDtos(
-            dtos: docs,
-            modelBuilder: api.modelBuilder,
-          ),
+          modelDocsBuilder?.call(api, this, modelBuilder, docs) ??
+              TModelDocs.fromDtos(
+                dtos: docs,
+                modelBuilder: (dto) => modelBuilder(api, this, dto),
+              ),
         );
         _isReady.completeIfNotComplete();
         log.debug('Updated ${docsNotifier.value.length} docs');
@@ -174,10 +187,10 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
   // 🎩 STATE --------------------------------------------------------------------------------- \\
 
   /// The Firestore API instance for remote operations.
-  late final TFirestoreApi<DTO, MODEL> api =
+  late final TFirestoreApi<DTO> api =
       apiBuilder?.call(
         user,
-        TApiFactory<DTO, MODEL>(collection: collection),
+        TApiFactory<DTO>(collection: collection),
         this,
         firestoreCacheService,
       ) ??
@@ -237,10 +250,20 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
   // 🏗️ HELPERS ------------------------------------------------------------------------------- \\
 
   @protected
-  TModelDocs<DTO, MODEL> initialDocs() => TModelDocs.fromDtos(
-    dtos: initialValues() ?? defaultValues(),
-    modelBuilder: api.modelBuilder,
-  );
+  TModelDocs<DTO, MODEL> defaultDocs() =>
+      modelDocsBuilder?.call(api, this, modelBuilder, defaultValues()) ??
+      TModelDocs.fromDtos(
+        dtos: defaultValues(),
+        modelBuilder: (dto) => modelBuilder(api, this, dto),
+      );
+
+  @protected
+  TModelDocs<DTO, MODEL> initialDocs() =>
+      modelDocsBuilder?.call(api, this, modelBuilder, initialValues() ?? defaultValues()) ??
+      TModelDocs.fromDtos(
+        dtos: initialValues() ?? defaultValues(),
+        modelBuilder: (dto) => modelBuilder(api, this, dto),
+      );
 
   @protected
   List<DTO>? initialValues() => initialValue?.call(vars(), collection, this);
@@ -264,7 +287,7 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
     log.debug('Clearing all local docs');
     docsNotifier.update(
       TModelDocs.empty(
-        modelBuilder: api.modelBuilder,
+        modelBuilder: (dto) => modelBuilder(api, this, dto),
       ),
       doNotifyListeners: doNotifyListeners,
     );

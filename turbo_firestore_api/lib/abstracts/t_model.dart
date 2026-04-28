@@ -7,6 +7,8 @@ class TModel<DTO extends TWriteableId> {
 
   final DTO dto;
 
+  TModel.fromDto(this.dto);
+
   String get id => dto.id;
 
   MODEL copyWith<MODEL extends TModel<DTO>>({

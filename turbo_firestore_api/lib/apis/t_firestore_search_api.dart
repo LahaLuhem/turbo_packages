@@ -25,8 +25,7 @@ part of 't_firestore_api.dart';
 /// See also:
 /// [TurboFirestoreListApi] list operations
 /// [TurboFirestoreGetApi] single document retrieval
-mixin TurboFirestoreSearchApi<DTO extends TWriteableId, MODEL extends TModel<DTO>>
-    on _TFirestoreApiBase<DTO, MODEL> {
+mixin TurboFirestoreSearchApi<DTO> on _TFirestoreApiBase<DTO> {
   /// Searches for documents matching a search term
   ///
   /// Returns raw Firestore data without type conversion
@@ -87,90 +86,91 @@ mixin TurboFirestoreSearchApi<DTO extends TWriteableId, MODEL extends TModel<DTO
         ),
       );
       Query<Map<String, dynamic>> collectionReferenceQuery(
-        Query<Map<String, dynamic>> collectionReference,
-      ) => switch (searchTermType) {
+          Query<Map<String, dynamic>> collectionReference,
+          ) => switch (searchTermType) {
         TSearchTermType.arrayContains =>
-          limit == null
-              ? collectionReference.where(
-                  searchField,
-                  arrayContainsAny: [searchTerm, ...searchTerm.split(' ')],
-                )
-              : collectionReference
-                    .where(
-                      searchField,
-                      arrayContainsAny: [searchTerm, ...searchTerm.split(' ')],
-                    )
-                    .limit(limit),
+        limit == null
+            ? collectionReference.where(
+          searchField,
+          arrayContainsAny: [searchTerm, ...searchTerm.split(' ')],
+        )
+            : collectionReference
+            .where(
+          searchField,
+          arrayContainsAny: [searchTerm, ...searchTerm.split(' ')],
+        )
+            .limit(limit),
         TSearchTermType.startsWith =>
-          limit == null
-              ? collectionReference.where(
-                  searchField,
-                  isGreaterThanOrEqualTo: searchTerm,
-                  isLessThan: '$searchTerm\uf8ff',
-                )
-              : collectionReference
-                    .where(
-                      searchField,
-                      isGreaterThanOrEqualTo: searchTerm,
-                      isLessThan: '$searchTerm\uf8ff',
-                    )
-                    .limit(limit),
+        limit == null
+            ? collectionReference.where(
+          searchField,
+          isGreaterThanOrEqualTo: searchTerm,
+          isLessThan: '$searchTerm\uf8ff',
+        )
+            : collectionReference
+            .where(
+          searchField,
+          isGreaterThanOrEqualTo: searchTerm,
+          isLessThan: '$searchTerm\uf8ff',
+        )
+            .limit(limit),
       };
       final result =
-          (await collectionReferenceQuery(
-                listCollectionReference(),
-              ).get(_getOptions)).docs
-              .map(
-                (e) => e.data(),
-              )
-              .toList();
+      (await collectionReferenceQuery(
+        listCollectionReference(),
+      ).get(_getOptions)).docs
+          .map(
+            (e) => e.data(),
+      )
+          .toList();
       if (doSearchNumberEquivalent) {
         try {
           final numberSearchTerm = double.tryParse(searchTerm);
           if (numberSearchTerm != null) {
             Query<Map<String, dynamic>> collectionReferenceQuery(
-              Query<Map<String, dynamic>> collectionReference,
-            ) => switch (searchTermType) {
+                Query<Map<String, dynamic>> collectionReference,
+                ) => switch (searchTermType) {
               TSearchTermType.arrayContains =>
-                limit == null
-                    ? collectionReference.where(
-                        searchField,
-                        arrayContainsAny: [numberSearchTerm],
-                      )
-                    : collectionReference
-                          .where(
-                            searchField,
-                            arrayContainsAny: [numberSearchTerm],
-                          )
-                          .limit(limit),
+              limit == null
+                  ? collectionReference.where(
+                searchField,
+                arrayContainsAny: [numberSearchTerm],
+              )
+                  : collectionReference
+                  .where(
+                searchField,
+                arrayContainsAny: [numberSearchTerm],
+              )
+                  .limit(limit),
               TSearchTermType.startsWith =>
-                limit == null
-                    ? collectionReference.where(
-                        searchField,
-                        isGreaterThanOrEqualTo: numberSearchTerm,
-                        isLessThan: numberSearchTerm + 1,
-                      )
-                    : collectionReference
-                          .where(
-                            searchField,
-                            isGreaterThanOrEqualTo: numberSearchTerm,
-                            isLessThan: numberSearchTerm + 1,
-                          )
-                          .limit(limit),
+              limit == null
+                  ? collectionReference.where(
+                searchField,
+                isGreaterThanOrEqualTo: numberSearchTerm,
+                isLessThan: numberSearchTerm + 1,
+              )
+                  : collectionReference
+                  .where(
+                searchField,
+                isGreaterThanOrEqualTo: numberSearchTerm,
+                isLessThan: numberSearchTerm + 1,
+              )
+                  .limit(limit),
             };
             final numberResult =
-                (await collectionReferenceQuery(
-                      listCollectionReference(),
-                    ).get(_getOptions)).docs
-                    .map(
-                      (e) => e.data(),
-                    )
-                    .toList();
+            (await collectionReferenceQuery(
+              listCollectionReference(),
+            ).get(_getOptions)).docs
+                .map(
+                  (e) => e.data(),
+            )
+                .toList();
             result.addAll(numberResult);
           }
         } catch (error, stackTrace) {
           _log.error(
-            message: '${error.runtimeType} caught while trying to search for number equivalent',
+            message:
+            '${error.runtimeType} caught while trying to search for number equivalent',
             sensitiveData: TSensitiveData(
               path: _collectionPath(),
               searchTerm: searchTerm,
@@ -212,7 +212,7 @@ mixin TurboFirestoreSearchApi<DTO extends TWriteableId, MODEL extends TModel<DTO
 
   /// Searches for documents with type conversion
   ///
-  /// Returns documents converted to type [T] using [_fromJson]
+  /// Returns documents converted to type [DTO] using [_fromJson]
   /// Supports both text and numeric search terms
   ///
   /// Parameters:
@@ -269,37 +269,38 @@ mixin TurboFirestoreSearchApi<DTO extends TWriteableId, MODEL extends TModel<DTO
           limit: limit,
         ),
       );
-      Query<DTO> collectionReferenceQuery(Query<DTO> collectionReference) => switch (searchTermType) {
-        TSearchTermType.arrayContains =>
-          limit == null
-              ? collectionReference.where(
-                  searchField,
-                  arrayContainsAny: [searchTerm, ...searchTerm.split(' ')],
-                )
-              : collectionReference
-                    .where(
-                      searchField,
-                      arrayContainsAny: [
-                        searchTerm,
-                        ...searchTerm.split(' '),
-                      ],
-                    )
-                    .limit(limit),
-        TSearchTermType.startsWith =>
-          limit == null
-              ? collectionReference.where(
-                  searchField,
-                  isGreaterThanOrEqualTo: searchTerm,
-                  isLessThan: '$searchTerm\uf8ff',
-                )
-              : collectionReference
-                    .where(
-                      searchField,
-                      isGreaterThanOrEqualTo: searchTerm,
-                      isLessThan: '$searchTerm\uf8ff',
-                    )
-                    .limit(limit),
-      };
+      Query<DTO> collectionReferenceQuery(Query<DTO> collectionReference) =>
+          switch (searchTermType) {
+            TSearchTermType.arrayContains =>
+            limit == null
+                ? collectionReference.where(
+              searchField,
+              arrayContainsAny: [searchTerm, ...searchTerm.split(' ')],
+            )
+                : collectionReference
+                .where(
+              searchField,
+              arrayContainsAny: [
+                searchTerm,
+                ...searchTerm.split(' '),
+              ],
+            )
+                .limit(limit),
+            TSearchTermType.startsWith =>
+            limit == null
+                ? collectionReference.where(
+              searchField,
+              isGreaterThanOrEqualTo: searchTerm,
+              isLessThan: '$searchTerm\uf8ff',
+            )
+                : collectionReference
+                .where(
+              searchField,
+              isGreaterThanOrEqualTo: searchTerm,
+              isLessThan: '$searchTerm\uf8ff',
+            )
+                .limit(limit),
+          };
       final result = (await collectionReferenceQuery(
         listCollectionReferenceWithConverter(),
       ).get(_getOptions)).docs.map((e) => e.data()).toList();
@@ -310,40 +311,40 @@ mixin TurboFirestoreSearchApi<DTO extends TWriteableId, MODEL extends TModel<DTO
             Query<DTO> collectionReferenceQuery(Query<DTO> collectionReference) =>
                 switch (searchTermType) {
                   TSearchTermType.startsWith =>
-                    limit == null
-                        ? collectionReference.where(
-                            searchField,
-                            arrayContainsAny: [numberSearchTerm],
-                          )
-                        : collectionReference
-                              .where(
-                                searchField,
-                                arrayContainsAny: [numberSearchTerm],
-                              )
-                              .limit(limit),
+                  limit == null
+                      ? collectionReference.where(
+                    searchField,
+                    arrayContainsAny: [numberSearchTerm],
+                  )
+                      : collectionReference
+                      .where(
+                    searchField,
+                    arrayContainsAny: [numberSearchTerm],
+                  )
+                      .limit(limit),
                   TSearchTermType.arrayContains =>
-                    limit == null
-                        ? collectionReference.where(
-                            searchField,
-                            isGreaterThanOrEqualTo: numberSearchTerm,
-                            isLessThan: numberSearchTerm + 1,
-                          )
-                        : collectionReference
-                              .where(
-                                searchField,
-                                isGreaterThanOrEqualTo: numberSearchTerm,
-                                isLessThan: numberSearchTerm + 1,
-                              )
-                              .limit(limit),
+                  limit == null
+                      ? collectionReference.where(
+                    searchField,
+                    isGreaterThanOrEqualTo: numberSearchTerm,
+                    isLessThan: numberSearchTerm + 1,
+                  )
+                      : collectionReference
+                      .where(
+                    searchField,
+                    isGreaterThanOrEqualTo: numberSearchTerm,
+                    isLessThan: numberSearchTerm + 1,
+                  )
+                      .limit(limit),
                 };
             final numberResult =
-                (await collectionReferenceQuery(
-                      listCollectionReferenceWithConverter(),
-                    ).get(_getOptions)).docs
-                    .map(
-                      (e) => e.data(),
-                    )
-                    .toList();
+            (await collectionReferenceQuery(
+              listCollectionReferenceWithConverter(),
+            ).get(_getOptions)).docs
+                .map(
+                  (e) => e.data(),
+            )
+                .toList();
             result.addAll(numberResult);
           }
         } catch (error, stackTrace) {

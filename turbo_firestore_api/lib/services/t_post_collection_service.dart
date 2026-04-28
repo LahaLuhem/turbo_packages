@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:turbo_firestore_api/abstracts/t_model.dart';
-import 'package:turbo_firestore_api/extensions/t_list_extension.dart';
 import 'package:turbo_firestore_api/models/t_model_docs.dart';
 import 'package:turbo_firestore_api/services/t_collection_service.dart';
 import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
@@ -17,8 +16,14 @@ abstract class TPostCollectionService<DTO extends TWriteableId, MODEL extends TM
   /// Creates a new [TPostCollectionService] instance.
   TPostCollectionService({
     required super.collection,
+    required super.modelBuilder,
     super.apiBuilder,
     super.initialiseStream = true,
+    super.defaultValue,
+    super.firestoreCacheService,
+    super.initialValue,
+    super.modelDocsBuilder,
+    super.streamBuilder,
   });
 
   /// Called after the local state has been updated with new data.
@@ -54,7 +59,7 @@ abstract class TPostCollectionService<DTO extends TWriteableId, MODEL extends TM
         docsNotifier.update(
           TModelDocs.fromDtos(
             dtos: docs,
-            modelBuilder: api.modelBuilder,
+            modelBuilder: (dto) => modelBuilder(api, this, dto),
           ),
         );
         markAsReady();

@@ -16,8 +16,14 @@ abstract class THookCollectionService<DTO extends TWriteableId, MODEL extends TM
   /// Creates a new [THookCollectionService] instance.
   THookCollectionService({
     required super.collection,
+    required super.modelBuilder,
     super.apiBuilder,
     super.initialiseStream = true,
+    super.defaultValue,
+    super.firestoreCacheService,
+    super.initialValue,
+    super.modelDocsBuilder,
+    super.streamBuilder,
   });
 
   /// Called before the local state is updated with new data.
@@ -64,7 +70,7 @@ abstract class THookCollectionService<DTO extends TWriteableId, MODEL extends TM
         docsNotifier.update(
           TModelDocs.fromDtos(
             dtos: docs,
-            modelBuilder: api.modelBuilder,
+            modelBuilder: (dto) => modelBuilder(api, this, dto),
           ),
         );
         markAsReady();

@@ -17,8 +17,14 @@ abstract class TPreCollectionService<DTO extends TWriteableId, MODEL extends TMo
   /// Creates a new [TPreCollectionService] instance.
   TPreCollectionService({
     required super.collection,
+    required super.modelBuilder,
     super.apiBuilder,
     super.initialiseStream = true,
+    super.defaultValue,
+    super.firestoreCacheService,
+    super.initialValue,
+    super.modelDocsBuilder,
+    super.streamBuilder,
   });
 
   /// Called before the local state is updated with new data.
@@ -55,7 +61,7 @@ abstract class TPreCollectionService<DTO extends TWriteableId, MODEL extends TMo
         docsNotifier.update(
           TModelDocs.fromDtos(
             dtos: docs,
-            modelBuilder: api.modelBuilder,
+            modelBuilder: (dto) => modelBuilder(api, this, dto),
           ),
         );
         markAsReady();

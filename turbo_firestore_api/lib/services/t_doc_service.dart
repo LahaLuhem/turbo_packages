@@ -7,6 +7,7 @@ import 'package:turbo_firestore_api/abstracts/i_firestore_cache_service.dart';
 import 'package:turbo_firestore_api/abstracts/t_model.dart';
 import 'package:turbo_firestore_api/factories/t_api_factory.dart';
 import 'package:turbo_firestore_api/turbo_firestore_api.dart';
+import 'package:turbo_firestore_api/typedefs/t_model_builder_def.dart';
 import 'package:turbo_notifiers/turbo_notifiers.dart';
 import 'package:turbo_response/turbo_response.dart';
 import 'package:turbo_serializable/abstracts/t_writeable.dart';
@@ -36,6 +37,7 @@ class TDocService<DTO extends TWriteableId, MODEL extends TModel<DTO>> extends T
   /// - [initialiseStream] - Whether to automatically initialize the Firestore stream on service
   TDocService({
     required this.defaultValue,
+    required this.modelBuilder,
     this.apiBuilder,
     this.streamBuilder,
     required this.collection,
@@ -51,7 +53,7 @@ class TDocService<DTO extends TWriteableId, MODEL extends TModel<DTO>> extends T
 
   @protected
   /// The Firestore collection definition that this service manages.
-  final TFirestoreCollection<DTO, MODEL> collection;
+  final TFirestoreCollection<DTO> collection;
 
   @protected
   /// Optional builder function to create the Firestore API instance. If not provided, the API will be created using the collection's `api()` method.
@@ -60,6 +62,10 @@ class TDocService<DTO extends TWriteableId, MODEL extends TModel<DTO>> extends T
   @protected
   /// Optional builder function to create the Firestore stream. If not provided, the stream will be created using the API's `streamAllWithConverter()` method.
   final TDocStreamBuilderDef<DTO, MODEL>? streamBuilder;
+
+  @protected
+  /// Function to convert between DTO and MODEL for local state management.
+  final TDocModelBuilderDef<DTO, MODEL> modelBuilder;
 
   @protected
   /// Function to provide initial document value.
@@ -128,17 +134,13 @@ class TDocService<DTO extends TWriteableId, MODEL extends TModel<DTO>> extends T
             doc: (current, _) => value,
           );
         } else {
-          _doc.update(
-            api.modelBuilder(defaultValue.call(vars(), collection, this)),
-          );
+          _doc.update(defaultDoc());
         }
         _isReady.completeIfNotComplete();
         log.debug('Updated doc');
       } else {
         log.debug('User is null, clearing doc');
-        _doc.update(
-          api.modelBuilder(defaultValue.call(vars(), collection, this)),
-        );
+        _doc.update(defaultDoc());
       }
     };
   }
@@ -172,10 +174,10 @@ class TDocService<DTO extends TWriteableId, MODEL extends TModel<DTO>> extends T
   // 🎩 STATE --------------------------------------------------------------------------------- \\
 
   /// The Firestore API instance for remote operations.
-  late final TFirestoreApi<DTO, MODEL> api =
+  late final TFirestoreApi<DTO> api =
       apiBuilder?.call(
         user,
-        TApiFactory<DTO, MODEL>(collection: collection),
+        TApiFactory<DTO>(collection: collection),
         this,
         firestoreCacheService,
       ) ??
@@ -185,12 +187,7 @@ class TDocService<DTO extends TWriteableId, MODEL extends TModel<DTO>> extends T
       );
 
   /// Local state for the document.
-  late final _doc = TNotifier<MODEL>(
-    api.modelBuilder(
-      initialValue?.call(vars(), collection, this) ?? (defaultValue.call(vars(), collection, this)),
-    ),
-    forceUpdate: true,
-  );
+  late final _doc = TNotifier<MODEL>(initialDoc(), forceUpdate: true);
 
   /// Completer that resolves when the service is ready.
   final _isReady = Completer<void>();
@@ -230,6 +227,19 @@ class TDocService<DTO extends TWriteableId, MODEL extends TModel<DTO>> extends T
   String get id => _doc.value.id;
 
   // 🏗️ HELPERS ------------------------------------------------------------------------------- \\
+
+  @protected
+  DTO initialDto() => initialValue?.call(vars(), collection, this) ?? defaultDto();
+
+  @protected
+  MODEL initialDoc() => modelBuilder(api, this, initialDto());
+
+  @protected
+  DTO defaultDto() => defaultValue.call(vars(), collection, this);
+
+  @protected
+  MODEL defaultDoc() => modelBuilder(api, this, defaultDto());
+
   // ⚙️ LOCAL MUTATORS ------------------------------------------------------------------------ \\
 
   /// Clears the local document state.
@@ -239,7 +249,7 @@ class TDocService<DTO extends TWriteableId, MODEL extends TModel<DTO>> extends T
       beforeLocalNotifyUpdate?.call(null);
     }
     _doc.update(
-      api.modelBuilder(defaultValue.call(vars(), collection, this)),
+      defaultDoc(),
       doNotifyListeners: doNotifyListeners,
     );
     if (doNotifyListeners) {
@@ -265,7 +275,7 @@ class TDocService<DTO extends TWriteableId, MODEL extends TModel<DTO>> extends T
       beforeLocalNotifyUpdate?.call(null);
     }
     _doc.update(
-      api.modelBuilder(defaultValue.call(vars(), collection, this)),
+      defaultDoc(),
       doNotifyListeners: doNotifyListeners,
     );
     if (doNotifyListeners) {
@@ -288,7 +298,10 @@ class TDocService<DTO extends TWriteableId, MODEL extends TModel<DTO>> extends T
     if (doNotifyListeners) {
       beforeLocalNotifyUpdate?.call(pDoc);
     }
-    _doc.update(api.modelBuilder(pDoc), doNotifyListeners: doNotifyListeners);
+    _doc.update(
+      modelBuilder(api, this, pDoc),
+      doNotifyListeners: doNotifyListeners,
+    );
     if (doNotifyListeners) {
       afterLocalNotifyUpdate?.call(pDoc);
     }
@@ -312,7 +325,7 @@ class TDocService<DTO extends TWriteableId, MODEL extends TModel<DTO>> extends T
     if (doNotifyListeners) {
       beforeLocalNotifyUpdate?.call(pDoc);
     }
-    _doc.update(api.modelBuilder(pDoc), doNotifyListeners: doNotifyListeners);
+    _doc.update(modelBuilder(api, this, pDoc), doNotifyListeners: doNotifyListeners);
     if (doNotifyListeners) {
       afterLocalNotifyUpdate?.call(pDoc);
     }
@@ -342,7 +355,7 @@ class TDocService<DTO extends TWriteableId, MODEL extends TModel<DTO>> extends T
     if (doNotifyListeners) {
       beforeLocalNotifyUpdate?.call(pDoc);
     }
-    _doc.update(api.modelBuilder(pDoc), doNotifyListeners: doNotifyListeners);
+    _doc.update(modelBuilder(api, this, pDoc), doNotifyListeners: doNotifyListeners);
     if (doNotifyListeners) {
       afterLocalNotifyUpdate?.call(pDoc);
     }

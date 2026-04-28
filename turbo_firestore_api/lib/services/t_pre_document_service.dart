@@ -16,10 +16,14 @@ abstract class TPreDocService<DTO extends TWriteableId, MODEL extends TModel<DTO
   TPreDocService({
     required super.collection,
     required super.defaultValue,
+    required super.modelBuilder,
     super.apiBuilder,
     super.initialValue,
     super.initialiseStream = true,
     super.streamBuilder,
+    super.afterLocalNotifyUpdate,
+    super.beforeLocalNotifyUpdate,
+    super.firestoreCacheService,
   });
 
   /// Called before the local state is updated with new data.

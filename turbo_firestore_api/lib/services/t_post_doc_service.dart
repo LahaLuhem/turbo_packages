@@ -16,10 +16,14 @@ abstract class TPostDocService<DTO extends TWriteableId, MODEL extends TModel<DT
   TPostDocService({
     required super.collection,
     required super.defaultValue,
+    required super.modelBuilder,
     super.apiBuilder,
     super.initialValue,
     super.initialiseStream = true,
     super.streamBuilder,
+    super.afterLocalNotifyUpdate,
+    super.beforeLocalNotifyUpdate,
+    super.firestoreCacheService,
   });
 
   /// Called after the local state has been updated with new data.

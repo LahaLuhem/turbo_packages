@@ -8,17 +8,17 @@ import 'package:turbo_firestore_api/services/t_doc_service.dart';
 import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
 
 typedef TCollectionApiBuilderDef<DTO extends TWriteableId, MODEL extends TModel<DTO>> =
-    TFirestoreApi<DTO, MODEL> Function(
+    TFirestoreApi<DTO> Function(
       User? user,
-      TApiFactory<DTO, MODEL> factory,
+      TApiFactory<DTO> factory,
       TCollectionService<DTO, MODEL> service,
       IFirestoreCacheService? firestoreCacheService,
     );
 
 typedef TDocApiBuilderDef<DTO extends TWriteableId, MODEL extends TModel<DTO>> =
-    TFirestoreApi<DTO, MODEL> Function(
+    TFirestoreApi<DTO> Function(
       User? user,
-      TApiFactory<DTO, MODEL> collection,
+      TApiFactory<DTO> factory,
       TDocService<DTO, MODEL> service,
       IFirestoreCacheService? firestoreCacheService,
     );

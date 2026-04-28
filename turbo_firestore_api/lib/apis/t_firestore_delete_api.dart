@@ -20,7 +20,7 @@ part of 't_firestore_api.dart';
 /// See also:
 /// [TFirestoreUpdateApi] document updates
 /// [TFirestoreCreateApi] document creation
-mixin TFirestoreDeleteApi<DTO extends TWriteableId, MODEL extends TModel<DTO>> on _TFirestoreApiBase<DTO, MODEL> {
+mixin TFirestoreDeleteApi<DTO> on _TFirestoreApiBase<DTO> {
   /// Deletes a document from Firestore
   ///
   /// Permanently removes document and all its data
@@ -61,10 +61,10 @@ mixin TFirestoreDeleteApi<DTO extends TWriteableId, MODEL extends TModel<DTO>> o
     Transaction? transaction,
   }) async {
     assert(
-      _isCollectionGroup == (collectionPathOverride != null),
-      'Firestore does not support finding a document by id when communicating with a collection group, '
-      'therefore, you must specify the collectionPathOverride containing all parent collection and document ids '
-      'in order to make this method work.',
+    _isCollectionGroup == (collectionPathOverride != null),
+    'Firestore does not support finding a document by id when communicating with a collection group, '
+        'therefore, you must specify the collectionPathOverride containing all parent collection and document ids '
+        'in order to make this method work.',
     );
     try {
       _log.debug(
@@ -228,10 +228,10 @@ mixin TFirestoreDeleteApi<DTO extends TWriteableId, MODEL extends TModel<DTO>> o
     String? collectionPathOverride,
   }) async {
     assert(
-      _isCollectionGroup == (collectionPathOverride != null),
-      'Firestore does not support finding a document by id when communicating with a collection group, '
-      'therefore, you must specify the collectionPathOverride containing all parent collection and document ids '
-      'in order to make this method work.',
+    _isCollectionGroup == (collectionPathOverride != null),
+    'Firestore does not support finding a document by id when communicating with a collection group, '
+        'therefore, you must specify the collectionPathOverride containing all parent collection and document ids '
+        'in order to make this method work.',
     );
     try {
       _log.debug(
@@ -254,7 +254,7 @@ mixin TFirestoreDeleteApi<DTO extends TWriteableId, MODEL extends TModel<DTO>> o
       nullSafeWriteBatch.delete(documentReference);
       _log.info(
         message:
-            'Adding delete to batch done! Returning WriteBatchWithReference..',
+        'Adding delete to batch done! Returning WriteBatchWithReference..',
         sensitiveData: null,
       );
       return TurboResponse.success(

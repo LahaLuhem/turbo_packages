@@ -6,14 +6,13 @@ import 'package:turbo_response/turbo_response.dart';
 
 import '../dtos/example_dto.dart';
 
-class ExampleAPI extends TFirestoreApi<ExampleDTO, ExampleModel> {
+class ExampleAPI extends TFirestoreApi<ExampleDTO> {
   ExampleAPI()
     : super(
         collectionPath: () => 'Examples',
         firebaseFirestore: FirebaseFirestore.instance,
         fromJson: ExampleDTO.fromJson,
         toJson: (dto) => dto.toJson(),
-        modelBuilder: (dto) => ExampleModel(dto: dto),
       );
 
   Future<TurboResponse<DocumentReference>> createExample() {

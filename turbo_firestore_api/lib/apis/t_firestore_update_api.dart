@@ -24,7 +24,7 @@ part of 't_firestore_api.dart';
 /// See also:
 /// [TFirestoreCreateApi] document creation
 /// [TFirestoreDeleteApi] document deletion
-mixin TFirestoreUpdateApi<DTO extends TWriteableId, MODEL extends TModel<DTO>> on _TFirestoreApiBase<DTO, MODEL> {
+mixin TFirestoreUpdateApi<DTO> on _TFirestoreApiBase<DTO> {
   /// Updates an existing document in Firestore
   ///
   /// Modifies document data while preserving fields not included in [writeable]
@@ -74,10 +74,10 @@ mixin TFirestoreUpdateApi<DTO extends TWriteableId, MODEL extends TModel<DTO>> o
     Transaction? transaction,
   }) async {
     assert(
-      _isCollectionGroup == (collectionPathOverride != null),
-      'Firestore does not support finding a document by id when communicating with a collection group, '
-      'therefore, you must specify the collectionPathOverride containing all parent collection and document ids '
-      'in order to make this method work.',
+    _isCollectionGroup == (collectionPathOverride != null),
+    'Firestore does not support finding a document by id when communicating with a collection group, '
+        'therefore, you must specify the collectionPathOverride containing all parent collection and document ids '
+        'in order to make this method work.',
     );
     try {
       _log.debug(
@@ -262,10 +262,10 @@ mixin TFirestoreUpdateApi<DTO extends TWriteableId, MODEL extends TModel<DTO>> o
     String? collectionPathOverride,
   }) async {
     assert(
-      _isCollectionGroup == (collectionPathOverride != null),
-      'Firestore does not support finding a document by id when communicating with a collection group, '
-      'therefore, you must specify the collectionPathOverride containing all parent collection and document ids '
-      'in order to make this method work.',
+    _isCollectionGroup == (collectionPathOverride != null),
+    'Firestore does not support finding a document by id when communicating with a collection group, '
+        'therefore, you must specify the collectionPathOverride containing all parent collection and document ids '
+        'in order to make this method work.',
     );
     final TurboResponse<TWriteBatchWithReference<Map<String, dynamic>>>?
     invalidResponse = writeable.validate();
@@ -310,7 +310,7 @@ mixin TFirestoreUpdateApi<DTO extends TWriteableId, MODEL extends TModel<DTO>> o
       );
       _log.info(
         message:
-            'Adding update to batch done! Returning WriteBatchWithReference..',
+        'Adding update to batch done! Returning WriteBatchWithReference..',
         sensitiveData: null,
       );
       return TurboResponse.success(

@@ -7,16 +7,21 @@ import 'package:turbo_firestore_api/turbo_firestore_api.dart';
 import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
 import 'package:turbolytics/turbolytics.dart';
 
-class TUserDocService<DTO extends TWriteableId, MODEL extends TModel<DTO>> extends TDocService<DTO, MODEL>
+class TUserDocService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
+    extends TDocService<DTO, MODEL>
     with Turbolytics {
   TUserDocService({
     required super.collection,
     required super.defaultValue,
+    required super.modelBuilder,
     this.userIdLocation = UserIdLocation.docId,
     super.apiBuilder,
     super.streamBuilder,
     super.initialValue,
     super.initialiseStream = true,
+    super.afterLocalNotifyUpdate,
+    super.beforeLocalNotifyUpdate,
+    super.firestoreCacheService,
   });
 
   final UserIdLocation userIdLocation;
@@ -29,12 +34,15 @@ class TUserDocService<DTO extends TWriteableId, MODEL extends TModel<DTO>> exten
             UserIdLocation.docId => api.streamByDocIdWithConverter(
               id: user.uid,
             ),
-            UserIdLocation.field => api.streamByQueryWithConverter(
-              whereDescription: '${api.userIdFieldName} == ${user.uid}',
-              collectionReferenceQuery: (collectionReference) => collectionReference.where(
-                api.userIdFieldName,
-                isEqualTo: user.uid,
-              ),
-            ).map((event) => event.firstOrNull),
+            UserIdLocation.field =>
+              api
+                  .streamByQueryWithConverter(
+                    whereDescription: '${api.userIdFieldName} == ${user.uid}',
+                    collectionReferenceQuery: (collectionReference) => collectionReference.where(
+                      api.userIdFieldName,
+                      isEqualTo: user.uid,
+                    ),
+                  )
+                  .map((event) => event.firstOrNull),
           };
 }
