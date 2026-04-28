@@ -25,7 +25,8 @@ part of 't_firestore_api.dart';
 /// See also:
 /// [TurboFirestoreListApi] list operations
 /// [TurboFirestoreGetApi] single document retrieval
-mixin TurboFirestoreSearchApi<T> on _TFirestoreApiBase<T> {
+mixin TurboFirestoreSearchApi<DTO extends TWriteableId, MODEL extends TModel<DTO>>
+    on _TFirestoreApiBase<DTO, MODEL> {
   /// Searches for documents matching a search term
   ///
   /// Returns raw Firestore data without type conversion
@@ -169,8 +170,7 @@ mixin TurboFirestoreSearchApi<T> on _TFirestoreApiBase<T> {
           }
         } catch (error, stackTrace) {
           _log.error(
-            message:
-                '${error.runtimeType} caught while trying to search for number equivalent',
+            message: '${error.runtimeType} caught while trying to search for number equivalent',
             sensitiveData: TSensitiveData(
               path: _collectionPath(),
               searchTerm: searchTerm,
@@ -251,7 +251,7 @@ mixin TurboFirestoreSearchApi<T> on _TFirestoreApiBase<T> {
   /// See also:
   /// [listBySearchTerm] raw data search
   /// [listByQueryWithConverter] custom type-safe queries
-  Future<TurboResponse<List<T>>> listBySearchTermWithConverter({
+  Future<TurboResponse<List<DTO>>> listBySearchTermWithConverter({
     required String searchTerm,
     required String searchField,
     required TSearchTermType searchTermType,
@@ -269,38 +269,37 @@ mixin TurboFirestoreSearchApi<T> on _TFirestoreApiBase<T> {
           limit: limit,
         ),
       );
-      Query<T> collectionReferenceQuery(Query<T> collectionReference) =>
-          switch (searchTermType) {
-            TSearchTermType.arrayContains =>
-              limit == null
-                  ? collectionReference.where(
+      Query<DTO> collectionReferenceQuery(Query<DTO> collectionReference) => switch (searchTermType) {
+        TSearchTermType.arrayContains =>
+          limit == null
+              ? collectionReference.where(
+                  searchField,
+                  arrayContainsAny: [searchTerm, ...searchTerm.split(' ')],
+                )
+              : collectionReference
+                    .where(
                       searchField,
-                      arrayContainsAny: [searchTerm, ...searchTerm.split(' ')],
+                      arrayContainsAny: [
+                        searchTerm,
+                        ...searchTerm.split(' '),
+                      ],
                     )
-                  : collectionReference
-                        .where(
-                          searchField,
-                          arrayContainsAny: [
-                            searchTerm,
-                            ...searchTerm.split(' '),
-                          ],
-                        )
-                        .limit(limit),
-            TSearchTermType.startsWith =>
-              limit == null
-                  ? collectionReference.where(
+                    .limit(limit),
+        TSearchTermType.startsWith =>
+          limit == null
+              ? collectionReference.where(
+                  searchField,
+                  isGreaterThanOrEqualTo: searchTerm,
+                  isLessThan: '$searchTerm\uf8ff',
+                )
+              : collectionReference
+                    .where(
                       searchField,
                       isGreaterThanOrEqualTo: searchTerm,
                       isLessThan: '$searchTerm\uf8ff',
                     )
-                  : collectionReference
-                        .where(
-                          searchField,
-                          isGreaterThanOrEqualTo: searchTerm,
-                          isLessThan: '$searchTerm\uf8ff',
-                        )
-                        .limit(limit),
-          };
+                    .limit(limit),
+      };
       final result = (await collectionReferenceQuery(
         listCollectionReferenceWithConverter(),
       ).get(_getOptions)).docs.map((e) => e.data()).toList();
@@ -308,7 +307,7 @@ mixin TurboFirestoreSearchApi<T> on _TFirestoreApiBase<T> {
         try {
           final numberSearchTerm = double.tryParse(searchTerm);
           if (numberSearchTerm != null) {
-            Query<T> collectionReferenceQuery(Query<T> collectionReference) =>
+            Query<DTO> collectionReferenceQuery(Query<DTO> collectionReference) =>
                 switch (searchTermType) {
                   TSearchTermType.startsWith =>
                     limit == null

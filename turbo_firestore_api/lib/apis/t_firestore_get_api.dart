@@ -21,7 +21,8 @@ part of 't_firestore_api.dart';
 /// See also:
 /// - [TFirestoreCreateApi] document creation and updates
 /// - [TFirestoreDeleteApi] document deletion
-mixin TurboFirestoreGetApi<T> on _TFirestoreApiBase<T> {
+mixin TurboFirestoreGetApi<DTO extends TWriteableId, MODEL extends TModel<DTO>>
+    on _TFirestoreApiBase<DTO, MODEL> {
   /// Retrieves a document by its unique identifier
   ///
   /// Returns raw Firestore data without type conversion. Useful for direct data access
@@ -148,7 +149,7 @@ mixin TurboFirestoreGetApi<T> on _TFirestoreApiBase<T> {
 
   /// Retrieves and converts a document by its unique identifier
   ///
-  /// Returns document data converted to type [T] using [_fromJson]
+  /// Returns document data converted to type [DTO] using [_fromJson]
   /// Provides type-safe access to Firestore data
   ///
   /// Parameters:
@@ -179,7 +180,7 @@ mixin TurboFirestoreGetApi<T> on _TFirestoreApiBase<T> {
   /// See also:
   /// - [getById] raw data access
   /// - [getDocRefByIdWithConverter] typed document reference
-  Future<TurboResponse<T>> getByIdWithConverter({
+  Future<TurboResponse<DTO>> getByIdWithConverter({
     required String id,
     String? collectionPathOverride,
     bool tryCache = true,
@@ -377,7 +378,7 @@ mixin TurboFirestoreGetApi<T> on _TFirestoreApiBase<T> {
 
   /// Gets a document reference with type conversion
   ///
-  /// Returns [DocumentReference] with automatic conversion between Firestore and [T]
+  /// Returns [DocumentReference] with automatic conversion between Firestore and [DTO]
   /// Requires [_fromJson] and [_toJson] configuration
   ///
   /// Parameters:
@@ -404,7 +405,7 @@ mixin TurboFirestoreGetApi<T> on _TFirestoreApiBase<T> {
   /// - [getDocRefById] raw data references
   /// - [getByIdWithConverter] direct typed access
   @override
-  DocumentReference<T> getDocRefByIdWithConverter({
+  DocumentReference<DTO> getDocRefByIdWithConverter({
     required String id,
     String? collectionPathOverride,
   }) {
@@ -423,7 +424,7 @@ mixin TurboFirestoreGetApi<T> on _TFirestoreApiBase<T> {
     );
     return _firebaseFirestore
         .doc('${_pPath(collectionPathOverride)}/$id')
-        .withConverter<T>(
+        .withConverter<DTO>(
           fromFirestore: (snapshot, _) {
             final data = snapshot.data() ?? {};
             try {
@@ -564,7 +565,7 @@ mixin TurboFirestoreGetApi<T> on _TFirestoreApiBase<T> {
 
   /// Gets a document snapshot with type conversion
   ///
-  /// Returns [DocumentSnapshot] with automatic conversion to type [T]
+  /// Returns [DocumentSnapshot] with automatic conversion to type [DTO]
   /// Useful for accessing metadata with typed data
   ///
   /// Parameters:
@@ -590,7 +591,7 @@ mixin TurboFirestoreGetApi<T> on _TFirestoreApiBase<T> {
   /// See also:
   /// - [getDocSnapshotById] raw data snapshots
   /// - [getDocRefByIdWithConverter] reference access
-  Future<DocumentSnapshot<T>> getDocSnapshotByIdWithConverter({
+  Future<DocumentSnapshot<DTO>> getDocSnapshotByIdWithConverter({
     required String id,
     String? collectionPathOverride,
   }) async {

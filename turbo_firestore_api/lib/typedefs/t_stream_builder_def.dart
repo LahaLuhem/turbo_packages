@@ -1,17 +1,18 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:turbo_firestore_api/abstracts/t_model.dart';
 import 'package:turbo_firestore_api/turbo_firestore_api.dart';
 import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
 
-typedef TCollectionStreamBuilderDef<T extends TWriteableId> =
-    Stream<List<T>> Function(
+typedef TCollectionStreamBuilderDef<DTO extends TWriteableId, MODEL extends TModel<DTO>> =
+    Stream<List<DTO>> Function(
       User user,
-      TFirestoreApi<T> api,
-      TCollectionService<T> service,
+      TFirestoreApi<DTO, MODEL> api,
+      TCollectionService<DTO, MODEL> service,
     );
 
-typedef TDocStreamBuilderDef<T extends TWriteableId> =
-    Stream<T?> Function(
+typedef TDocStreamBuilderDef<DTO extends TWriteableId, MODEL extends TModel<DTO>> =
+    Stream<DTO?> Function(
       User user,
-      TFirestoreApi<T> api,
-      TDocService<T> service,
+      TFirestoreApi<DTO, MODEL> api,
+      TDocService<DTO, MODEL> service,
     );

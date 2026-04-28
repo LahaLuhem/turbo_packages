@@ -1,11 +1,12 @@
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:turbo_firestore_api/abstracts/t_model.dart';
 import 'package:turbo_firestore_api/turbo_firestore_api.dart';
 import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
 import 'package:turbolytics/turbolytics.dart';
 
-class TUserCollectionService<WRITEABLE extends TWriteableId> extends TCollectionService<WRITEABLE>
+class TUserCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>> extends TCollectionService<DTO, MODEL>
     with Turbolytics {
   TUserCollectionService({
     required super.collection,
@@ -17,7 +18,7 @@ class TUserCollectionService<WRITEABLE extends TWriteableId> extends TCollection
   });
 
   @override
-  Stream<List<WRITEABLE>> Function(User user) get stream =>
+  Stream<List<DTO>> Function(User user) get stream =>
       (user) =>
           streamBuilder?.call(user, api, this) ??
           api.streamByQueryWithConverter(

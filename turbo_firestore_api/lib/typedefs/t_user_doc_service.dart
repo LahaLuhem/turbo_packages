@@ -1,12 +1,13 @@
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:turbo_firestore_api/abstracts/t_model.dart';
 import 'package:turbo_firestore_api/enums/t_user_id_location.dart';
 import 'package:turbo_firestore_api/turbo_firestore_api.dart';
 import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
 import 'package:turbolytics/turbolytics.dart';
 
-class TUserDocService<WRITEABLE extends TWriteableId> extends TDocService<WRITEABLE>
+class TUserDocService<DTO extends TWriteableId, MODEL extends TModel<DTO>> extends TDocService<DTO, MODEL>
     with Turbolytics {
   TUserDocService({
     required super.collection,
@@ -21,7 +22,7 @@ class TUserDocService<WRITEABLE extends TWriteableId> extends TDocService<WRITEA
   final UserIdLocation userIdLocation;
 
   @override
-  Stream<WRITEABLE?> Function(User user) get stream =>
+  Stream<DTO?> Function(User user) get stream =>
       (user) =>
           streamBuilder?.call(user, api, this) ??
           switch (userIdLocation) {

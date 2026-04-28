@@ -1,14 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:turbo_firestore_api/abstracts/i_firestore_cache_service.dart';
+import 'package:turbo_firestore_api/abstracts/t_model.dart';
 import 'package:turbo_firestore_api/turbo_firestore_api.dart';
+import 'package:turbo_firestore_api/typedefs/t_model_builder_def.dart';
 import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
 
-class TFirestoreCollection<WRITEABLE extends TWriteableId> {
+class TFirestoreCollection<DTO extends TWriteableId, MODEL extends TModel<DTO>> {
   const TFirestoreCollection({
     required this.apiName,
     required this.collectionName,
     required this.fromJson,
     required this.toJson,
+    required this.modelBuilder,
     this.createdAtFieldName = TFirestoreApiDefaults.createdAtFieldName,
     this.documentReferenceFieldName = TFirestoreApiDefaults.documentReferenceFieldName,
     this.fromJsonError,
@@ -23,7 +26,9 @@ class TFirestoreCollection<WRITEABLE extends TWriteableId> {
     this.tryCache = false,
   });
 
-  final Map<String, dynamic> Function(WRITEABLE value) toJson;
+  final DTO Function(Map<String, dynamic> json) fromJson;
+  final DTO Function(Map<String, dynamic> json)? fromJsonError;
+  final Map<String, dynamic> Function(DTO value) toJson;
   final String apiName;
   final String collectionName;
   final String createdAtFieldName;
@@ -33,22 +38,24 @@ class TFirestoreCollection<WRITEABLE extends TWriteableId> {
   final String unknownIdFallback;
   final String updatedAtFieldName;
   final String userIdFieldName;
-  final WRITEABLE Function(Map<String, dynamic> json) fromJson;
-  final WRITEABLE Function(Map<String, dynamic> json)? fromJsonError;
+  final TModelBuilderDef<DTO, MODEL> modelBuilder;
   final bool isCollectionGroup;
   final bool tryAddLocalDocumentReference;
   final bool tryAddLocalId;
   final bool tryCache;
 
-  TFirestoreApi<WRITEABLE> api({
+  TFirestoreApi<DTO, MODEL> api({
     FirebaseFirestore? firebaseFirestore,
     GetOptions? getOptions,
     String Function(String collectionName)? path,
     TFirestoreLogger? logger,
     bool? isCollectionGroup,
     IFirestoreCacheService? firestoreCacheService,
-  }) => TFirestoreApi<WRITEABLE>(
-    firestoreCache: firestoreCacheService != null ? TFirestoreCache(firestoreCacheService: firestoreCacheService!) : null,
+  }) => TFirestoreApi<DTO, MODEL>(
+    modelBuilder: modelBuilder,
+    firestoreCache: firestoreCacheService != null
+        ? TFirestoreCache(firestoreCacheService: firestoreCacheService)
+        : null,
     userIdFieldName: userIdFieldName,
     defaultId: defaultId,
     unknownId: unknownIdFallback,
@@ -68,13 +75,13 @@ class TFirestoreCollection<WRITEABLE extends TWriteableId> {
     updatedAtFieldName: updatedAtFieldName,
   );
 
-  TCollectionService<WRITEABLE> collectionService({
-    TCollectionApiBuilderDef<WRITEABLE>? apiBuilder,
-    TCollectionStreamBuilderDef<WRITEABLE>? streamBuilder,
-    TCollectionValueBuilderDef<WRITEABLE>? initialValue,
-    TCollectionValueBuilderDef<WRITEABLE>? defaultValue,
+  TCollectionService<DTO, MODEL> collectionService({
+    TCollectionApiBuilderDef<DTO, MODEL>? apiBuilder,
+    TCollectionStreamBuilderDef<DTO, MODEL>? streamBuilder,
+    TCollectionValueBuilderDef<DTO, MODEL>? initialValue,
+    TCollectionValueBuilderDef<DTO, MODEL>? defaultValue,
     bool initialiseStream = true,
-  }) => TCollectionService(
+  }) => TCollectionService<DTO, MODEL>(
     collection: this,
     apiBuilder: apiBuilder,
     defaultValue: defaultValue,
@@ -83,13 +90,13 @@ class TFirestoreCollection<WRITEABLE extends TWriteableId> {
     initialiseStream: initialiseStream,
   );
 
-  TDocService<WRITEABLE> docService({
-    required TDocValueBuilderDef<WRITEABLE> defaultValue,
-    TDocApiBuilderDef<WRITEABLE>? apiBuilder,
-    TDocStreamBuilderDef<WRITEABLE>? streamBuilder,
-    TDocValueBuilderDef<WRITEABLE>? initialValue,
+  TDocService<DTO, MODEL> docService({
+    required TDocValueBuilderDef<DTO, MODEL> defaultValue,
+    TDocApiBuilderDef<DTO, MODEL>? apiBuilder,
+    TDocStreamBuilderDef<DTO, MODEL>? streamBuilder,
+    TDocValueBuilderDef<DTO, MODEL>? initialValue,
     bool initialiseStream = true,
-  }) => TDocService(
+  }) => TDocService<DTO, MODEL>(
     collection: this,
     apiBuilder: apiBuilder,
     defaultValue: defaultValue,

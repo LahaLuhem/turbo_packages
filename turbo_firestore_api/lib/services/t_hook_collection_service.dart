@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:turbo_firestore_api/models/t_id_docs.dart';
+import 'package:turbo_firestore_api/abstracts/t_model.dart';
+import 'package:turbo_firestore_api/models/t_model_docs.dart';
 import 'package:turbo_firestore_api/services/t_collection_service.dart';
 import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
 
@@ -9,9 +10,9 @@ import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
 /// the local state is updated with new data from Firestore.
 ///
 /// Type Parameters:
-/// - [WRITEABLE] - The document type, must extend [TWriteableId]
-abstract class THookCollectionService<WRITEABLE extends TWriteableId>
-    extends TCollectionService<WRITEABLE> {
+/// - [DTO] - The document type, must extend [TWriteableId]
+abstract class THookCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
+    extends TCollectionService<DTO, MODEL> {
   /// Creates a new [THookCollectionService] instance.
   THookCollectionService({
     required super.collection,
@@ -26,7 +27,7 @@ abstract class THookCollectionService<WRITEABLE extends TWriteableId>
   ///
   /// Parameters:
   /// - [docs] - The new documents from Firestore
-  Future<void> beforeSyncNotifyUpdate(List<WRITEABLE> docs);
+  Future<void> beforeSyncNotifyUpdate(List<DTO> docs);
 
   /// Called after the local state has been updated with new data.
   ///
@@ -35,7 +36,7 @@ abstract class THookCollectionService<WRITEABLE extends TWriteableId>
   ///
   /// Parameters:
   /// - [docs] - The new documents from Firestore
-  Future<void> afterSyncNotifyUpdate(List<WRITEABLE> docs);
+  Future<void> afterSyncNotifyUpdate(List<DTO> docs);
 
   /// Handles incoming data updates from Firestore with pre and post-sync notifications.
   ///
@@ -54,13 +55,18 @@ abstract class THookCollectionService<WRITEABLE extends TWriteableId>
   /// - [value] - The new document values from Firestore
   /// - [user] - The current Firebase user
   @override
-  Future<void> Function(List<WRITEABLE>? value, User? user) get onData {
+  Future<void> Function(List<DTO>? value, User? user) get onData {
     return (value, user) async {
       final docs = value ?? defaultValues();
       if (user != null) {
         log.debug('Updating docs for user ${user.uid}');
         await beforeSyncNotifyUpdate(docs);
-        docsNotifier.update(TIdDocs(docs));
+        docsNotifier.update(
+          TModelDocs.fromDtos(
+            dtos: docs,
+            modelBuilder: api.modelBuilder,
+          ),
+        );
         markAsReady();
         await afterSyncNotifyUpdate(docs);
         log.debug('Updated ${docs.length} docs');

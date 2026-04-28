@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart' hide Type;
 import 'package:turbo_firestore_api/abstracts/i_firestore_cache_service.dart';
+import 'package:turbo_firestore_api/abstracts/t_model.dart';
 import 'package:turbo_firestore_api/constants/t_firestore_api_defaults.dart';
 import 'package:turbo_firestore_api/enums/t_operation_type.dart';
 import 'package:turbo_firestore_api/enums/t_search_term_type.dart';
@@ -12,6 +13,7 @@ import 'package:turbo_firestore_api/extensions/t_map_extension.dart';
 import 'package:turbo_firestore_api/models/t_sensitive_data.dart';
 import 'package:turbo_firestore_api/models/t_write_batch_with_reference.dart';
 import 'package:turbo_firestore_api/typedefs/collection_reference_def.dart';
+import 'package:turbo_firestore_api/typedefs/t_model_builder_def.dart';
 import 'package:turbo_firestore_api/util/t_firestore_logger.dart';
 import 'package:turbo_response/turbo_response.dart';
 import 'package:turbo_serializable/abstracts/t_writeable.dart';
@@ -29,13 +31,14 @@ part 't_firestore_update_api.dart';
 ///
 /// Operation-family mixins constrain on this base to access private fields
 /// and helpers while remaining in separate part files for code organization.
-abstract class _TFirestoreApiBase<T> {
+abstract class _TFirestoreApiBase<DTO extends TWriteableId, MODEL extends TModel<DTO>> {
   _TFirestoreApiBase({
     required FirebaseFirestore firebaseFirestore,
     required String Function() collectionPath,
-    Map<String, dynamic> Function(T value)? toJson,
-    T Function(Map<String, dynamic> json)? fromJson,
-    T Function(Map<String, dynamic> json)? fromJsonError,
+    required this.modelBuilder,
+    Map<String, dynamic> Function(DTO value)? toJson,
+    DTO Function(Map<String, dynamic> json)? fromJson,
+    DTO Function(Map<String, dynamic> json)? fromJsonError,
     bool tryAddLocalId = TFirestoreApiDefaults.tryAddLocalId,
     TFirestoreLogger? logger,
     String createdAtFieldName = TFirestoreApiDefaults.createdAtFieldName,
@@ -75,10 +78,10 @@ abstract class _TFirestoreApiBase<T> {
   final String Function() _collectionPath;
 
   /// Used to serialize your data to JSON when using 'WithConverter' methods.
-  final Map<String, dynamic> Function(T value)? _toJson;
+  final Map<String, dynamic> Function(DTO value)? _toJson;
 
   /// Used to deserialize your data to JSON when using 'WithConverter' methods.
-  final T Function(Map<String, dynamic> json)? _fromJson;
+  final DTO Function(Map<String, dynamic> json)? _fromJson;
 
   /// Used to deserialize your data to JSON when using 'WithConverter' methods and a data error occurs.
   ///
@@ -86,7 +89,7 @@ abstract class _TFirestoreApiBase<T> {
   /// This is especially useful when you are working with iterables of the same type.
   /// Because now when an error occurs it will use a default object and parsing of the other objects
   /// that have no errors can continue. Whereas before it would just throw an error and stop parsing.
-  final T Function(Map<String, dynamic> json)? _fromJsonError;
+  final DTO Function(Map<String, dynamic> json)? _fromJsonError;
 
   /// Used to add an id field to any of your local Firestore data (so not actually in Firestore).
   ///
@@ -163,6 +166,8 @@ abstract class _TFirestoreApiBase<T> {
 
   /// Used to cache Firestore documents and queries for faster access and offline support.
   final TFirestoreCache? _firestoreCache;
+
+  final TModelBuilderDef<DTO, MODEL> modelBuilder;
 
   /// Used to determined if a document exists based on given [id].
   Future<bool> docExists({
@@ -355,7 +360,7 @@ abstract class _TFirestoreApiBase<T> {
   ///
   /// Declared here so that operation-family mixins can call it.
   /// Concrete implementation lives in [TurboFirestoreGetApi].
-  DocumentReference<T> getDocRefByIdWithConverter({
+  DocumentReference<DTO> getDocRefByIdWithConverter({
     required String id,
     String? collectionPathOverride,
   });
@@ -370,7 +375,7 @@ abstract class _TFirestoreApiBase<T> {
   ///
   /// Declared here so that operation-family mixins can call it.
   /// Concrete implementation lives in [TurboFirestoreListApi].
-  Query<T> listCollectionReferenceWithConverter();
+  Query<DTO> listCollectionReferenceWithConverter();
 }
 
 /// A powerful, type-safe wrapper around Cloud Firestore operations.
@@ -378,7 +383,7 @@ abstract class _TFirestoreApiBase<T> {
 /// The [TFirestoreApi] provides a high-level interface for interacting with Firestore,
 /// offering automatic type conversion, validation, and enhanced error handling.
 ///
-/// Type parameter [T] represents the model type this API instance will work with.
+/// Type parameter [DTO] represents the model type this API instance will work with.
 ///
 /// Features:
 /// - Automatic type conversion between Firestore documents and Dart objects
@@ -425,15 +430,15 @@ abstract class _TFirestoreApiBase<T> {
 ///   where: (ref) => ref.where('age', isGreaterThanOrEqualTo: 18),
 /// );
 /// ```
-class TFirestoreApi<T extends TWriteable> extends _TFirestoreApiBase<T>
+class TFirestoreApi<DTO extends TWriteableId, MODEL extends TModel<DTO>> extends _TFirestoreApiBase<DTO, MODEL>
     with
-        TurboFirestoreGetApi<T>,
-        TurboFirestoreListApi<T>,
-        TFirestoreCreateApi<T>,
-        TFirestoreDeleteApi<T>,
-        TurboFirestoreSearchApi<T>,
-        TurboFirestoreStreamApi<T>,
-        TFirestoreUpdateApi<T> {
+        TurboFirestoreGetApi<DTO, MODEL>,
+        TurboFirestoreListApi<DTO, MODEL>,
+        TFirestoreCreateApi<DTO, MODEL>,
+        TFirestoreDeleteApi<DTO, MODEL>,
+        TurboFirestoreSearchApi<DTO, MODEL>,
+        TurboFirestoreStreamApi<DTO, MODEL>,
+        TFirestoreUpdateApi<DTO, MODEL> {
   /// Creates a new instance of [TFirestoreApi].
   ///
   /// Required parameters:
@@ -441,8 +446,8 @@ class TFirestoreApi<T extends TWriteable> extends _TFirestoreApiBase<T>
   /// - [collectionPath] Function that returns the path to the Firestore collection
   ///
   /// Optional parameters for type conversion:
-  /// - [toJson] Converts instances of [T] to Firestore-compatible maps
-  /// - [fromJson] Creates instances of [T] from Firestore documents
+  /// - [toJson] Converts instances of [DTO] to Firestore-compatible maps
+  /// - [fromJson] Creates instances of [DTO] from Firestore documents
   /// - [fromJsonError] Alternative conversion for error cases
   ///
   /// Document ID management:
@@ -475,6 +480,7 @@ class TFirestoreApi<T extends TWriteable> extends _TFirestoreApiBase<T>
   TFirestoreApi({
     required super.firebaseFirestore,
     required super.collectionPath,
+    required super.modelBuilder,
     super.toJson,
     super.fromJson,
     super.fromJsonError,

@@ -24,7 +24,7 @@ part of 't_firestore_api.dart';
 /// See also:
 /// [TurboFirestoreListApi] one-time list operations
 /// [TurboFirestoreSearchApi] search operations
-mixin TurboFirestoreStreamApi<T> on _TFirestoreApiBase<T> {
+mixin TurboFirestoreStreamApi<DTO extends TWriteableId, MODEL extends TModel<DTO>> on _TFirestoreApiBase<DTO, MODEL> {
   /// Streams all documents from a collection with exception handling
   ///
   /// Returns real-time updates for all documents with error conversion
@@ -93,7 +93,7 @@ mixin TurboFirestoreStreamApi<T> on _TFirestoreApiBase<T> {
   /// Requires [_fromJson] configuration
   /// Errors are caught and transformed to [TFirestoreException]
   ///
-  /// Returns [Stream] of [List<T>] containing:
+  /// Returns [Stream] of [List<DTO>] containing:
   /// - Converted document data
   /// - Real-time updates
   ///
@@ -117,7 +117,7 @@ mixin TurboFirestoreStreamApi<T> on _TFirestoreApiBase<T> {
   /// See also:
   /// [streamAll] raw data streaming
   /// [streamByQueryWithConverter] filtered type-safe streaming
-  Stream<List<T>> streamAllWithConverter() {
+  Stream<List<DTO>> streamAllWithConverter() {
     final path = _collectionPath();
     _log.debug(
       message: 'Finding stream with converter..',
@@ -241,7 +241,7 @@ mixin TurboFirestoreStreamApi<T> on _TFirestoreApiBase<T> {
   /// [collectionReferenceQuery] custom query to filter documents
   /// [whereDescription] description of the query for logging
   ///
-  /// Returns [Stream] of [List<T>] containing:
+  /// Returns [Stream] of [List<DTO>] containing:
   /// - Converted document data
   /// - Real-time updates
   ///
@@ -267,8 +267,8 @@ mixin TurboFirestoreStreamApi<T> on _TFirestoreApiBase<T> {
   /// See also:
   /// [streamByQuery] raw data query streaming
   /// [streamAllWithConverter] unfiltered type-safe streaming
-  Stream<List<T>> streamByQueryWithConverter({
-    CollectionReferenceDef<T>? collectionReferenceQuery,
+  Stream<List<DTO>> streamByQueryWithConverter({
+    CollectionReferenceDef<DTO>? collectionReferenceQuery,
     required String whereDescription,
   }) {
     final path = _collectionPath();
@@ -421,7 +421,7 @@ mixin TurboFirestoreStreamApi<T> on _TFirestoreApiBase<T> {
   /// See also:
   /// [streamByDocId] raw data document streaming
   /// [streamAllWithConverter] collection type-safe streaming
-  Stream<T?> streamByDocIdWithConverter({
+  Stream<DTO?> streamByDocIdWithConverter({
     required String id,
     String? collectionPathOverride,
   }) {

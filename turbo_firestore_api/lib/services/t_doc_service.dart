@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart' hide Type;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:turbo_firestore_api/abstracts/i_firestore_cache_service.dart';
+import 'package:turbo_firestore_api/abstracts/t_model.dart';
 import 'package:turbo_firestore_api/factories/t_api_factory.dart';
 import 'package:turbo_firestore_api/turbo_firestore_api.dart';
 import 'package:turbo_notifiers/turbo_notifiers.dart';
@@ -24,8 +25,8 @@ import 'package:turbolytics/turbolytics.dart';
 /// - Before/after update notifications
 ///
 /// Type Parameters:
-/// - [WRITEABLE] - The document type, must extend [TWriteableId]
-class TDocService<WRITEABLE extends TWriteableId> extends TAuthSyncService<WRITEABLE>
+/// - [DTO] - The document type, must extend [TWriteableId]
+class TDocService<DTO extends TWriteableId, MODEL extends TModel<DTO>> extends TAuthSyncService<DTO>
     with Turbolytics {
   /// Creates a new [TDocService] instance.
   ///
@@ -50,23 +51,23 @@ class TDocService<WRITEABLE extends TWriteableId> extends TAuthSyncService<WRITE
 
   @protected
   /// The Firestore collection definition that this service manages.
-  final TFirestoreCollection<WRITEABLE> collection;
+  final TFirestoreCollection<DTO, MODEL> collection;
 
   @protected
   /// Optional builder function to create the Firestore API instance. If not provided, the API will be created using the collection's `api()` method.
-  final TDocApiBuilderDef<WRITEABLE>? apiBuilder;
+  final TDocApiBuilderDef<DTO, MODEL>? apiBuilder;
 
   @protected
   /// Optional builder function to create the Firestore stream. If not provided, the stream will be created using the API's `streamAllWithConverter()` method.
-  final TDocStreamBuilderDef<WRITEABLE>? streamBuilder;
+  final TDocStreamBuilderDef<DTO, MODEL>? streamBuilder;
 
   @protected
   /// Function to provide initial document value.
-  final TDocValueBuilderDef<WRITEABLE>? initialValue;
+  final TDocValueBuilderDef<DTO, MODEL>? initialValue;
 
   @protected
   /// Function to provide default document value.
-  final TDocValueBuilderDef<WRITEABLE> defaultValue;
+  final TDocValueBuilderDef<DTO, MODEL> defaultValue;
 
   @protected
   /// Optional Firestore cache service for caching document data locally.
@@ -98,7 +99,7 @@ class TDocService<WRITEABLE extends TWriteableId> extends TAuthSyncService<WRITE
   // ⚡️ OVERRIDES ----------------------------------------------------------------------------- \\
 
   @override
-  Stream<WRITEABLE?> Function(User user) get stream =>
+  Stream<DTO?> Function(User user) get stream =>
       (user) =>
           streamBuilder?.call(user, api, this) ?? api.streamByDocIdWithConverter(id: user.uid);
 
@@ -117,7 +118,7 @@ class TDocService<WRITEABLE extends TWriteableId> extends TAuthSyncService<WRITE
   /// - [value] - The new document value from Firestore
   /// - [user] - The current Firebase user
   @override
-  Future<void> Function(WRITEABLE? value, User? user) get onData {
+  Future<void> Function(DTO? value, User? user) get onData {
     return (value, user) async {
       if (user != null) {
         log.debug('Updating doc for user ${user.uid}');
@@ -128,7 +129,7 @@ class TDocService<WRITEABLE extends TWriteableId> extends TAuthSyncService<WRITE
           );
         } else {
           _doc.update(
-            defaultValue.call(vars(), collection, this),
+            api.modelBuilder(defaultValue.call(vars(), collection, this)),
           );
         }
         _isReady.completeIfNotComplete();
@@ -136,7 +137,7 @@ class TDocService<WRITEABLE extends TWriteableId> extends TAuthSyncService<WRITE
       } else {
         log.debug('User is null, clearing doc');
         _doc.update(
-          defaultValue.call(vars(), collection, this),
+          api.modelBuilder(defaultValue.call(vars(), collection, this)),
         );
       }
     };
@@ -171,10 +172,10 @@ class TDocService<WRITEABLE extends TWriteableId> extends TAuthSyncService<WRITE
   // 🎩 STATE --------------------------------------------------------------------------------- \\
 
   /// The Firestore API instance for remote operations.
-  late final TFirestoreApi<WRITEABLE> api =
+  late final TFirestoreApi<DTO, MODEL> api =
       apiBuilder?.call(
         user,
-        TApiFactory<WRITEABLE>(collection: collection),
+        TApiFactory<DTO, MODEL>(collection: collection),
         this,
         firestoreCacheService,
       ) ??
@@ -184,8 +185,10 @@ class TDocService<WRITEABLE extends TWriteableId> extends TAuthSyncService<WRITE
       );
 
   /// Local state for the document.
-  late final _doc = TNotifier<WRITEABLE>(
-    initialValue?.call(vars(), collection, this) ?? (defaultValue.call(vars(), collection, this)),
+  late final _doc = TNotifier<MODEL>(
+    api.modelBuilder(
+      initialValue?.call(vars(), collection, this) ?? (defaultValue.call(vars(), collection, this)),
+    ),
     forceUpdate: true,
   );
 
@@ -207,10 +210,10 @@ class TDocService<WRITEABLE extends TWriteableId> extends TAuthSyncService<WRITE
           as V;
 
   /// Called before local state is updated.
-  ValueChanged<WRITEABLE?>? beforeLocalNotifyUpdate;
+  ValueChanged<DTO?>? beforeLocalNotifyUpdate;
 
   /// Called after local state is updated.
-  ValueChanged<WRITEABLE?>? afterLocalNotifyUpdate;
+  ValueChanged<DTO?>? afterLocalNotifyUpdate;
 
   /// Future that completes when the service is ready.
   Future<void> get isReady => _isReady.future;
@@ -219,7 +222,7 @@ class TDocService<WRITEABLE extends TWriteableId> extends TAuthSyncService<WRITE
   Listenable get listenable => _doc;
 
   /// Value listenable for the document state.
-  ValueListenable<WRITEABLE> get doc => _doc;
+  ValueListenable<MODEL> get doc => _doc;
 
   /// Whether a document exists in local state.
 
@@ -236,7 +239,7 @@ class TDocService<WRITEABLE extends TWriteableId> extends TAuthSyncService<WRITE
       beforeLocalNotifyUpdate?.call(null);
     }
     _doc.update(
-      defaultValue.call(vars(), collection, this),
+      api.modelBuilder(defaultValue.call(vars(), collection, this)),
       doNotifyListeners: doNotifyListeners,
     );
     if (doNotifyListeners) {
@@ -262,7 +265,7 @@ class TDocService<WRITEABLE extends TWriteableId> extends TAuthSyncService<WRITE
       beforeLocalNotifyUpdate?.call(null);
     }
     _doc.update(
-      defaultValue.call(vars(), collection, this),
+      api.modelBuilder(defaultValue.call(vars(), collection, this)),
       doNotifyListeners: doNotifyListeners,
     );
     if (doNotifyListeners) {
@@ -276,8 +279,8 @@ class TDocService<WRITEABLE extends TWriteableId> extends TAuthSyncService<WRITE
   /// - [doc] - The document to create
   /// - [doNotifyListeners] - Whether to notify listeners of the change
   @protected
-  WRITEABLE createLocalDoc({
-    required CreateDocDef<WRITEABLE> doc,
+  DTO createLocalDoc({
+    required CreateDocDef<DTO, MODEL> doc,
     bool doNotifyListeners = true,
   }) {
     final pDoc = doc(vars());
@@ -285,7 +288,7 @@ class TDocService<WRITEABLE extends TWriteableId> extends TAuthSyncService<WRITE
     if (doNotifyListeners) {
       beforeLocalNotifyUpdate?.call(pDoc);
     }
-    _doc.update(pDoc, doNotifyListeners: doNotifyListeners);
+    _doc.update(api.modelBuilder(pDoc), doNotifyListeners: doNotifyListeners);
     if (doNotifyListeners) {
       afterLocalNotifyUpdate?.call(pDoc);
     }
@@ -299,9 +302,9 @@ class TDocService<WRITEABLE extends TWriteableId> extends TAuthSyncService<WRITE
   /// - [doc] - The document update function
   /// - [doNotifyListeners] - Whether to notify listeners of the change
   @protected
-  WRITEABLE updateLocalDoc({
+  DTO updateLocalDoc({
     required String id,
-    required UpdateDocDef<WRITEABLE> doc,
+    required UpdateDocDef<DTO, MODEL> doc,
     bool doNotifyListeners = true,
   }) {
     final pDoc = doc(_doc.value, vars(id: id));
@@ -309,7 +312,7 @@ class TDocService<WRITEABLE extends TWriteableId> extends TAuthSyncService<WRITE
     if (doNotifyListeners) {
       beforeLocalNotifyUpdate?.call(pDoc);
     }
-    _doc.update(pDoc, doNotifyListeners: doNotifyListeners);
+    _doc.update(api.modelBuilder(pDoc), doNotifyListeners: doNotifyListeners);
     if (doNotifyListeners) {
       afterLocalNotifyUpdate?.call(pDoc);
     }
@@ -329,9 +332,9 @@ class TDocService<WRITEABLE extends TWriteableId> extends TAuthSyncService<WRITE
   ///
   /// Returns the upserted document
   @protected
-  WRITEABLE upsertLocalDoc({
+  DTO upsertLocalDoc({
     required String id,
-    required UpsertDocDef<WRITEABLE> doc,
+    required UpsertDocDef<DTO, MODEL> doc,
     bool doNotifyListeners = true,
   }) {
     final pDoc = doc(_doc.value, vars(id: id));
@@ -339,7 +342,7 @@ class TDocService<WRITEABLE extends TWriteableId> extends TAuthSyncService<WRITE
     if (doNotifyListeners) {
       beforeLocalNotifyUpdate?.call(pDoc);
     }
-    _doc.update(pDoc, doNotifyListeners: doNotifyListeners);
+    _doc.update(api.modelBuilder(pDoc), doNotifyListeners: doNotifyListeners);
     if (doNotifyListeners) {
       afterLocalNotifyUpdate?.call(pDoc);
     }
@@ -407,11 +410,11 @@ class TDocService<WRITEABLE extends TWriteableId> extends TAuthSyncService<WRITE
   ///
   /// Returns a [TurboResponse] with the updated document reference
   @protected
-  Future<TurboResponse<WRITEABLE>> updateDoc({
+  Future<TurboResponse<DTO>> updateDoc({
     Transaction? transaction,
     required String id,
-    required UpdateDocDef<WRITEABLE> doc,
-    TWriteable Function(WRITEABLE doc)? remoteUpdateRequestBuilder,
+    required UpdateDocDef<DTO, MODEL> doc,
+    TWriteable Function(DTO doc)? remoteUpdateRequestBuilder,
     bool doNotifyListeners = true,
   }) async {
     try {
@@ -456,9 +459,9 @@ class TDocService<WRITEABLE extends TWriteableId> extends TAuthSyncService<WRITE
   ///
   /// Returns a [TurboResponse] with the created document reference
   @protected
-  Future<TurboResponse<WRITEABLE>> createDoc({
+  Future<TurboResponse<DTO>> createDoc({
     Transaction? transaction,
-    required CreateDocDef<WRITEABLE> doc,
+    required CreateDocDef<DTO, MODEL> doc,
     bool doNotifyListeners = true,
   }) async {
     try {
@@ -507,11 +510,11 @@ class TDocService<WRITEABLE extends TWriteableId> extends TAuthSyncService<WRITE
   ///
   /// Returns a [TurboResponse] with the upserted document reference
   @protected
-  Future<TurboResponse<WRITEABLE>> upsertDoc({
+  Future<TurboResponse<DTO>> upsertDoc({
     Transaction? transaction,
     required String id,
-    required UpsertDocDef<WRITEABLE> doc,
-    TWriteableId Function(WRITEABLE doc)? remoteUpdateRequestBuilder,
+    required UpsertDocDef<DTO, MODEL> doc,
+    TWriteableId Function(DTO doc)? remoteUpdateRequestBuilder,
     bool doNotifyListeners = true,
   }) async {
     try {

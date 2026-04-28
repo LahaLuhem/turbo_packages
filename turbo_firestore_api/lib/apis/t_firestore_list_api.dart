@@ -21,7 +21,7 @@ part of 't_firestore_api.dart';
 /// See also:
 /// [TurboFirestoreGetApi] single document retrieval
 /// [TurboFirestoreSearchApi] search operations
-mixin TurboFirestoreListApi<T> on _TFirestoreApiBase<T> {
+mixin TurboFirestoreListApi<DTO extends TWriteableId, MODEL extends TModel<DTO>> on _TFirestoreApiBase<DTO, MODEL> {
   /// Lists documents matching a custom query
   ///
   /// Returns raw Firestore data without type conversion
@@ -165,8 +165,8 @@ mixin TurboFirestoreListApi<T> on _TFirestoreApiBase<T> {
   /// See also:
   /// [listByQuery] raw data queries
   /// [listAllWithConverter] retrieve all typed documents
-  Future<TurboResponse<List<T>>> listByQueryWithConverter({
-    required CollectionReferenceDef<T> collectionReferenceQuery,
+  Future<TurboResponse<List<DTO>>> listByQueryWithConverter({
+    required CollectionReferenceDef<DTO> collectionReferenceQuery,
     required String whereDescription,
     bool tryCache = true,
   }) async {
@@ -188,7 +188,7 @@ mixin TurboFirestoreListApi<T> on _TFirestoreApiBase<T> {
           _log.info(
             message: 'Found items in cache!',
           );
-          final parsedResults = <T>[];
+          final parsedResults = <DTO>[];
           for (final doc in cachedResults) {
             parsedResults.add(_fromJson.call(doc));
             return TurboResponse.success(result: parsedResults);
@@ -359,7 +359,7 @@ mixin TurboFirestoreListApi<T> on _TFirestoreApiBase<T> {
   /// See also:
   /// [listAll] raw data access
   /// [listByQueryWithConverter] filtered type-safe queries
-  Future<TurboResponse<List<T>>> listAllWithConverter({
+  Future<TurboResponse<List<DTO>>> listAllWithConverter({
     bool tryCache = true,
   }) async {
     try {
@@ -534,7 +534,7 @@ mixin TurboFirestoreListApi<T> on _TFirestoreApiBase<T> {
   /// [listCollectionReference] raw data references
   /// [listByQueryWithConverter] direct type-safe queries
   @override
-  Query<T> listCollectionReferenceWithConverter() {
+  Query<DTO> listCollectionReferenceWithConverter() {
     _log.debug(
       message: 'Finding collection with converter..',
       sensitiveData: TSensitiveData(
@@ -544,7 +544,7 @@ mixin TurboFirestoreListApi<T> on _TFirestoreApiBase<T> {
     return (_isCollectionGroup
             ? _firebaseFirestore.collectionGroup(_collectionPath())
             : _firebaseFirestore.collection(_collectionPath()))
-        .withConverter<T>(
+        .withConverter<DTO>(
           fromFirestore: (snapshot, _) {
             final data = snapshot.data() ?? {};
             try {

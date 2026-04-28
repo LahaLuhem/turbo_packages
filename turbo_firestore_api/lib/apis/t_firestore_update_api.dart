@@ -24,7 +24,7 @@ part of 't_firestore_api.dart';
 /// See also:
 /// [TFirestoreCreateApi] document creation
 /// [TFirestoreDeleteApi] document deletion
-mixin TFirestoreUpdateApi<T> on _TFirestoreApiBase<T> {
+mixin TFirestoreUpdateApi<DTO extends TWriteableId, MODEL extends TModel<DTO>> on _TFirestoreApiBase<DTO, MODEL> {
   /// Updates an existing document in Firestore
   ///
   /// Modifies document data while preserving fields not included in [writeable]

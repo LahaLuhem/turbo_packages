@@ -4,16 +4,15 @@ import 'package:cloud_firestore/cloud_firestore.dart' hide Type;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:turbo_firestore_api/abstracts/i_firestore_cache_service.dart';
+import 'package:turbo_firestore_api/abstracts/t_model.dart';
 import 'package:turbo_firestore_api/factories/t_api_factory.dart';
-import 'package:turbo_firestore_api/models/t_id_docs.dart';
+import 'package:turbo_firestore_api/models/t_model_docs.dart';
 import 'package:turbo_firestore_api/turbo_firestore_api.dart';
 import 'package:turbo_notifiers/turbo_notifiers.dart';
 import 'package:turbo_response/turbo_response.dart';
 import 'package:turbo_serializable/abstracts/t_serializable.dart';
 import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
 import 'package:turbolytics/turbolytics.dart';
-
-// TODO(brian): Add local caching with local storage interface allowing user to use hive ro other prefered local caching and save the jsons locally on device ith an invalidation trigger | 26/04/2026
 
 /// A service for managing a collection of Firestore documents with synchronized local state.
 ///
@@ -27,7 +26,7 @@ import 'package:turbolytics/turbolytics.dart';
 /// - Automatic user authentication state sync
 ///
 /// Type Parameters:
-/// - [WRITEABLE] - The document type, must extend [TWriteableId]
+/// - [DTO] - The document type, must extend [TWriteableId]
 ///
 /// Example:
 /// ```dart
@@ -50,7 +49,8 @@ import 'package:turbolytics/turbolytics.dart';
 /// - Automatic stream update blocking during mutations
 /// - Error handling and logging
 /// - User authentication state synchronization
-class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncService<List<WRITEABLE>>
+class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
+    extends TAuthSyncService<List<DTO>>
     with Turbolytics {
   /// Creates a new [TCollectionService] instance.
   ///
@@ -71,23 +71,23 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
 
   @protected
   /// The Firestore collection definition that this service manages.
-  final TFirestoreCollection<WRITEABLE> collection;
+  final TFirestoreCollection<DTO, MODEL> collection;
 
   @protected
   /// Optional builder function to create the Firestore API instance. If not provided, the API will be created using the collection's `api()` method.
-  final TCollectionApiBuilderDef<WRITEABLE>? apiBuilder;
+  final TCollectionApiBuilderDef<DTO, MODEL>? apiBuilder;
 
   @protected
   /// Optional builder function to create the Firestore stream. If not provided, the stream will be created using the API's `streamAllWithConverter()` method.
-  final TCollectionStreamBuilderDef<WRITEABLE>? streamBuilder;
+  final TCollectionStreamBuilderDef<DTO, MODEL>? streamBuilder;
 
   @protected
   /// Function to provide initial document value.
-  final TCollectionValueBuilderDef<WRITEABLE>? initialValue;
+  final TCollectionValueBuilderDef<DTO, MODEL>? initialValue;
 
   @protected
   /// Function to provide default document value.
-  final TCollectionValueBuilderDef<WRITEABLE>? defaultValue;
+  final TCollectionValueBuilderDef<DTO, MODEL>? defaultValue;
 
   @protected
   /// Optional Firestore cache service for caching document data locally.
@@ -113,7 +113,7 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
   // ⚡️ OVERRIDES ----------------------------------------------------------------------------- \\
 
   @override
-  Stream<List<WRITEABLE>> Function(User user) get stream =>
+  Stream<List<DTO>> Function(User user) get stream =>
       (user) => streamBuilder?.call(user, api, this) ?? api.streamAllWithConverter();
 
   /// Handles data updates from the Firestore stream.
@@ -121,12 +121,17 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
   /// Updates the local state when new data arrives from Firestore.
   /// If [user] is null, clears the local state.
   @override
-  Future<void> Function(List<WRITEABLE>? value, User? user) get onData {
+  Future<void> Function(List<DTO>? value, User? user) get onData {
     return (value, user) async {
       final docs = value ?? defaultValues();
       if (user != null) {
         log.debug('Updating docs for user ${user.uid}');
-        docsNotifier.update(TIdDocs(docs));
+        docsNotifier.update(
+          TModelDocs.fromDtos(
+            dtos: docs,
+            modelBuilder: api.modelBuilder,
+          ),
+        );
         _isReady.completeIfNotComplete();
         log.debug('Updated ${docsNotifier.value.length} docs');
       } else {
@@ -169,10 +174,10 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
   // 🎩 STATE --------------------------------------------------------------------------------- \\
 
   /// The Firestore API instance for remote operations.
-  late final TFirestoreApi<WRITEABLE> api =
+  late final TFirestoreApi<DTO, MODEL> api =
       apiBuilder?.call(
         user,
-        TApiFactory<WRITEABLE>(collection: collection),
+        TApiFactory<DTO, MODEL>(collection: collection),
         this,
         firestoreCacheService,
       ) ??
@@ -183,7 +188,7 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
 
   /// Local state for documents, indexed by their IDs.
   @protected
-  late final docsNotifier = TNotifier<TIdDocs<WRITEABLE>>(
+  late final docsNotifier = TNotifier<TModelDocs<DTO, MODEL>>(
     initialDocs(),
     forceUpdate: true,
   );
@@ -206,10 +211,10 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
           as V;
 
   @Deprecated('Use TCollectionService.docs')
-  ValueListenable<TIdDocs<WRITEABLE>> get docsPerId => docsNotifier;
+  ValueListenable<TModelDocs<DTO, MODEL>> get docsPerId => docsNotifier;
 
   /// A listenable that provides the current documents indexed by their IDs.
-  ValueListenable<TIdDocs<WRITEABLE>> get docs => docsNotifier;
+  ValueListenable<TModelDocs<DTO, MODEL>> get docs => docsNotifier;
 
   /// Whether the collection has any documents.
   bool get hasDocs => docsNotifier.value.isNotEmpty;
@@ -218,10 +223,10 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
   bool exists(String id) => docsNotifier.value.exists(id);
 
   /// Finds a document by its ID. Throws if not found.
-  WRITEABLE findById(String id) => docsNotifier.value.get(id)!;
+  MODEL findById(String id) => docsNotifier.value.get(id)!;
 
   /// Finds a document by its ID. Returns null if not found.
-  WRITEABLE? tryFindById(String? id) => docsNotifier.value.get(id);
+  MODEL? tryFindById(String? id) => docsNotifier.value.get(id);
 
   /// Future that completes when the service is ready to use.
   Future<void> get isReady => _isReady.future;
@@ -232,15 +237,16 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
   // 🏗️ HELPERS ------------------------------------------------------------------------------- \\
 
   @protected
-  TIdDocs<WRITEABLE> initialDocs() => TIdDocs(
-    initialValues() ?? defaultValues(),
+  TModelDocs<DTO, MODEL> initialDocs() => TModelDocs.fromDtos(
+    dtos: initialValues() ?? defaultValues(),
+    modelBuilder: api.modelBuilder,
   );
 
   @protected
-  List<WRITEABLE>? initialValues() => initialValue?.call(vars(), collection, this);
+  List<DTO>? initialValues() => initialValue?.call(vars(), collection, this);
 
   @protected
-  List<WRITEABLE> defaultValues() => defaultValue?.call(vars(), collection, this) ?? [];
+  List<DTO> defaultValues() => defaultValue?.call(vars(), collection, this) ?? [];
 
   // ⚙️ LOCAL MUTATORS ------------------------------------------------------------------------ \\
 
@@ -257,7 +263,9 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
   void clearLocalDocs({bool doNotifyListeners = true}) {
     log.debug('Clearing all local docs');
     docsNotifier.update(
-      TIdDocs.empty(),
+      TModelDocs.empty(
+        modelBuilder: api.modelBuilder,
+      ),
       doNotifyListeners: doNotifyListeners,
     );
   }
@@ -306,9 +314,9 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
   /// - [doc] - The definition of how to update the document
   /// - [doNotifyListeners] - Whether to notify listeners of the change
   @protected
-  WRITEABLE updateLocalDoc({
+  DTO updateLocalDoc({
     required String id,
-    required UpdateDocDef<WRITEABLE> doc,
+    required UpdateDocDef<DTO, MODEL> doc,
     bool doNotifyListeners = true,
   }) {
     log.debug('Updating local doc with id: $id');
@@ -318,7 +326,7 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
     );
     docsNotifier.updateCurrent(
       (value) => value
-        ..update(
+        ..updateDto(
           pDoc,
         ),
       doNotifyListeners: doNotifyListeners,
@@ -333,8 +341,8 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
   /// - [doc] - The definition of how to create the document
   /// - [doNotifyListeners] - Whether to notify listeners of the change
   @protected
-  WRITEABLE createLocalDoc({
-    required CreateDocDef<WRITEABLE> doc,
+  DTO createLocalDoc({
+    required CreateDocDef<DTO, MODEL> doc,
     bool doNotifyListeners = true,
   }) {
     final pDoc = doc(
@@ -342,7 +350,7 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
     );
     log.debug('Creating local doc with id: ${pDoc.id}');
     docsNotifier.updateCurrent(
-      (value) => value..update(pDoc),
+      (value) => value..updateDto(pDoc),
       doNotifyListeners: doNotifyListeners,
     );
     return pDoc;
@@ -355,13 +363,13 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
   /// - [doc] - The definition of how to update the documents
   /// - [doNotifyListeners] - Whether to notify listeners of the changes
   @protected
-  List<WRITEABLE> updateLocalDocs({
+  List<DTO> updateLocalDocs({
     required List<String> ids,
-    required UpdateDocDef<WRITEABLE> doc,
+    required UpdateDocDef<DTO, MODEL> doc,
     bool doNotifyListeners = true,
   }) {
     log.debug('Updating ${ids.length} local docs');
-    final pDocs = <WRITEABLE>[];
+    final pDocs = <DTO>[];
     for (final id in ids) {
       final pDoc = updateLocalDoc(id: id, doc: doc, doNotifyListeners: false);
       pDocs.add(pDoc);
@@ -377,12 +385,12 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
   /// - [docs] - The definition of how to create the documents
   /// - [doNotifyListeners] - Whether to notify listeners of the changes
   @protected
-  List<WRITEABLE> createLocalDocs({
-    required List<CreateDocDef<WRITEABLE>> docs,
+  List<DTO> createLocalDocs({
+    required List<CreateDocDef<DTO, MODEL>> docs,
     bool doNotifyListeners = true,
   }) {
     log.debug('Creating ${docsNotifier.value.length} local docs');
-    final pDocs = <WRITEABLE>[];
+    final pDocs = <DTO>[];
     for (final doc in docs) {
       final pDoc = createLocalDoc(doc: doc, doNotifyListeners: false);
       pDocs.add(pDoc);
@@ -404,13 +412,13 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
   ///
   /// Returns the list of upserted documents
   @protected
-  List<WRITEABLE> upsertLocalDocs({
+  List<DTO> upsertLocalDocs({
     required List<String> ids,
-    required UpsertDocDef<WRITEABLE> doc,
+    required UpsertDocDef<DTO, MODEL> doc,
     bool doNotifyListeners = true,
   }) {
     log.debug('Upserting ${ids.length} local docs');
-    final pDocs = <WRITEABLE>[];
+    final pDocs = <DTO>[];
     for (final id in ids) {
       final pDoc = upsertLocalDoc(
         id: id,
@@ -436,15 +444,15 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
   ///
   /// Returns the upserted document
   @protected
-  WRITEABLE upsertLocalDoc({
+  DTO upsertLocalDoc({
     required String id,
-    required UpsertDocDef<WRITEABLE> doc,
+    required UpsertDocDef<DTO, MODEL> doc,
     bool doNotifyListeners = true,
   }) {
     log.debug('Upserting local doc with id: $id');
     final pDoc = doc(tryFindById(id), vars(id: id));
     docsNotifier.updateCurrent(
-      (value) => value..update(pDoc),
+      (value) => value..updateDto(pDoc),
       doNotifyListeners: doNotifyListeners,
     );
     return pDoc;
@@ -469,11 +477,11 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
   ///
   /// Returns a [TurboResponse] with the upserted document reference
   @protected
-  Future<TurboResponse<WRITEABLE>> upsertDoc({
+  Future<TurboResponse<DTO>> upsertDoc({
     Transaction? transaction,
     required String id,
-    required UpsertDocDef<WRITEABLE> doc,
-    TSerializable Function(WRITEABLE doc)? remoteUpdateRequestBuilder,
+    required UpsertDocDef<DTO, MODEL> doc,
+    TSerializable Function(DTO doc)? remoteUpdateRequestBuilder,
     bool doNotifyListeners = true,
   }) async {
     try {
@@ -522,11 +530,11 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
   ///
   /// Returns a [TurboResponse] with the updated document reference
   @protected
-  Future<TurboResponse<WRITEABLE>> updateDoc({
+  Future<TurboResponse<DTO>> updateDoc({
     Transaction? transaction,
     required String id,
-    required UpdateDocDef<WRITEABLE> doc,
-    TWriteableId Function(WRITEABLE doc)? remoteUpdateRequestBuilder,
+    required UpdateDocDef<DTO, MODEL> doc,
+    TWriteableId Function(DTO doc)? remoteUpdateRequestBuilder,
     bool doNotifyListeners = true,
   }) async {
     try {
@@ -571,9 +579,9 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
   ///
   /// Returns a [TurboResponse] with the created document reference
   @protected
-  Future<TurboResponse<WRITEABLE>> createDoc({
+  Future<TurboResponse<DTO>> createDoc({
     Transaction? transaction,
-    required CreateDocDef<WRITEABLE> doc,
+    required CreateDocDef<DTO, MODEL> doc,
     bool doNotifyListeners = true,
   }) async {
     try {
@@ -617,10 +625,10 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
   ///
   /// Returns a [TurboResponse] indicating success or failure
   @protected
-  Future<TurboResponse<List<WRITEABLE>>> updateDocs({
+  Future<TurboResponse<List<DTO>>> updateDocs({
     Transaction? transaction,
     required List<String> ids,
-    required UpdateDocDef<WRITEABLE> doc,
+    required UpdateDocDef<DTO, MODEL> doc,
     bool doNotifyListeners = true,
   }) async {
     try {
@@ -677,9 +685,9 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
   ///
   /// Returns a [TurboResponse] indicating success or failure
   @protected
-  Future<TurboResponse<List<WRITEABLE>>> createDocs({
+  Future<TurboResponse<List<DTO>>> createDocs({
     Transaction? transaction,
-    required List<CreateDocDef<WRITEABLE>> docs,
+    required List<CreateDocDef<DTO, MODEL>> docs,
     bool doNotifyListeners = true,
   }) async {
     try {
@@ -838,10 +846,10 @@ class TCollectionService<WRITEABLE extends TWriteableId> extends TAuthSyncServic
   ///
   /// Returns a [TurboResponse] with the list of upserted documents
   @protected
-  Future<TurboResponse<List<WRITEABLE>>> upsertDocs({
+  Future<TurboResponse<List<DTO>>> upsertDocs({
     Transaction? transaction,
     required List<String> ids,
-    required UpsertDocDef<WRITEABLE> doc,
+    required UpsertDocDef<DTO, MODEL> doc,
     bool doNotifyListeners = true,
   }) async {
     try {

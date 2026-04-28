@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:turbo_firestore_api/abstracts/t_model.dart';
 import 'package:turbo_firestore_api/services/t_doc_service.dart';
 import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
 
@@ -8,9 +9,9 @@ import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
 /// the local state is updated with new data from Firestore.
 ///
 /// Type Parameters:
-/// - [WRITEABLE] - The document type, must extend [TWriteableId]
-abstract class THookDocService<WRITEABLE extends TWriteableId>
-    extends TDocService<WRITEABLE> {
+/// - [DTO] - The document type, must extend [TWriteableId]
+abstract class THookDocService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
+    extends TDocService<DTO, MODEL> {
   /// Creates a new [THookDocService] instance.
   THookDocService({
     required super.collection,
@@ -28,7 +29,7 @@ abstract class THookDocService<WRITEABLE extends TWriteableId>
   ///
   /// Parameters:
   /// - [doc] - The new document from Firestore
-  Future<void> beforeSyncNotifyUpdate(WRITEABLE? doc);
+  Future<void> beforeSyncNotifyUpdate(DTO? doc);
 
   /// Called after the local state has been updated with new data.
   ///
@@ -37,7 +38,7 @@ abstract class THookDocService<WRITEABLE extends TWriteableId>
   ///
   /// Parameters:
   /// - [doc] - The new document from Firestore
-  Future<void> afterSyncNotifyUpdate(WRITEABLE? doc);
+  Future<void> afterSyncNotifyUpdate(DTO? doc);
 
   /// Handles incoming data updates from Firestore with pre and post-sync notifications.
   ///
@@ -56,7 +57,7 @@ abstract class THookDocService<WRITEABLE extends TWriteableId>
   /// - [value] - The new document value from Firestore
   /// - [user] - The current Firebase user
   @override
-  Future<void> Function(WRITEABLE? value, User? user) get onData {
+  Future<void> Function(DTO? value, User? user) get onData {
     return (value, user) async {
       if (user != null) {
         log.debug('Updating doc for user ${user.uid}');
