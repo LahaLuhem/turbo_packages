@@ -297,7 +297,7 @@ final class Success<T> extends TurboResponse<T> {
   final String? message;
 
   /// Creates a copy of this Success with the given fields replaced with new values.
-  Success<T> copyWith({
+  TurboResponse<T> copyWith<T>({
     T? result,
     String? title,
     String? message,
@@ -369,7 +369,7 @@ final class Fail<T> extends TurboResponse<T> {
   final String? message;
 
   /// Creates a copy of this Fail with the given fields replaced with new values.
-  Fail<T> copyWith({
+  TurboResponse<T> copyWith<T>({
     Object? error,
     StackTrace? stackTrace,
     String? title,

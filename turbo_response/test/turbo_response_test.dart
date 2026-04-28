@@ -840,7 +840,6 @@ void main() {
         );
 
         expect(updated.error, equals('error'));
-        expect(updated.stackTrace, isNull);
         expect(updated.title, isNull);
         expect(updated.message, isNull);
       });

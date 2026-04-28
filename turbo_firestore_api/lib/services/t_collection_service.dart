@@ -261,7 +261,8 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
   /// Listenable for the document collection state.
   Listenable get listenable => docs;
 
-  // 🏗️ HELPERS ------------------------------------------------------------------------------- \\
+  /// Returns a list of documents for the given list ID. Throws if the list does not exist.
+  List<MODEL> getList(Object id) => docsNotifier.value.getList(id);
 
   @protected
   TModelDocs<DTO, MODEL> defaultDocs() =>
@@ -299,21 +300,29 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
   @protected
   List<DTO> defaultValues() => defaultValue?.call(vars(), collection, this) ?? [];
 
+  @protected
+  List<MODEL> upsertResults({
+    required Iterable<DTO> dtos,
+    bool doNotifyListeners = true,
+  }) {
+    final pDtos = dtos.toList();
+    if (pDtos.isEmpty) return [];
+    final models = docs.value.upsertDtos(dtos);
+    if (doNotifyListeners) docsNotifier.rebuild();
+    return models;
+  }
+
+  @protected
+  MODEL upsertResult({
+    required DTO dto,
+    bool doNotifyListeners = true,
+  }) {
+    final model = docs.value.upsertDto(dto);
+    if (doNotifyListeners) docsNotifier.rebuild();
+    return model;
+  }
+
   // ⚙️ LOCAL MUTATORS ------------------------------------------------------------------------ \\
-
-  List<MODEL> getList(Object id) => docsNotifier.value.getList(id);
-
-  void addList(Object id, TSortFilteredList<DTO, MODEL> list) => docsNotifier.updateCurrent(
-    (value) => value
-      ..addList(
-        id: id,
-        sortFilteredList: list,
-      ),
-  );
-
-  void removeList(Object id) => docsNotifier.updateCurrent(
-    (value) => value..removeList(id),
-  );
 
   /// Resets the local documents to their initial value.
   void resetLocalDocs({bool doNotifyListeners = true}) {
@@ -391,7 +400,7 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
     );
     docsNotifier.updateCurrent(
       (value) => value
-        ..updateDto(
+        ..upsertDto(
           pDoc,
         ),
       doNotifyListeners: doNotifyListeners,
@@ -415,7 +424,7 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
     );
     log.debug('Creating local doc with id: ${pDoc.id}');
     docsNotifier.updateCurrent(
-      (value) => value..updateDto(pDoc),
+      (value) => value..upsertDto(pDoc),
       doNotifyListeners: doNotifyListeners,
     );
     return pDoc;
@@ -517,7 +526,7 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
     log.debug('Upserting local doc with id: $id');
     final pDoc = doc(tryFindById(id), vars(id: id));
     docsNotifier.updateCurrent(
-      (value) => value..updateDto(pDoc),
+      (value) => value..upsertDto(pDoc),
       doNotifyListeners: doNotifyListeners,
     );
     return pDoc;
@@ -578,7 +587,105 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
     }
   }
 
+  // 🐒 SYNCED API CALLS
+
+  Future<TurboResponse<List<MODEL>>> listAll({
+    bool tryCache = true,
+  }) async {
+    final response = await api.listAllWithConverter(tryCache: tryCache);
+    if (response.isSuccess) {
+      final models = upsertResults(dtos: response.result);
+      return TurboResponse.success(
+        result: models,
+        title: response.title,
+        message: response.message,
+      );
+    }
+    return const TurboResponse.failAsBool();
+  }
+
+  Future<TurboResponse<List<MODEL>>> listByQuery({
+    required CollectionReferenceDef<DTO> collectionReferenceQuery,
+    required String whereDescription,
+    bool tryCache = true,
+  }) async {
+    final response = await api.listByQueryWithConverter(
+      collectionReferenceQuery: collectionReferenceQuery,
+      whereDescription: whereDescription,
+      tryCache: tryCache,
+    );
+    if (response.isSuccess) {
+      final models = upsertResults(dtos: response.result);
+      return TurboResponse.success(
+        result: models,
+        title: response.title,
+        message: response.message,
+      );
+    }
+    return const TurboResponse.failAsBool();
+  }
+
+  Future<TurboResponse<MODEL>> getById({
+    required String id,
+    String? collectionPathOverride,
+    bool tryCache = true,
+  }) async {
+    final response = await api.getByIdWithConverter(
+      id: id,
+      collectionPathOverride: collectionPathOverride,
+      tryCache: tryCache,
+    );
+    if (response.isSuccess) {
+      final model = upsertResult(dto: response.result);
+      return TurboResponse.success(
+        result: model,
+        title: response.title,
+        message: response.message,
+      );
+    }
+    return const TurboResponse.failAsBool();
+  }
+
+  Future<TurboResponse<List<MODEL>>> listBySearchTermWithConverter({
+    required String searchTerm,
+    required String searchField,
+    required TSearchTermType searchTermType,
+    bool doSearchNumberEquivalent = false,
+    int? limit,
+  }) async {
+    final response = await api.listBySearchTermWithConverter(
+      searchTerm: searchTerm,
+      searchField: searchField,
+      searchTermType: searchTermType,
+      doSearchNumberEquivalent: doSearchNumberEquivalent,
+      limit: limit,
+    );
+    if (response.isSuccess) {
+      final models = upsertResults(dtos: response.result);
+      return TurboResponse.success(
+        result: models,
+        title: response.title,
+        message: response.message,
+      );
+    }
+    return const TurboResponse.failAsBool();
+  }
+
   // 🕹️ LOCAL & REMOTE MUTATORS --------------------------------------------------------------- \\
+
+  /// Adds a sorted and filtered list of documents to the local state.
+  void addList(Object id, TSortFilteredList<DTO, MODEL> list) => docsNotifier.updateCurrent(
+    (value) => value
+      ..addList(
+        id: id,
+        sortFilteredList: list,
+      ),
+  );
+
+  /// Removes a sorted and filtered list of documents from the local state.
+  void removeList(Object id) => docsNotifier.updateCurrent(
+    (value) => value..removeList(id),
+  );
 
   /// Updates a document both locally and in Firestore.
   ///

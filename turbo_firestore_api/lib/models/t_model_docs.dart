@@ -62,15 +62,39 @@ class TModelDocs<DTO extends TWriteableId, MODEL extends TModel<DTO>> {
   Iterable<MODEL> get models => _idMap.values;
   List<MODEL> getList(Object id) => _sortFilteredListsMap[id]?.values ?? [];
 
-  DTO updateDto(DTO newValue) {
-    final model = update(modelBuilder(newValue));
+  List<MODEL> upsertDtos(Iterable<DTO> newValues) {
+    final models = <MODEL>[];
+    for (final newValue in newValues) {
+      final model = upsertDto(newValue);
+      models.add(model);
+      for (final sortFilteredList in _sortFilteredListsMap.values) {
+        sortFilteredList.add(model);
+      }
+    }
+    return models;
+  }
+
+  List<MODEL> upsertValues(Iterable<MODEL> newValues) {
+    final models = <MODEL>[];
+    for (final newValue in newValues) {
+      final model = upsertValue(newValue);
+      models.add(model);
+      for (final sortFilteredList in _sortFilteredListsMap.values) {
+        sortFilteredList.add(model);
+      }
+    }
+    return models;
+  }
+
+  MODEL upsertDto(DTO newValue) {
+    final model = upsertValue(modelBuilder(newValue));
     for (final sortFilteredList in _sortFilteredListsMap.values) {
       sortFilteredList.add(model);
     }
-    return model.dto;
+    return model;
   }
 
-  MODEL update(MODEL newValue) {
+  MODEL upsertValue(MODEL newValue) {
     _idMap[newValue.id] = newValue;
     return newValue;
   }
