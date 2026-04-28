@@ -142,7 +142,7 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
           modelDocsBuilder?.call(api, this, modelBuilder, docs) ??
               TModelDocs.fromDtos(
                 dtos: docs,
-                modelBuilder: (dto) => modelBuilder(api, this, dto),
+                modelBuilder: (dto) => modelBuilder(this, null, dto),
               ),
         );
         _isReady.completeIfNotComplete();
@@ -254,7 +254,7 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
       modelDocsBuilder?.call(api, this, modelBuilder, defaultValues()) ??
       TModelDocs.fromDtos(
         dtos: defaultValues(),
-        modelBuilder: (dto) => modelBuilder(api, this, dto),
+        modelBuilder: (dto) => modelBuilder(this, null, dto),
       );
 
   @protected
@@ -262,7 +262,7 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
       modelDocsBuilder?.call(api, this, modelBuilder, initialValues() ?? defaultValues()) ??
       TModelDocs.fromDtos(
         dtos: initialValues() ?? defaultValues(),
-        modelBuilder: (dto) => modelBuilder(api, this, dto),
+        modelBuilder: (dto) => modelBuilder(this, null, dto),
       );
 
   @protected
@@ -287,7 +287,7 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
     log.debug('Clearing all local docs');
     docsNotifier.update(
       TModelDocs.empty(
-        modelBuilder: (dto) => modelBuilder(api, this, dto),
+        modelBuilder: (dto) => modelBuilder(this, null, dto),
       ),
       doNotifyListeners: doNotifyListeners,
     );

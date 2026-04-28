@@ -61,7 +61,7 @@ abstract class TPreCollectionService<DTO extends TWriteableId, MODEL extends TMo
         docsNotifier.update(
           TModelDocs.fromDtos(
             dtos: docs,
-            modelBuilder: (dto) => modelBuilder(api, this, dto),
+            modelBuilder: (dto) => modelBuilder(this, null, dto),
           ),
         );
         markAsReady();

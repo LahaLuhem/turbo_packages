@@ -59,7 +59,7 @@ abstract class TPostCollectionService<DTO extends TWriteableId, MODEL extends TM
         docsNotifier.update(
           TModelDocs.fromDtos(
             dtos: docs,
-            modelBuilder: (dto) => modelBuilder(api, this, dto),
+            modelBuilder: (dto) => modelBuilder(this, null, dto),
           ),
         );
         markAsReady();

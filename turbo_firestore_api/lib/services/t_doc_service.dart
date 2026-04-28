@@ -232,13 +232,13 @@ class TDocService<DTO extends TWriteableId, MODEL extends TModel<DTO>> extends T
   DTO initialDto() => initialValue?.call(vars(), collection, this) ?? defaultDto();
 
   @protected
-  MODEL initialDoc() => modelBuilder(api, this, initialDto());
+  MODEL initialDoc() => modelBuilder(this, null, initialDto());
 
   @protected
   DTO defaultDto() => defaultValue.call(vars(), collection, this);
 
   @protected
-  MODEL defaultDoc() => modelBuilder(api, this, defaultDto());
+  MODEL defaultDoc() => modelBuilder(this, null, defaultDto());
 
   // ⚙️ LOCAL MUTATORS ------------------------------------------------------------------------ \\
 
@@ -299,7 +299,7 @@ class TDocService<DTO extends TWriteableId, MODEL extends TModel<DTO>> extends T
       beforeLocalNotifyUpdate?.call(pDoc);
     }
     _doc.update(
-      modelBuilder(api, this, pDoc),
+      modelBuilder(this, null, pDoc),
       doNotifyListeners: doNotifyListeners,
     );
     if (doNotifyListeners) {
@@ -325,7 +325,7 @@ class TDocService<DTO extends TWriteableId, MODEL extends TModel<DTO>> extends T
     if (doNotifyListeners) {
       beforeLocalNotifyUpdate?.call(pDoc);
     }
-    _doc.update(modelBuilder(api, this, pDoc), doNotifyListeners: doNotifyListeners);
+    _doc.update(modelBuilder(this, null, pDoc), doNotifyListeners: doNotifyListeners);
     if (doNotifyListeners) {
       afterLocalNotifyUpdate?.call(pDoc);
     }
@@ -355,7 +355,7 @@ class TDocService<DTO extends TWriteableId, MODEL extends TModel<DTO>> extends T
     if (doNotifyListeners) {
       beforeLocalNotifyUpdate?.call(pDoc);
     }
-    _doc.update(modelBuilder(api, this, pDoc), doNotifyListeners: doNotifyListeners);
+    _doc.update(modelBuilder(this, null, pDoc), doNotifyListeners: doNotifyListeners);
     if (doNotifyListeners) {
       afterLocalNotifyUpdate?.call(pDoc);
     }
