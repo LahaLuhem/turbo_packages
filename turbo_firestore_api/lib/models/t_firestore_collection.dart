@@ -5,6 +5,7 @@ import 'package:turbo_firestore_api/abstracts/t_model.dart';
 import 'package:turbo_firestore_api/turbo_firestore_api.dart';
 import 'package:turbo_firestore_api/typedefs/t_model_builder_def.dart';
 import 'package:turbo_firestore_api/typedefs/t_model_docs_builder_def.dart';
+import 'package:turbo_firestore_api/typedefs/t_sort_filter_defs.dart';
 import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
 
 class TFirestoreCollection<DTO extends TWriteableId> {
@@ -85,7 +86,9 @@ class TFirestoreCollection<DTO extends TWriteableId> {
     TCollectionValueBuilderDef<DTO, MODEL>? defaultValue,
     IFirestoreCacheService? firestoreCacheService,
     bool initialiseStream = true,
+    TSortFilteredListsMap<DTO, MODEL> Function()? initialSortFilteredListsMap,
   }) => TCollectionService<DTO, MODEL>(
+    initialSortFilteredListsMap: initialSortFilteredListsMap,
     modelBuilder: modelBuilder,
     modelDocsBuilder: modelDocsBuilder,
     collection: this,
