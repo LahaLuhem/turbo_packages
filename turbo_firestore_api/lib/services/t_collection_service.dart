@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart' hide Type;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -146,7 +145,13 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
       if (user != null) {
         log.debug('Updating docs for user ${user.uid}');
         docsNotifier.update(
-          modelDocsBuilder?.call(api, this, modelBuilder, docs) ??
+          modelDocsBuilder?.call(
+                api,
+                this,
+                modelBuilder,
+                initialSortFilteredListsMap?.call(),
+                docs,
+              ) ??
               TModelDocs.fromDtos(
                 dtos: docs,
                 modelBuilder: (dto) => modelBuilder(this, null, dto),
@@ -260,7 +265,13 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
 
   @protected
   TModelDocs<DTO, MODEL> defaultDocs() =>
-      modelDocsBuilder?.call(api, this, modelBuilder, defaultValues()) ??
+      modelDocsBuilder?.call(
+        api,
+        this,
+        modelBuilder,
+        initialSortFilteredListsMap?.call(),
+        defaultValues(),
+      ) ??
       TModelDocs.fromDtos(
         dtos: defaultValues(),
         modelBuilder: (dto) => modelBuilder(this, null, dto),
@@ -269,7 +280,13 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
 
   @protected
   TModelDocs<DTO, MODEL> initialDocs() =>
-      modelDocsBuilder?.call(api, this, modelBuilder, initialValues() ?? defaultValues()) ??
+      modelDocsBuilder?.call(
+        api,
+        this,
+        modelBuilder,
+        initialSortFilteredListsMap?.call(),
+        initialValues() ?? defaultValues(),
+      ) ??
       TModelDocs.fromDtos(
         dtos: initialValues() ?? defaultValues(),
         modelBuilder: (dto) => modelBuilder(this, null, dto),
