@@ -195,8 +195,8 @@ mixin TurboFirestoreListApi<DTO> on _TFirestoreApiBase<DTO> {
           final parsedResults = <DTO>[];
           for (final doc in cachedResults) {
             parsedResults.add(_fromJson.call(doc));
-            return TurboResponse.success(result: parsedResults);
           }
+          return TurboResponse.success(result: parsedResults);
         }
       }
 
