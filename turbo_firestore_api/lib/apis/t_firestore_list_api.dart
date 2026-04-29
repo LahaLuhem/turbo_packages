@@ -60,6 +60,7 @@ mixin TurboFirestoreListApi<DTO> on _TFirestoreApiBase<DTO> {
     required CollectionReferenceDef<Map<String, dynamic>> collectionReferenceQuery,
     required String whereDescription,
     bool tryCache = true,
+    bool forceCacheRefresh = false,
   }) async {
     try {
       _log.debug(
@@ -70,10 +71,11 @@ mixin TurboFirestoreListApi<DTO> on _TFirestoreApiBase<DTO> {
         ),
       );
 
-      if (tryCache) {
+      if (tryCache || forceCacheRefresh || (_firestoreCache?.forceCacheRefresh ?? false)) {
         final cachedResults = await _firestoreCache?.list(
           path: _collectionPath(),
           query: whereDescription,
+          forceCacheRefresh: forceCacheRefresh,
         );
         if (cachedResults != null) {
           _log.info(
@@ -169,6 +171,7 @@ mixin TurboFirestoreListApi<DTO> on _TFirestoreApiBase<DTO> {
     required CollectionReferenceDef<DTO> collectionReferenceQuery,
     required String whereDescription,
     bool tryCache = true,
+    bool forceCacheRefresh = false,
   }) async {
     try {
       _log.debug(
@@ -179,10 +182,11 @@ mixin TurboFirestoreListApi<DTO> on _TFirestoreApiBase<DTO> {
         ),
       );
 
-      if (tryCache && _fromJson != null) {
+      if ((tryCache || forceCacheRefresh || (_firestoreCache?.forceCacheRefresh ?? false)) && _fromJson != null) {
         final cachedResults = await _firestoreCache?.list(
           path: _collectionPath(),
           query: whereDescription,
+          forceCacheRefresh: forceCacheRefresh,
         );
         if (cachedResults != null) {
           _log.info(
@@ -267,6 +271,7 @@ mixin TurboFirestoreListApi<DTO> on _TFirestoreApiBase<DTO> {
   /// [listByQuery] filtered queries
   Future<TurboResponse<List<Map<String, dynamic>>>> listAll({
     bool tryCache = true,
+    bool forceCacheRefresh = false,
   }) async {
     try {
       _log.debug(
@@ -361,6 +366,7 @@ mixin TurboFirestoreListApi<DTO> on _TFirestoreApiBase<DTO> {
   /// [listByQueryWithConverter] filtered type-safe queries
   Future<TurboResponse<List<DTO>>> listAllWithConverter({
     bool tryCache = true,
+    bool forceCacheRefresh = false,
   }) async {
     try {
       _log.debug(
@@ -370,10 +376,11 @@ mixin TurboFirestoreListApi<DTO> on _TFirestoreApiBase<DTO> {
         ),
       );
 
-      if (tryCache) {
+      if (tryCache || forceCacheRefresh || (_firestoreCache?.forceCacheRefresh ?? false)) {
         final cachedResults = await _firestoreCache?.list(
           path: _collectionPath(),
           query: 'all',
+          forceCacheRefresh: forceCacheRefresh,
         );
         if (cachedResults != null && _fromJson != null) {
           _log.info(

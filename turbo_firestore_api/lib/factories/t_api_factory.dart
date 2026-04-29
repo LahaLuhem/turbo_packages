@@ -17,9 +17,11 @@ class TApiFactory<DTO extends TWriteableId> {
     TFirestoreLogger? logger,
     bool? isCollectionGroup,
     IFirestoreCacheService? firestoreCacheService,
+    bool? forceCacheRefresh,
   }) => _collection.api(
     firebaseFirestore: firebaseFirestore,
     firestoreCacheService: firestoreCacheService,
+    forceCacheRefresh: forceCacheRefresh,
     getOptions: getOptions,
     isCollectionGroup: isCollectionGroup,
     logger: logger,

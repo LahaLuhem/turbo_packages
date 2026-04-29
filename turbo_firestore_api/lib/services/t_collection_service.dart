@@ -591,8 +591,12 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
 
   Future<TurboResponse<List<MODEL>>> listAll({
     bool tryCache = true,
+    bool forceCacheRefresh = false,
   }) async {
-    final response = await api.listAllWithConverter(tryCache: tryCache);
+    final response = await api.listAllWithConverter(
+      tryCache: tryCache,
+      forceCacheRefresh: forceCacheRefresh,
+    );
     if (response.isSuccess) {
       final models = upsertResults(dtos: response.result);
       return TurboResponse.success(
@@ -608,11 +612,13 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
     required CollectionReferenceDef<DTO> collectionReferenceQuery,
     required String whereDescription,
     bool tryCache = true,
+    bool forceCacheRefresh = false,
   }) async {
     final response = await api.listByQueryWithConverter(
       collectionReferenceQuery: collectionReferenceQuery,
       whereDescription: whereDescription,
       tryCache: tryCache,
+      forceCacheRefresh: forceCacheRefresh,
     );
     if (response.isSuccess) {
       final models = upsertResults(dtos: response.result);
@@ -629,11 +635,13 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
     required String id,
     String? collectionPathOverride,
     bool tryCache = true,
+    bool forceCacheRefresh = false,
   }) async {
     final response = await api.getByIdWithConverter(
       id: id,
       collectionPathOverride: collectionPathOverride,
       tryCache: tryCache,
+      forceCacheRefresh: forceCacheRefresh,
     );
     if (response.isSuccess) {
       final model = upsertResult(dto: response.result);

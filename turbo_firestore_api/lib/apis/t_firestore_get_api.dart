@@ -58,6 +58,7 @@ mixin TurboFirestoreGetApi<DTO> on _TFirestoreApiBase<DTO> {
     required String id,
     String? collectionPathOverride,
     bool tryCache = true,
+    bool forceCacheRefresh = false,
   }) async {
     assert(
     _isCollectionGroup == (collectionPathOverride != null),
@@ -74,10 +75,11 @@ mixin TurboFirestoreGetApi<DTO> on _TFirestoreApiBase<DTO> {
         ),
       );
 
-      if (tryCache) {
+      if (tryCache || forceCacheRefresh || (_firestoreCache?.forceCacheRefresh ?? false)) {
         final cachedResult = await _firestoreCache?.get(
           path: _pPath(collectionPathOverride),
           id: id,
+          forceCacheRefresh: forceCacheRefresh,
         );
         if (cachedResult != null) {
           _log.info(
@@ -183,6 +185,7 @@ mixin TurboFirestoreGetApi<DTO> on _TFirestoreApiBase<DTO> {
     required String id,
     String? collectionPathOverride,
     bool tryCache = true,
+    bool forceCacheRefresh = false,
   }) async {
     assert(
     _isCollectionGroup == (collectionPathOverride != null),
@@ -199,10 +202,11 @@ mixin TurboFirestoreGetApi<DTO> on _TFirestoreApiBase<DTO> {
         ),
       );
 
-      if (tryCache && _fromJson != null) {
+      if ((tryCache || forceCacheRefresh || (_firestoreCache?.forceCacheRefresh ?? false)) && _fromJson != null) {
         final cachedResult = await _firestoreCache?.get(
           path: _pPath(collectionPathOverride),
           id: id,
+          forceCacheRefresh: forceCacheRefresh,
         );
         if (cachedResult != null) {
           final parsedCachedResult = _fromJson.call(cachedResult);

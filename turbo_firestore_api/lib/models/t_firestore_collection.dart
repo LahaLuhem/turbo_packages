@@ -26,6 +26,7 @@ class TFirestoreCollection<DTO extends TWriteableId> {
     this.unknownIdValue = TFirestoreApiDefaults.unknownValueValue,
     this.userIdFieldName = TFirestoreApiDefaults.userIdFieldName,
     this.tryCache = false,
+    this.forceCacheRefresh = false,
     this.unknownValueValue = TFirestoreApiDefaults.unknownValueValue,
   });
 
@@ -46,6 +47,7 @@ class TFirestoreCollection<DTO extends TWriteableId> {
   final bool tryAddLocalDocumentReference;
   final bool tryAddLocalId;
   final bool tryCache;
+  final bool forceCacheRefresh;
 
   TFirestoreApi<DTO> api({
     FirebaseFirestore? firebaseFirestore,
@@ -54,9 +56,13 @@ class TFirestoreCollection<DTO extends TWriteableId> {
     TFirestoreLogger? logger,
     bool? isCollectionGroup,
     IFirestoreCacheService? firestoreCacheService,
+    bool? forceCacheRefresh,
   }) => TFirestoreApi<DTO>(
     firestoreCache: firestoreCacheService != null
-        ? TFirestoreCache(firestoreCacheService: firestoreCacheService)
+        ? TFirestoreCache(
+            firestoreCacheService: firestoreCacheService,
+            forceCacheRefresh: forceCacheRefresh ?? this.forceCacheRefresh,
+          )
         : null,
     userIdFieldName: userIdFieldName,
     defaultIdValue: defaultIdValue,

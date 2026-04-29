@@ -12,12 +12,14 @@ class TFirestoreCache {
     this.cacheInvalidationTime = const TimeOfDay(hour: 4, minute: 0),
     this.cacheInvalidationDuration,
     this.cacheInvalidationWeekday = DateTime.monday,
+    this.forceCacheRefresh = false,
   }) : _firestoreCacheService = firestoreCacheService;
 
   final IFirestoreCacheService _firestoreCacheService;
   final TimeOfDay cacheInvalidationTime;
   final Duration? cacheInvalidationDuration;
   final int cacheInvalidationWeekday;
+  final bool forceCacheRefresh;
 
   bool isValid({required DateTime now, required DateTime cachedAt}) {
     if (cacheInvalidationDuration != null) {
@@ -49,8 +51,16 @@ class TFirestoreCache {
   Future<Map<String, dynamic>?> get({
     required String path,
     required String id,
+    bool forceCacheRefresh = false,
   }) async {
     await _firestoreCacheService.isReady;
+    if (this.forceCacheRefresh || forceCacheRefresh) {
+      TLog(location: 'TFirestoreCache').info(
+        'Force refreshing cached query for $id at $path, deleting cache entry.',
+      );
+      await _deleteCachedDoc(id, path);
+      return null;
+    }
     final cachedQuery = await _firestoreCacheService.getCachedQuery(_genId(id, path));
     if (cachedQuery == null) return null;
     final doc = cachedQuery.doc;
@@ -81,8 +91,16 @@ class TFirestoreCache {
   Future<List<Map<String, dynamic>>?> list({
     required String path,
     required String query,
+    bool forceCacheRefresh = false,
   }) async {
     await _firestoreCacheService.isReady;
+    if (this.forceCacheRefresh || forceCacheRefresh) {
+      TLog(location: 'TFirestoreCache').info(
+        'Force refreshing cached query for $query at $path, deleting cache entry.',
+      );
+      await _deleteCachedDoc(query, path);
+      return null;
+    }
     final cachedQuery = await _firestoreCacheService.getCachedQuery(_genId(query, path));
     if (cachedQuery == null) return null;
     final docs = cachedQuery.docs;

@@ -213,5 +213,41 @@ void main() {
       expect(got, isNull);
       expect(service.deletedIds, isEmpty);
     });
+
+    test('get force refresh deletes and returns null when entry exists', () async {
+      cache = TFirestoreCache(
+        firestoreCacheService: service,
+        cacheInvalidationDuration: const Duration(hours: 1),
+        forceCacheRefresh: true,
+      );
+
+      await cache.saveDoc(docId: 'd1', path: 'col', doc: {'a': 1});
+      final got = await cache.get(path: 'col', id: 'd1');
+
+      expect(got, isNull);
+      expect(service.deletedIds, contains('d1@col'));
+      expect(service.store.containsKey('d1@col'), isFalse);
+    });
+
+    test('list force refresh deletes and returns null when entry exists', () async {
+      cache = TFirestoreCache(
+        firestoreCacheService: service,
+        cacheInvalidationDuration: const Duration(hours: 1),
+        forceCacheRefresh: true,
+      );
+
+      await cache.saveDocs(
+        query: 'q1',
+        path: 'col',
+        docs: [
+          {'a': 1},
+        ],
+      );
+      final got = await cache.list(path: 'col', query: 'q1');
+
+      expect(got, isNull);
+      expect(service.deletedIds, contains('q1@col'));
+      expect(service.store.containsKey('q1@col'), isFalse);
+    });
   });
 }
