@@ -62,6 +62,17 @@ class TModelDocs<DTO extends TWriteableId, MODEL extends TModel<DTO>> {
   Iterable<MODEL> get models => _idMap.values;
   List<MODEL> getList(Object? id) => _sortFilteredListsMap[id]?.values ?? [];
 
+  List<MODEL> listByIds(Iterable<String> ids) {
+    final models = <MODEL>[];
+    for (final id in ids) {
+      final model = _idMap[id];
+      if (model != null) {
+        models.add(model);
+      }
+    }
+    return models;
+  }
+
   List<MODEL> upsertDtos(Iterable<DTO> newValues) {
     final models = <MODEL>[];
     for (final newValue in newValues) {
