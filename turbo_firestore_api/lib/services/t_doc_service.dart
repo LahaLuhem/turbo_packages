@@ -46,6 +46,7 @@ class TDocService<DTO extends TWriteableId, MODEL extends TModel<DTO>> extends T
     this.firestoreCacheService,
     this.afterLocalNotifyUpdate,
     this.beforeLocalNotifyUpdate,
+    this.onMissingRemoteValue,
   });
 
   // 📍 LOCATOR ------------------------------------------------------------------------------- \\
@@ -78,6 +79,10 @@ class TDocService<DTO extends TWriteableId, MODEL extends TModel<DTO>> extends T
   @protected
   /// Optional Firestore cache service for caching document data locally.
   final IFirestoreCacheService? firestoreCacheService;
+
+  @protected
+  /// Whether to attempt to create a missing remote document if the local state is default and no remote document exists.
+  final TDocValueBuilderDef<DTO, MODEL>? onMissingRemoteValue;
 
   // 🎬 INIT & DISPOSE ------------------------------------------------------------------------ \\
 
@@ -134,6 +139,11 @@ class TDocService<DTO extends TWriteableId, MODEL extends TModel<DTO>> extends T
             doc: (current, _) => value,
           );
         } else {
+          if (_doc.value.dto.isDefault && onMissingRemoteValue != null) {
+            await createDoc(
+              doc: (vars) => onMissingRemoteValue!(vars, collection, this),
+            );
+          }
           _doc.update(defaultDoc());
         }
         _isReady.completeIfNotComplete();

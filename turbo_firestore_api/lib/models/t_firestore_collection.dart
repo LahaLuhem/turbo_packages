@@ -22,7 +22,7 @@ class TFirestoreCollection<DTO extends TWriteableId> {
     this.tryAddLocalDocumentReference = TFirestoreApiDefaults.tryAddLocalDocumentReference,
     this.tryAddLocalId = TFirestoreApiDefaults.tryAddLocalId,
     this.updatedAtFieldName = TFirestoreApiDefaults.updatedAtFieldName,
-    this.defaultIdValue = TFirestoreApiDefaults.defaultId,
+    this.defaultIdValue = TFirestoreApiDefaults.defaultIdValue,
     this.unknownIdValue = TFirestoreApiDefaults.unknownValueValue,
     this.userIdFieldName = TFirestoreApiDefaults.userIdFieldName,
     this.tryCache = false,
@@ -115,7 +115,8 @@ class TFirestoreCollection<DTO extends TWriteableId> {
     IFirestoreCacheService? firestoreCacheService,
     ValueChanged<DTO?>? afterLocalNotifyUpdate,
     ValueChanged<DTO?>? beforeLocalNotifyUpdate,
-    bool initialiseStream = true,
+    bool initialiseStream = TFirestoreApiDefaults.initialiseStream,
+    TDocValueBuilderDef<DTO, MODEL>? onMissingRemoteValue,
   }) => TDocService<DTO, MODEL>(
     modelBuilder: modelBuilder,
     collection: this,
@@ -127,5 +128,6 @@ class TFirestoreCollection<DTO extends TWriteableId> {
     initialValue: initialValue,
     streamBuilder: streamBuilder,
     initialiseStream: initialiseStream,
+    onMissingRemoteValue: onMissingRemoteValue,
   );
 }

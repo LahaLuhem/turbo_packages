@@ -46,7 +46,7 @@ abstract class _TFirestoreApiBase<T> {
     bool tryAddLocalDocumentReference = TFirestoreApiDefaults.tryAddLocalDocumentReference,
     GetOptions? getOptions,
     this.unknownIdValue = TFirestoreApiDefaults.unknownValueValue,
-    this.defaultIdValue = TFirestoreApiDefaults.defaultId,
+    this.defaultIdValue = TFirestoreApiDefaults.defaultIdValue,
     this.unknownValue = TFirestoreApiDefaults.unknownValueValue,
     TFirestoreCache? firestoreCache,
   }) : _firestoreCache = firestoreCache,

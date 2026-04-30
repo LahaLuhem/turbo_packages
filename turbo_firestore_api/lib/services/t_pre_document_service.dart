@@ -17,6 +17,7 @@ abstract class TPreDocService<DTO extends TWriteableId, MODEL extends TModel<DTO
     required super.collection,
     required super.defaultValue,
     required super.modelBuilder,
+    super.onMissingRemoteValue,
     super.apiBuilder,
     super.initialValue,
     super.initialiseStream = true,

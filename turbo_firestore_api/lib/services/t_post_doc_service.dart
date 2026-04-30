@@ -17,6 +17,7 @@ abstract class TPostDocService<DTO extends TWriteableId, MODEL extends TModel<DT
     required super.collection,
     required super.defaultValue,
     required super.modelBuilder,
+    super.onMissingRemoteValue,
     super.apiBuilder,
     super.initialValue,
     super.initialiseStream = true,
