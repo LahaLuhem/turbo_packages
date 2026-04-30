@@ -233,8 +233,8 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
             id: id ?? api.genId,
             now: DateTime.now(),
             userId: userId,
-            defaultId: api.defaultIdValue,
-            unknownId: api.unknownIdValue,
+            defaultIdValue: api.defaultIdValue,
+            unknownIdValue: api.unknownIdValue,
             unknownValue: api.unknownValue,
           )
           as V;

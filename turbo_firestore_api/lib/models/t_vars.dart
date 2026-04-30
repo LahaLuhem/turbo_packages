@@ -8,16 +8,16 @@ class TVars {
     required this.id,
     required this.now,
     required this.userId,
-    required this.defaultId,
-    required this.unknownId,
+    required this.defaultIdValue,
+    required this.unknownIdValue,
     required this.unknownValue,
   });
 
   final String? userId;
   final String id;
   final DateTime now;
-  final String defaultId;
-  final String unknownId;
+  final String defaultIdValue;
+  final String unknownIdValue;
   final String unknownValue;
 
   @override
