@@ -10,5 +10,6 @@ abstract class TFirestoreApiDefaults {
   static const documentReferenceFieldName = 'documentReference';
   static const isCollectionGroup = false;
   static const tryAddLocalDocumentReference = false;
+  static const initialiseStream = true;
   static const tryAddLocalId = true;
 }

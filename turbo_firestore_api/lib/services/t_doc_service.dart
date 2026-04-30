@@ -41,7 +41,7 @@ class TDocService<DTO extends TWriteableId, MODEL extends TModel<DTO>> extends T
     this.apiBuilder,
     this.streamBuilder,
     required this.collection,
-    super.initialiseStream = true,
+    super.initialiseStream = TFirestoreApiDefaults.initialiseStream,
     this.initialValue,
     this.firestoreCacheService,
     this.afterLocalNotifyUpdate,

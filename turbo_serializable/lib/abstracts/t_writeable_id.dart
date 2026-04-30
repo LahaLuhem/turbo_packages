@@ -1,4 +1,5 @@
 import 'package:turbo_serializable/abstracts/t_writeable.dart';
+import 'package:turbo_serializable/constants/ts_defaults.dart';
 
 /// A base class for objects that require a string identifier.
 ///
@@ -36,4 +37,7 @@ abstract class TWriteableId extends TWriteable {
   /// String get id => 'user-${DateTime.now().millisecondsSinceEpoch}';
   /// ```
   String get id;
+
+  /// Returns true if the ID of this object is equal to the default ID value defined in [TSDefaults].
+  bool get isDefault => id == TSDefaults.defaultIdValue;
 }
