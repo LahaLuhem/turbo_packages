@@ -14,7 +14,7 @@ class TUserDocService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
     required super.collection,
     required super.defaultValue,
     required super.modelBuilder,
-    this.userIdLocation = UserIdLocation.docId,
+    this.userIdLocation = UserIdLocation.defaultValue,
     super.apiBuilder,
     super.streamBuilder,
     super.initialValue,

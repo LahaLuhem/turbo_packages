@@ -225,7 +225,7 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
   // 🛠 UTIL ---------------------------------------------------------------------------------- \\
   // 🧲 FETCHERS ------------------------------------------------------------------------------ \\
 
-  List<MODEL> listByIds(List<String> ids) => docsNotifier.value.listByIds(ids);
+  List<MODEL> listByIds(Iterable<String> ids) => docsNotifier.value.listByIds(ids);
 
   /// Returns a new instance of [V] with basic variables filled in.
   V vars<V extends TVars>({String? id}) =>
