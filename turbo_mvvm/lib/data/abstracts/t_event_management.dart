@@ -1,24 +1,18 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:turbo_mvvm/data/abstracts/t_base_view_model.dart';
 import 'package:turbo_mvvm/typedefs/t_event_handler.dart';
 import 'package:turbo_mvvm/utils/t_completer_queue.dart';
 
-abstract class TBaseEventViewModel<ARGUMENTS, EVENT extends Object>
-    extends TBaseViewModel<ARGUMENTS> {
+abstract class TEventManagement<EVENT extends Object> {
+  TEventManagement() {
+    _registerEvents();
+    _initStream();
+  }
 
   // 📍 LOCATOR ------------------------------------------------------------------------------- \\
   // 🧩 DEPENDENCIES -------------------------------------------------------------------------- \\
   // 🎬 INIT & DISPOSE ------------------------------------------------------------------------ \\
-
-  @override
-  @mustCallSuper
-  Future<void> initialise({bool doSetInitialised = true}) async {
-    _registerEvents();
-    _initStream();
-    super.initialise(doSetInitialised: doSetInitialised);
-  }
 
   void _initStream() => _streamSubscription ??= _controller.stream.listen(
     (event) => _eventQueue.lockAndRun(
@@ -44,13 +38,11 @@ abstract class TBaseEventViewModel<ARGUMENTS, EVENT extends Object>
     }
   }
 
-  @override
   @mustCallSuper
-  Future<void> dispose() async {
+  FutureOr<void> dispose() async {
     await _controller.close();
     await _streamSubscription?.cancel();
     _eventMap.clear();
-    super.dispose();
   }
 
   // 👂 LISTENERS ----------------------------------------------------------------------------- \\
@@ -76,6 +68,10 @@ abstract class TBaseEventViewModel<ARGUMENTS, EVENT extends Object>
 
   // 🧲 FETCHERS ------------------------------------------------------------------------------ \\
   // 🏗️ HELPERS ------------------------------------------------------------------------------- \\
+
+  void send(EVENT event) => emit(event);
+  void add(EVENT event) => emit(event);
+
   // 🪄 MUTATORS ------------------------------------------------------------------------------ \\
 
   Future<RESULT> emitAsync<RESULT>(EVENT event) async {
@@ -85,6 +81,4 @@ abstract class TBaseEventViewModel<ARGUMENTS, EVENT extends Object>
   }
 
   void emit(EVENT event) => _controller.add(event);
-  void send(EVENT event) => emit(event);
-  void add(EVENT event) => emit(event);
 }
