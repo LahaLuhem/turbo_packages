@@ -600,7 +600,7 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
       forceCacheRefresh: forceCacheRefresh,
     );
     if (response.isSuccess) {
-      final models = upsertResults(dtos: response.result);
+      final models = upsertResults(dtos: response.result!);
       return TurboResponse.success(
         result: models,
         title: response.title,
@@ -623,7 +623,7 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
       forceCacheRefresh: forceCacheRefresh,
     );
     if (response.isSuccess) {
-      final models = upsertResults(dtos: response.result);
+      final models = upsertResults(dtos: response.result!);
       return TurboResponse.success(
         result: models,
         title: response.title,
@@ -646,7 +646,7 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
       forceCacheRefresh: forceCacheRefresh,
     );
     if (response.isSuccess) {
-      final model = upsertResult(dto: response.result);
+      final model = upsertResult(dto: response.result!);
       return TurboResponse.success(
         result: model,
         title: response.title,
@@ -671,7 +671,7 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
       limit: limit,
     );
     if (response.isSuccess) {
-      final models = upsertResults(dtos: response.result);
+      final models = upsertResults(dtos: response.result!);
       return TurboResponse.success(
         result: models,
         title: response.title,

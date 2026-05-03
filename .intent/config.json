@@ -1,0 +1,124 @@
+{
+  "scripts": [
+    {
+      "name": "help",
+      "command": "make help",
+      "mode": "command",
+      "category": "other"
+    },
+    {
+      "name": "analyze",
+      "command": "make analyze",
+      "mode": "command",
+      "category": "other"
+    },
+    {
+      "name": "format",
+      "command": "make format",
+      "mode": "command",
+      "category": "format"
+    },
+    {
+      "name": "fix",
+      "command": "make fix",
+      "mode": "command",
+      "category": "other"
+    },
+    {
+      "name": "test",
+      "command": "make test",
+      "mode": "command",
+      "category": "test"
+    },
+    {
+      "name": "build",
+      "command": "make build",
+      "mode": "command",
+      "category": "build"
+    },
+    {
+      "name": "watch",
+      "command": "make watch",
+      "mode": "service",
+      "category": "dev"
+    },
+    {
+      "name": "clean",
+      "command": "make clean",
+      "mode": "command",
+      "category": "other"
+    },
+    {
+      "name": "get",
+      "command": "make get",
+      "mode": "command",
+      "category": "other"
+    },
+    {
+      "name": "pub-check",
+      "command": "make pub-check",
+      "mode": "command",
+      "category": "other"
+    },
+    {
+      "name": "pub-publish-dry-run",
+      "command": "make pub-publish-dry-run",
+      "mode": "command",
+      "category": "other"
+    },
+    {
+      "name": "pub-publish",
+      "command": "make pub-publish",
+      "mode": "command",
+      "category": "other"
+    },
+    {
+      "name": "all",
+      "command": "make all",
+      "mode": "command",
+      "category": "other"
+    },
+    {
+      "name": "all-from-clean",
+      "command": "make all-from-clean",
+      "mode": "command",
+      "category": "other"
+    },
+    {
+      "name": "all-from-build",
+      "command": "make all-from-build",
+      "mode": "command",
+      "category": "build"
+    },
+    {
+      "name": "all-from-fix",
+      "command": "make all-from-fix",
+      "mode": "command",
+      "category": "other"
+    },
+    {
+      "name": "all-from-format",
+      "command": "make all-from-format",
+      "mode": "command",
+      "category": "format"
+    },
+    {
+      "name": "all-from-analyze",
+      "command": "make all-from-analyze",
+      "mode": "command",
+      "category": "other"
+    },
+    {
+      "name": "all-from-test",
+      "command": "make all-from-test",
+      "mode": "command",
+      "category": "test"
+    },
+    {
+      "name": "all-from-pub-check",
+      "command": "make all-from-pub-check",
+      "mode": "command",
+      "category": "other"
+    }
+  ]
+}
