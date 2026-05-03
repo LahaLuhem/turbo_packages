@@ -22,17 +22,15 @@ abstract class TBaseEventViewModel<ARGUMENTS, EVENT extends Object>
 
   void _initStream() => _streamSubscription ??= _controller.stream.listen(
     (event) => _eventQueue.lockAndRun(
-      run: (unlock) async => _eventQueue.lockAndRun(
-        run: (unlock) async {
-          try {
-            await _eventMap[event]?.call(event);
-          } catch (error, stackTrace) {
-            onEventError?.call(error, stackTrace, event);
-          } finally {
-            unlock();
-          }
-        },
-      ),
+      run: (unlock) async {
+        try {
+          await _eventMap[event]?.call(event);
+        } catch (error, stackTrace) {
+          onEventError?.call(error, stackTrace, event);
+        } finally {
+          unlock();
+        }
+      },
     ),
     cancelOnError: cancelOnStreamError,
     onDone: onDone,
@@ -87,4 +85,6 @@ abstract class TBaseEventViewModel<ARGUMENTS, EVENT extends Object>
   }
 
   void emit(EVENT event) => _controller.add(event);
+  void send(EVENT event) => emit(event);
+  void add(EVENT event) => emit(event);
 }
