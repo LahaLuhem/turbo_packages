@@ -1,5 +1,6 @@
 library turbo_mvvm;
 
+export 'data/abstracts/t_base_event_view_model.dart';
 export 'data/abstracts/t_base_view_model.dart';
 export 'data/constants/turbo_mvvm_defaults.dart';
 export 'data/enums/t_busy_type.dart';

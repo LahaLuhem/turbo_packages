@@ -9,9 +9,9 @@ import 'package:turbo_mvvm/services/t_busy_service.dart';
 part '../../widgets/t_view_model_builder.dart';
 
 /// Base view model class.
-abstract class TBaseViewModel<A> extends ChangeNotifier {
-  /// Holds arguments of type [A] provided by the [TViewModelBuilder._argumentBuilder].
-  late final A arguments;
+abstract class TBaseViewModel<ARGUMENTS> extends ChangeNotifier {
+  /// Holds arguments of type [ARGUMENTS] provided by the [TViewModelBuilder._argumentBuilder].
+  late final ARGUMENTS arguments;
 
   /// Callback that is used by [isMounted] to check whether the parent [TViewModelBuilder] is mounted.
   late bool Function()? _mounted;
@@ -41,7 +41,8 @@ abstract class TBaseViewModel<A> extends ChangeNotifier {
   ///
   /// This method is called in the [TViewModelBuilderState.initState] method.
   @override
-  void dispose() {
+  @mustCallSuper
+  FutureOr<void> dispose() {
     disposableBuildContext!.dispose();
     disposableBuildContext = null;
     _mounted = null;
