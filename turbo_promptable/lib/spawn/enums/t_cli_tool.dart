@@ -15,12 +15,20 @@ enum TCliTool {
     String? model,
     bool headless = true,
   }) {
-    final pConversation = conversationId != null ? ' ${resume(conversationId)}' : '';
-    final pSystemPrompt = systemPrompt != null ? ' ${this.systemPrompt(systemPrompt)}' : '';
-    final pTools = allowedTools != null ? ' ${this.allowedTools(allowedTools)}' : '';
+    final pConversation = conversationId != null
+        ? ' ${resume(conversationId)}'
+        : '';
+    final pSystemPrompt = systemPrompt != null
+        ? ' ${this.systemPrompt(systemPrompt)}'
+        : '';
+    final pTools = allowedTools != null
+        ? ' ${this.allowedTools(allowedTools)}'
+        : '';
     final pYolo = '${yolo ? ' ${this.yolo}' : ''}';
     final pModel = model != null ? ' ${this.model(model)}' : '';
-    final pHeadless = headless && this.headless != null ? ' ${this.headless}' : '';
+    final pHeadless = headless && this.headless != null
+        ? ' ${this.headless}'
+        : '';
     return '$command'
         '$pConversation'
         '$pSystemPrompt'

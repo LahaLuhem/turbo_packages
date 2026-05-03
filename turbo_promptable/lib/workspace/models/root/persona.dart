@@ -38,7 +38,8 @@ class Persona extends Role {
          identity: identity,
        );
 
-  factory Persona.fromJson(Map<String, dynamic> json) => _$PersonaFromJson(json);
+  factory Persona.fromJson(Map<String, dynamic> json) =>
+      _$PersonaFromJson(json);
   @override
   Map<String, dynamic> toJson() => _$PersonaToJson(this);
 }

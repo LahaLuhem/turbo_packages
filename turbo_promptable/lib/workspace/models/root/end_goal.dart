@@ -18,7 +18,8 @@ class EndGoal extends Goal {
   final AcceptanceCriteria? acceptanceCriteria;
   final Constraints? constraints;
 
-  factory EndGoal.fromJson(Map<String, dynamic> json) => _$EndGoalFromJson(json);
+  factory EndGoal.fromJson(Map<String, dynamic> json) =>
+      _$EndGoalFromJson(json);
   @override
   Map<String, dynamic> toJson() => _$EndGoalToJson(this);
 }

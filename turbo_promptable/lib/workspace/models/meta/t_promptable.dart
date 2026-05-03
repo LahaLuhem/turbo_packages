@@ -35,11 +35,13 @@ abstract class TPromptable extends TSerializable {
     writeable: this,
     mdFrontmatterBuilder: (writeable) => writeable.mdFrontMatter(),
     mdBodyBuilder: (writeable, _) {
-      final json = Map<String, dynamic>.from(writeable.toJson())..remove(TSDefaults.metaDataKey);
+      final json = Map<String, dynamic>.from(writeable.toJson())
+        ..remove(TSDefaults.metaDataKey);
       return json.toMd(
         metaDataToFrontMatter: false,
         headingLevel: 2,
-        listItemBuilder: (key, item) => key == TSDefaults.itemsKey ? '- [ ] $item' : null,
+        listItemBuilder: (key, item) =>
+            key == TSDefaults.itemsKey ? '- [ ] $item' : null,
       );
     },
     mdBuilder: (writeable, frontmatter, body) =>
@@ -59,7 +61,9 @@ abstract class TPromptable extends TSerializable {
     if (cascadeNameToMetaData && name.isNotEmpty) {
       frontMatter['name'] = name;
     }
-    if (cascadeDescriptionToMetaData && description != null && description!.isNotEmpty) {
+    if (cascadeDescriptionToMetaData &&
+        description != null &&
+        description!.isNotEmpty) {
       frontMatter['description'] = description;
     }
     if (metaData != null) {
@@ -74,13 +78,13 @@ abstract class TPromptable extends TSerializable {
     required TBodyType bodyType,
   }) =>
       '${openRef ?? TRefType.curlyBraces.openDouble}'
-          ' ${switch (bodyType) {
+      ' ${switch (bodyType) {
         TBodyType.md => name,
         TBodyType.xml => xmlKey,
         TBodyType.yaml => yamlKey,
         TBodyType.json => jsonKey,
       }} '
-          '${closeRef ?? TRefType.curlyBraces.closeDouble}';
+      '${closeRef ?? TRefType.curlyBraces.closeDouble}';
 
   // 🏗️ HELPERS ------------------------------------------------------------------------------- \\
 
@@ -119,5 +123,4 @@ abstract class TPromptable extends TSerializable {
     openRef: openRef,
     closeRef: closeRef,
   );
-
 }

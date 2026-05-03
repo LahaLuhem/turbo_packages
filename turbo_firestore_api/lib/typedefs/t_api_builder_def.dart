@@ -7,7 +7,10 @@ import 'package:turbo_firestore_api/services/t_collection_service.dart';
 import 'package:turbo_firestore_api/services/t_doc_service.dart';
 import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
 
-typedef TCollectionApiBuilderDef<DTO extends TWriteableId, MODEL extends TModel<DTO>> =
+typedef TCollectionApiBuilderDef<
+  DTO extends TWriteableId,
+  MODEL extends TModel<DTO>
+> =
     TFirestoreApi<DTO> Function(
       User? user,
       TApiFactory<DTO> factory,

@@ -2,7 +2,11 @@ import 'package:turbo_firestore_api/abstracts/t_model.dart';
 import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
 
 /// Extension on [List] that provides utility methods for working with lists in the context of Turbo Firestore.
-extension TDtoListExtensionExtension<DTO extends TWriteableId, MODEL extends TModel<DTO>> on List<DTO> {
+extension TDtoListExtensionExtension<
+  DTO extends TWriteableId,
+  MODEL extends TModel<DTO>
+>
+    on List<DTO> {
   Map<String, DTO> toDtoIdMap([String Function(DTO writeable)? idBuilder]) {
     final _idBuilder = idBuilder ?? (writeable) => writeable.id;
     final map = <String, DTO>{};
@@ -24,7 +28,8 @@ extension TDtoListExtensionExtension<DTO extends TWriteableId, MODEL extends TMo
     return map;
   }
 
-  (List<MODEL> models, Map<String, int> idMap) toIdDocsModelsMap<MODEL extends TModel<DTO>>({
+  (List<MODEL> models, Map<String, int> idMap)
+  toIdDocsModelsMap<MODEL extends TModel<DTO>>({
     required String Function(DTO dto) idBuilder,
     required MODEL Function(DTO dto) modelBuilder,
   }) {
@@ -41,7 +46,10 @@ extension TDtoListExtensionExtension<DTO extends TWriteableId, MODEL extends TMo
 }
 
 /// Extension on [List] that provides utility methods for working with lists in the context of Turbo Firestore.
-extension TModelListExtensionExtension<DTO extends TWriteableId, MODEL extends TModel<DTO>>
+extension TModelListExtensionExtension<
+  DTO extends TWriteableId,
+  MODEL extends TModel<DTO>
+>
     on List<MODEL> {
   Map<String, MODEL> toModelIdMap([String Function(MODEL model)? idBuilder]) {
     final _idBuilder = idBuilder ?? (model) => model.id;

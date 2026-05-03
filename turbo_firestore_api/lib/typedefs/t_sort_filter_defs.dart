@@ -6,5 +6,7 @@ typedef TFilterPredicate<DTO extends TWriteableId, MODEL extends TModel<DTO>> =
     bool Function(MODEL model);
 typedef TSortPredicate<DTO extends TWriteableId, MODEL extends TModel<DTO>> =
     int Function(MODEL a, MODEL b);
-typedef TSortFilteredListsMap<DTO extends TWriteableId, MODEL extends TModel<DTO>> =
-    Map<Object, TSortFilteredList<DTO, MODEL>>;
+typedef TSortFilteredListsMap<
+  DTO extends TWriteableId,
+  MODEL extends TModel<DTO>
+> = Map<Object, TSortFilteredList<DTO, MODEL>>;

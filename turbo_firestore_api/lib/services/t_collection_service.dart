@@ -105,7 +105,8 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
 
   @protected
   /// Optional map of sorting and filtering definitions for managing sorted and filtered lists of documents. This can be used to maintain multiple views of the data based on different criteria.
-  final TSortFilteredListsMap<DTO, MODEL> Function()? initialSortFilteredListsMap;
+  final TSortFilteredListsMap<DTO, MODEL> Function()?
+  initialSortFilteredListsMap;
 
   @protected
   /// Optional Firestore cache service for caching document data locally.
@@ -132,7 +133,8 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
 
   @override
   Stream<List<DTO>> Function(User user) get stream =>
-      (user) => streamBuilder?.call(user, api, this) ?? api.streamAllWithConverter();
+      (user) =>
+          streamBuilder?.call(user, api, this) ?? api.streamAllWithConverter();
 
   /// Handles data updates from the Firestore stream.
   ///
@@ -225,7 +227,8 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
   // 🛠 UTIL ---------------------------------------------------------------------------------- \\
   // 🧲 FETCHERS ------------------------------------------------------------------------------ \\
 
-  List<MODEL> listByIds(Iterable<String> ids) => docsNotifier.value.listByIds(ids);
+  List<MODEL> listByIds(Iterable<String> ids) =>
+      docsNotifier.value.listByIds(ids);
 
   /// Returns a new instance of [V] with basic variables filled in.
   V vars<V extends TVars>({String? id}) =>
@@ -300,7 +303,8 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
   List<DTO>? initialValues() => initialValue?.call(vars(), collection, this);
 
   @protected
-  List<DTO> defaultValues() => defaultValue?.call(vars(), collection, this) ?? [];
+  List<DTO> defaultValues() =>
+      defaultValue?.call(vars(), collection, this) ?? [];
 
   @protected
   List<MODEL> upsertResults({
@@ -568,7 +572,8 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
         doNotifyListeners: doNotifyListeners,
       );
       final future = api.createDoc(
-        writeable: remoteUpdateRequestBuilder?.call(pDoc) ?? pDoc as TSerializable,
+        writeable:
+            remoteUpdateRequestBuilder?.call(pDoc) ?? pDoc as TSerializable,
         id: id,
         transaction: transaction,
         merge: true,
@@ -684,13 +689,14 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
   // 🕹️ LOCAL & REMOTE MUTATORS --------------------------------------------------------------- \\
 
   /// Adds a sorted and filtered list of documents to the local state.
-  void addList(Object id, TSortFilteredList<DTO, MODEL> list) => docsNotifier.updateCurrent(
-    (value) => value
-      ..addList(
-        id: id,
-        sortFilteredList: list,
-      ),
-  );
+  void addList(Object id, TSortFilteredList<DTO, MODEL> list) =>
+      docsNotifier.updateCurrent(
+        (value) => value
+          ..addList(
+            id: id,
+            sortFilteredList: list,
+          ),
+      );
 
   /// Removes a sorted and filtered list of documents from the local state.
   void removeList(Object id) => docsNotifier.updateCurrent(
@@ -727,7 +733,8 @@ class TCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
         doNotifyListeners: doNotifyListeners,
       );
       final future = api.updateDoc(
-        writeable: remoteUpdateRequestBuilder?.call(pDoc) ?? pDoc as TWriteableId,
+        writeable:
+            remoteUpdateRequestBuilder?.call(pDoc) ?? pDoc as TWriteableId,
         id: id,
         transaction: transaction,
       );

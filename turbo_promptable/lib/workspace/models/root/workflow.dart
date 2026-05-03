@@ -23,7 +23,8 @@ class Workflow extends TPromptable {
   final List<Tool>? tools;
   final List<ToolSet>? toolSets;
 
-  factory Workflow.fromJson(Map<String, dynamic> json) => _$WorkflowFromJson(json);
+  factory Workflow.fromJson(Map<String, dynamic> json) =>
+      _$WorkflowFromJson(json);
   @override
   Map<String, dynamic> toJson() => _$WorkflowToJson(this);
 }

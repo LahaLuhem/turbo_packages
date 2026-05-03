@@ -41,29 +41,31 @@ abstract class _TFirestoreApiBase<T> {
     String updatedAtFieldName = TFirestoreApiDefaults.updatedAtFieldName,
     String idFieldName = TFirestoreApiDefaults.idFieldName,
     this.userIdFieldName = TFirestoreApiDefaults.userIdFieldName,
-    String documentReferenceFieldName = TFirestoreApiDefaults.documentReferenceFieldName,
+    String documentReferenceFieldName =
+        TFirestoreApiDefaults.documentReferenceFieldName,
     bool isCollectionGroup = TFirestoreApiDefaults.isCollectionGroup,
-    bool tryAddLocalDocumentReference = TFirestoreApiDefaults.tryAddLocalDocumentReference,
+    bool tryAddLocalDocumentReference =
+        TFirestoreApiDefaults.tryAddLocalDocumentReference,
     GetOptions? getOptions,
     this.unknownIdValue = TFirestoreApiDefaults.unknownValueValue,
     this.defaultIdValue = TFirestoreApiDefaults.defaultIdValue,
     this.unknownValue = TFirestoreApiDefaults.unknownValueValue,
     TFirestoreCache? firestoreCache,
   }) : _firestoreCache = firestoreCache,
-        _firebaseFirestore = firebaseFirestore,
-        _collectionPath = collectionPath,
-        _toJson = toJson,
-        _fromJson = fromJson,
-        _fromJsonError = fromJsonError,
-        _tryAddLocalId = tryAddLocalId,
-        _log = logger ?? TFirestoreLogger(),
-        _createdAtFieldName = createdAtFieldName,
-        _updatedAtFieldName = updatedAtFieldName,
-        _idFieldName = idFieldName,
-        _documentReferenceFieldName = documentReferenceFieldName,
-        _isCollectionGroup = isCollectionGroup,
-        _tryAddLocalDocumentReference = tryAddLocalDocumentReference,
-        _getOptions = getOptions;
+       _firebaseFirestore = firebaseFirestore,
+       _collectionPath = collectionPath,
+       _toJson = toJson,
+       _fromJson = fromJson,
+       _fromJsonError = fromJsonError,
+       _tryAddLocalId = tryAddLocalId,
+       _log = logger ?? TFirestoreLogger(),
+       _createdAtFieldName = createdAtFieldName,
+       _updatedAtFieldName = updatedAtFieldName,
+       _idFieldName = idFieldName,
+       _documentReferenceFieldName = documentReferenceFieldName,
+       _isCollectionGroup = isCollectionGroup,
+       _tryAddLocalDocumentReference = tryAddLocalDocumentReference,
+       _getOptions = getOptions;
 
   // 📍 LOCATOR ------------------------------------------------------------------------------- \\
   // 🧩 DEPENDENCIES -------------------------------------------------------------------------- \\
@@ -156,7 +158,8 @@ abstract class _TFirestoreApiBase<T> {
   WriteBatch get writeBatch => _firebaseFirestore.batch();
 
   /// The current collection
-  CollectionReference get collection => _firebaseFirestore.collection(_collectionPath());
+  CollectionReference get collection =>
+      _firebaseFirestore.collection(_collectionPath());
 
   /// A new document
   DocumentReference get doc => collection.doc();
@@ -173,10 +176,10 @@ abstract class _TFirestoreApiBase<T> {
     String? collectionPathOverride,
   }) async {
     assert(
-    _isCollectionGroup == (collectionPathOverride != null),
-    'Firestore does not support finding a document by id when communicating with a collection group, '
-        'therefore, you must specify the collectionPathOverride containing all parent collection and document ids '
-        'in order to make this method work.',
+      _isCollectionGroup == (collectionPathOverride != null),
+      'Firestore does not support finding a document by id when communicating with a collection group, '
+      'therefore, you must specify the collectionPathOverride containing all parent collection and document ids '
+      'in order to make this method work.',
     );
     final docRef = getDocRefById(
       id: id,
@@ -219,7 +222,8 @@ abstract class _TFirestoreApiBase<T> {
   }
 
   /// Helper method to get the effective collection path, considering overrides.
-  String _pPath(String? collectionPathOverride) => collectionPathOverride ?? _collectionPath();
+  String _pPath(String? collectionPathOverride) =>
+      collectionPathOverride ?? _collectionPath();
 
   /// Creates a TFirestoreException with extracted context.
   ///
@@ -282,8 +286,8 @@ abstract class _TFirestoreApiBase<T> {
   ///
   /// This method properly unwraps the TurboResponse and handles error cases.
   TWriteBatchWithReference<Map<String, dynamic>>? _handleBatchResponse(
-      TurboResponse<TWriteBatchWithReference<Map<String, dynamic>>> response,
-      ) {
+    TurboResponse<TWriteBatchWithReference<Map<String, dynamic>>> response,
+  ) {
     return response.when<TWriteBatchWithReference<Map<String, dynamic>>?>(
       success: (success) => success.result,
       fail: (_) => null,
@@ -294,8 +298,8 @@ abstract class _TFirestoreApiBase<T> {
   ///
   /// This method properly handles the batch response and executes the commit operation.
   Future<TurboResponse<DocumentReference>> _handleBatchOperation(
-      TurboResponse<TWriteBatchWithReference<Map<String, dynamic>>> batchResponse,
-      ) async {
+    TurboResponse<TWriteBatchWithReference<Map<String, dynamic>>> batchResponse,
+  ) async {
     final batchResult = _handleBatchResponse(batchResponse);
     if (batchResult != null) {
       _log.debug(
@@ -333,10 +337,10 @@ abstract class _TFirestoreApiBase<T> {
 
   /// Helper method to run a [Transaction] from [_firebaseFirestore]..
   Future<E> runTransaction<E>(
-      TransactionHandler<E> transactionHandler, {
-        Duration timeout = const Duration(seconds: 30),
-        int maxAttempts = 5,
-      }) => _firebaseFirestore.runTransaction(
+    TransactionHandler<E> transactionHandler, {
+    Duration timeout = const Duration(seconds: 30),
+    int maxAttempts = 5,
+  }) => _firebaseFirestore.runTransaction(
     transactionHandler,
     timeout: timeout,
     maxAttempts: maxAttempts,

@@ -33,14 +33,19 @@ class TFirestoreCache {
       cacheInvalidationTime.minute,
     );
     final daysSinceWeekday = (now.weekday - cacheInvalidationWeekday + 7) % 7;
-    lastInvalidation = lastInvalidation.subtract(Duration(days: daysSinceWeekday));
+    lastInvalidation = lastInvalidation.subtract(
+      Duration(days: daysSinceWeekday),
+    );
     if (lastInvalidation.isAfter(now)) {
       lastInvalidation = lastInvalidation.subtract(const Duration(days: 7));
     }
     return cachedAt.isAfter(lastInvalidation);
   }
 
-  TCachedQuery? _validateCacheEntry({required DateTime now, required TCachedQuery cachedQuery}) {
+  TCachedQuery? _validateCacheEntry({
+    required DateTime now,
+    required TCachedQuery cachedQuery,
+  }) {
     if (isValid(now: now, cachedAt: cachedQuery.createdAt)) {
       return cachedQuery;
     }
@@ -61,7 +66,9 @@ class TFirestoreCache {
       await _deleteCachedDoc(id, path);
       return null;
     }
-    final cachedQuery = await _firestoreCacheService.getCachedQuery(_genId(id, path));
+    final cachedQuery = await _firestoreCacheService.getCachedQuery(
+      _genId(id, path),
+    );
     if (cachedQuery == null) return null;
     final doc = cachedQuery.doc;
     if (doc == null) {
@@ -101,7 +108,9 @@ class TFirestoreCache {
       await _deleteCachedDoc(query, path);
       return null;
     }
-    final cachedQuery = await _firestoreCacheService.getCachedQuery(_genId(query, path));
+    final cachedQuery = await _firestoreCacheService.getCachedQuery(
+      _genId(query, path),
+    );
     if (cachedQuery == null) return null;
     final docs = cachedQuery.docs;
     if (docs == null || docs.isEmpty) {
@@ -206,10 +215,11 @@ abstract class IFirestoreCacheService {
   // 🏗️ HELPERS ------------------------------------------------------------------------------- \\
   // 🪄 MUTATORS ------------------------------------------------------------------------------ \\
 
-  FutureOr<void> writeCachedQuery({required TCachedQuery cachedQuery}) async => await write(
-    cachedQuery.id,
-    cachedQuery.toJson(),
-  );
+  FutureOr<void> writeCachedQuery({required TCachedQuery cachedQuery}) async =>
+      await write(
+        cachedQuery.id,
+        cachedQuery.toJson(),
+      );
 
   FutureOr<TCachedQuery?> getCachedQuery(String id) async {
     final json = await read(id);

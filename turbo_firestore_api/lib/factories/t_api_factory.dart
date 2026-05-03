@@ -6,7 +6,8 @@ import 'package:turbo_firestore_api/util/t_firestore_logger.dart';
 import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
 
 class TApiFactory<DTO extends TWriteableId> {
-  TApiFactory({required TFirestoreCollection<DTO> collection}) : _collection = collection;
+  TApiFactory({required TFirestoreCollection<DTO> collection})
+    : _collection = collection;
 
   final TFirestoreCollection<DTO> _collection;
 

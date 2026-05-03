@@ -457,7 +457,8 @@ extension TurboResponseX<T> on TurboResponse<T> {
       await success?.call(this as Success<T>) ??
           (throw StateError('No handler provided for Success state')),
     Fail<T>() =>
-      await fail?.call(this as Fail<T>) ?? (throw StateError('No handler provided for Fail state')),
+      await fail?.call(this as Fail<T>) ??
+          (throw StateError('No handler provided for Fail state')),
   };
 
   /// Handles a successful response, returning a value.
@@ -520,11 +521,12 @@ extension TurboResponseX<T> on TurboResponse<T> {
   FutureOr<TurboResponse<R>> mapSuccess<R>(
     FutureOr<R> Function(T value) transform,
   ) async => switch (this) {
-    Success<T>(result: final value, title: final t, message: final m) => Success<R>(
-      result: await transform(value),
-      title: t,
-      message: m,
-    ),
+    Success<T>(result: final value, title: final t, message: final m) =>
+      Success<R>(
+        result: await transform(value),
+        title: t,
+        message: m,
+      ),
     Fail<T>(
       error: final e,
       stackTrace: final st,
@@ -630,10 +632,11 @@ extension TurboResponseX<T> on TurboResponse<T> {
   ///   () => computeExpensiveDefault(),
   /// );
   /// ```
-  FutureOr<T> unwrapOrCompute(FutureOr<T> Function() defaultValue) async => switch (this) {
-    Success(result: final r) => r,
-    Fail() => await defaultValue(),
-  };
+  FutureOr<T> unwrapOrCompute(FutureOr<T> Function() defaultValue) async =>
+      switch (this) {
+        Success(result: final r) => r,
+        Fail() => await defaultValue(),
+      };
 
   /// Recovers from a failure by transforming it into a success.
   ///
@@ -777,7 +780,9 @@ extension TurboResponseX<T> on TurboResponse<T> {
           : TurboResponse.fail(
               error: error ?? Exception('Validation failed'),
               title: title ?? 'Validation Error',
-              message: message ?? 'The success value did not meet the required condition',
+              message:
+                  message ??
+                  'The success value did not meet the required condition',
             );
     }
     return this;

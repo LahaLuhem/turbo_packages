@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-05-03
+
+### Changed
+- **BREAKING**: `TurboResponse.result` getter now returns `T?` instead of `T`. On `Fail` states it returns `null` instead of throwing `TurboException`. Use `unwrap()` for the throwing behavior.
+- `Fail<T>` now has an explicit `result` override returning `null`
+- Code formatting aligned to Dart 3.10 style
+
 ## [1.1.0] - 2026-01-17
 
 ### Changed

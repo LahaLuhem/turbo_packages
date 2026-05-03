@@ -61,10 +61,10 @@ mixin TFirestoreDeleteApi<DTO> on _TFirestoreApiBase<DTO> {
     Transaction? transaction,
   }) async {
     assert(
-    _isCollectionGroup == (collectionPathOverride != null),
-    'Firestore does not support finding a document by id when communicating with a collection group, '
-        'therefore, you must specify the collectionPathOverride containing all parent collection and document ids '
-        'in order to make this method work.',
+      _isCollectionGroup == (collectionPathOverride != null),
+      'Firestore does not support finding a document by id when communicating with a collection group, '
+      'therefore, you must specify the collectionPathOverride containing all parent collection and document ids '
+      'in order to make this method work.',
     );
     try {
       _log.debug(
@@ -228,10 +228,10 @@ mixin TFirestoreDeleteApi<DTO> on _TFirestoreApiBase<DTO> {
     String? collectionPathOverride,
   }) async {
     assert(
-    _isCollectionGroup == (collectionPathOverride != null),
-    'Firestore does not support finding a document by id when communicating with a collection group, '
-        'therefore, you must specify the collectionPathOverride containing all parent collection and document ids '
-        'in order to make this method work.',
+      _isCollectionGroup == (collectionPathOverride != null),
+      'Firestore does not support finding a document by id when communicating with a collection group, '
+      'therefore, you must specify the collectionPathOverride containing all parent collection and document ids '
+      'in order to make this method work.',
     );
     try {
       _log.debug(
@@ -254,7 +254,7 @@ mixin TFirestoreDeleteApi<DTO> on _TFirestoreApiBase<DTO> {
       nullSafeWriteBatch.delete(documentReference);
       _log.info(
         message:
-        'Adding delete to batch done! Returning WriteBatchWithReference..',
+            'Adding delete to batch done! Returning WriteBatchWithReference..',
         sensitiveData: null,
       );
       return TurboResponse.success(

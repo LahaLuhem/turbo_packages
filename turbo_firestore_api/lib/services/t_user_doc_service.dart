@@ -39,10 +39,11 @@ class TUserDocService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
               api
                   .streamByQueryWithConverter(
                     whereDescription: '${api.userIdFieldName} == ${user.uid}',
-                    collectionReferenceQuery: (collectionReference) => collectionReference.where(
-                      api.userIdFieldName,
-                      isEqualTo: user.uid,
-                    ),
+                    collectionReferenceQuery: (collectionReference) =>
+                        collectionReference.where(
+                          api.userIdFieldName,
+                          isEqualTo: user.uid,
+                        ),
                   )
                   .map((event) => event.firstOrNull),
           };

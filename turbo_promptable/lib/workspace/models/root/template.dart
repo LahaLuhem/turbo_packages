@@ -11,7 +11,8 @@ class Template extends TPromptable {
     super.metaData,
   }) : super(name: name);
 
-  factory Template.fromJson(Map<String, dynamic> json) => _$TemplateFromJson(json);
+  factory Template.fromJson(Map<String, dynamic> json) =>
+      _$TemplateFromJson(json);
   @override
   Map<String, dynamic> toJson() => _$TemplateToJson(this);
 }

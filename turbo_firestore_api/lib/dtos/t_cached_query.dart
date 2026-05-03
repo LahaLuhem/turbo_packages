@@ -21,7 +21,8 @@ class TCachedQuery {
   final DateTime updatedAt;
 
   static const fromJsonFactory = _$TCachedQueryFromJson;
-  factory TCachedQuery.fromJson(Map<String, dynamic> json) => _$TCachedQueryFromJson(json);
+  factory TCachedQuery.fromJson(Map<String, dynamic> json) =>
+      _$TCachedQueryFromJson(json);
   static const toJsonFactory = _$TCachedQueryToJson;
   Map<String, dynamic> toJson() => _$TCachedQueryToJson(this);
 }

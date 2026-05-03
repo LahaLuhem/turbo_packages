@@ -14,7 +14,8 @@ class ToolSet extends Tool {
     super.abilities,
   });
 
-  factory ToolSet.fromJson(Map<String, dynamic> json) => _$ToolSetFromJson(json);
+  factory ToolSet.fromJson(Map<String, dynamic> json) =>
+      _$ToolSetFromJson(json);
   @override
   Map<String, dynamic> toJson() => _$ToolSetToJson(this);
 }

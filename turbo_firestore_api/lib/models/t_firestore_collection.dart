@@ -15,11 +15,13 @@ class TFirestoreCollection<DTO extends TWriteableId> {
     required this.fromJson,
     required this.toJson,
     this.createdAtFieldName = TFirestoreApiDefaults.createdAtFieldName,
-    this.documentReferenceFieldName = TFirestoreApiDefaults.documentReferenceFieldName,
+    this.documentReferenceFieldName =
+        TFirestoreApiDefaults.documentReferenceFieldName,
     this.fromJsonError,
     this.idFieldName = TFirestoreApiDefaults.idFieldName,
     this.isCollectionGroup = TFirestoreApiDefaults.isCollectionGroup,
-    this.tryAddLocalDocumentReference = TFirestoreApiDefaults.tryAddLocalDocumentReference,
+    this.tryAddLocalDocumentReference =
+        TFirestoreApiDefaults.tryAddLocalDocumentReference,
     this.tryAddLocalId = TFirestoreApiDefaults.tryAddLocalId,
     this.updatedAtFieldName = TFirestoreApiDefaults.updatedAtFieldName,
     this.defaultIdValue = TFirestoreApiDefaults.defaultIdValue,

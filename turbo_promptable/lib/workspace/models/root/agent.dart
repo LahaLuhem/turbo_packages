@@ -1,8 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:turbo_promptable/spawn/enums/t_config_source.dart';
 import 'package:turbo_promptable/turbo_promptable.dart';
 import 'package:turbo_promptable/workspace/models/meta/t_spawnable.dart';
-import 'package:turbo_promptable/workspace/models/root/role.dart';
 
 part 'agent.g.dart';
 

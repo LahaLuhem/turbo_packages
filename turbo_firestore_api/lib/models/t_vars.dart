@@ -23,7 +23,9 @@ class TVars {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is TVars && runtimeType == other.runtimeType && userId == other.userId;
+      other is TVars &&
+          runtimeType == other.runtimeType &&
+          userId == other.userId;
 
   @override
   int get hashCode => userId.hashCode;

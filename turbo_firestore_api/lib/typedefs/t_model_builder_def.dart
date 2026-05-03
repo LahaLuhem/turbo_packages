@@ -8,14 +8,20 @@ typedef TModelBuilderDef<DTO extends TWriteableId, MODEL extends TModel<DTO>> =
       DTO dto,
     );
 
-typedef TCollectionModelBuilderDef<DTO extends TWriteableId, MODEL extends TModel<DTO>> =
+typedef TCollectionModelBuilderDef<
+  DTO extends TWriteableId,
+  MODEL extends TModel<DTO>
+> =
     MODEL Function(
       TCollectionService<DTO, MODEL> service,
       dynamic state,
       DTO dto,
     );
 
-typedef TDocModelBuilderDef<DTO extends TWriteableId, MODEL extends TModel<DTO>> =
+typedef TDocModelBuilderDef<
+  DTO extends TWriteableId,
+  MODEL extends TModel<DTO>
+> =
     MODEL Function(
       TDocService<DTO, MODEL> service,
       dynamic state,

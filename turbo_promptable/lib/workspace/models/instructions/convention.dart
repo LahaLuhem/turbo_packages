@@ -18,7 +18,8 @@ class Convention extends Instruction {
     super.examples,
   });
 
-  factory Convention.fromJson(Map<String, dynamic> json) => _$ConventionFromJson(json);
+  factory Convention.fromJson(Map<String, dynamic> json) =>
+      _$ConventionFromJson(json);
   @override
   Map<String, dynamic> toJson() => _$ConventionToJson(this);
 }

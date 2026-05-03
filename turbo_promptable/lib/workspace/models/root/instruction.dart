@@ -39,7 +39,8 @@ class Instruction extends TPromptable {
   final Instruction? child;
   final List<Instruction>? children;
 
-  factory Instruction.fromJson(Map<String, dynamic> json) => _$InstructionFromJson(json);
+  factory Instruction.fromJson(Map<String, dynamic> json) =>
+      _$InstructionFromJson(json);
   @override
   Map<String, dynamic> toJson() => _$InstructionToJson(this);
 }

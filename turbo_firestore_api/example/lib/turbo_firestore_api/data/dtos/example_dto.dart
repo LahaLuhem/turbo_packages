@@ -1,5 +1,4 @@
 import 'package:turbo_firestore_api/abstracts/t_model.dart';
-import 'package:turbo_serializable/abstracts/t_writeable.dart';
 import 'package:turbo_response/turbo_response.dart';
 import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
 
@@ -15,6 +14,7 @@ class ExampleDTO extends TWriteableId {
     required this.id,
   });
 
+  @override
   final String id;
   final String thisIsAString;
   final double thisIsANumber;

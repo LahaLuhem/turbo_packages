@@ -52,73 +52,108 @@ void main() {
     });
   });
 
-  group('TFirestoreCache.isValid - weekday/time mode (default Monday 04:00)', () {
-    final cache = TFirestoreCache(
-      firestoreCacheService: _FakeFirestoreCacheService(),
-    );
+  group(
+    'TFirestoreCache.isValid - weekday/time mode (default Monday 04:00)',
+    () {
+      final cache = TFirestoreCache(
+        firestoreCacheService: _FakeFirestoreCacheService(),
+      );
 
-    // Calendar reference (Gregorian):
-    //   Mon 2026-04-27, Tue 2026-04-28, Wed 2026-04-29, Sun 2026-05-03,
-    //   Mon 2026-05-04.
+      // Calendar reference (Gregorian):
+      //   Mon 2026-04-27, Tue 2026-04-28, Wed 2026-04-29, Sun 2026-05-03,
+      //   Mon 2026-05-04.
 
-    test('valid: cached just after last Monday 04:00, now mid-week', () {
-      final now = DateTime(2026, 4, 29, 14, 0); // Wed
-      final cachedAt = DateTime(2026, 4, 27, 4, 0, 1); // Mon 04:00:01
-      expect(cache.isValid(now: now, cachedAt: cachedAt), isTrue);
-    });
+      test('valid: cached just after last Monday 04:00, now mid-week', () {
+        final now = DateTime(2026, 4, 29, 14, 0); // Wed
+        final cachedAt = DateTime(2026, 4, 27, 4, 0, 1); // Mon 04:00:01
+        expect(cache.isValid(now: now, cachedAt: cachedAt), isTrue);
+      });
 
-    test('invalid: cached before last Monday 04:00 boundary', () {
-      final now = DateTime(2026, 4, 29, 14, 0); // Wed
-      final cachedAt = DateTime(2026, 4, 27, 3, 59); // Mon 03:59 — before boundary
-      expect(cache.isValid(now: now, cachedAt: cachedAt), isFalse);
-    });
+      test('invalid: cached before last Monday 04:00 boundary', () {
+        final now = DateTime(2026, 4, 29, 14, 0); // Wed
+        final cachedAt = DateTime(
+          2026,
+          4,
+          27,
+          3,
+          59,
+        ); // Mon 03:59 — before boundary
+        expect(cache.isValid(now: now, cachedAt: cachedAt), isFalse);
+      });
 
-    test('invalid: cached previous week', () {
-      final now = DateTime(2026, 4, 29, 14, 0); // Wed
-      final cachedAt = DateTime(2026, 4, 22, 12, 0); // prev Wed
-      expect(cache.isValid(now: now, cachedAt: cachedAt), isFalse);
-    });
+      test('invalid: cached previous week', () {
+        final now = DateTime(2026, 4, 29, 14, 0); // Wed
+        final cachedAt = DateTime(2026, 4, 22, 12, 0); // prev Wed
+        expect(cache.isValid(now: now, cachedAt: cachedAt), isFalse);
+      });
 
-    test('Sunday before next Monday 04:00 uses previous Monday boundary', () {
-      final now = DateTime(2026, 5, 3, 23, 0); // Sun
-      final cachedAtValid = DateTime(2026, 4, 27, 5, 0); // last Mon 05:00
-      final cachedAtInvalid = DateTime(2026, 4, 27, 3, 0); // last Mon 03:00
-      expect(cache.isValid(now: now, cachedAt: cachedAtValid), isTrue);
-      expect(cache.isValid(now: now, cachedAt: cachedAtInvalid), isFalse);
-    });
+      test('Sunday before next Monday 04:00 uses previous Monday boundary', () {
+        final now = DateTime(2026, 5, 3, 23, 0); // Sun
+        final cachedAtValid = DateTime(2026, 4, 27, 5, 0); // last Mon 05:00
+        final cachedAtInvalid = DateTime(2026, 4, 27, 3, 0); // last Mon 03:00
+        expect(cache.isValid(now: now, cachedAt: cachedAtValid), isTrue);
+        expect(cache.isValid(now: now, cachedAt: cachedAtInvalid), isFalse);
+      });
 
-    test('Monday before 04:00 uses PREVIOUS Monday as boundary', () {
-      final now = DateTime(2026, 5, 4, 3, 30); // Mon 03:30
-      final cachedAtAfterPrev = DateTime(2026, 4, 27, 5, 0); // prev Mon 05:00
-      final cachedAtBeforePrev = DateTime(2026, 4, 27, 3, 0); // prev Mon 03:00
-      expect(cache.isValid(now: now, cachedAt: cachedAtAfterPrev), isTrue);
-      expect(cache.isValid(now: now, cachedAt: cachedAtBeforePrev), isFalse);
-    });
+      test('Monday before 04:00 uses PREVIOUS Monday as boundary', () {
+        final now = DateTime(2026, 5, 4, 3, 30); // Mon 03:30
+        final cachedAtAfterPrev = DateTime(2026, 4, 27, 5, 0); // prev Mon 05:00
+        final cachedAtBeforePrev = DateTime(
+          2026,
+          4,
+          27,
+          3,
+          0,
+        ); // prev Mon 03:00
+        expect(cache.isValid(now: now, cachedAt: cachedAtAfterPrev), isTrue);
+        expect(cache.isValid(now: now, cachedAt: cachedAtBeforePrev), isFalse);
+      });
 
-    test('Monday at/after 04:00 rolls boundary to current Monday', () {
-      final now = DateTime(2026, 5, 4, 4, 30); // Mon 04:30
-      final cachedJustAfterBoundary = DateTime(2026, 5, 4, 4, 0, 1); // Mon 04:00:01
-      final cachedJustBeforeBoundary = DateTime(2026, 5, 4, 3, 59, 59); // Mon 03:59:59
-      expect(cache.isValid(now: now, cachedAt: cachedJustAfterBoundary), isTrue);
-      expect(cache.isValid(now: now, cachedAt: cachedJustBeforeBoundary), isFalse);
-    });
+      test('Monday at/after 04:00 rolls boundary to current Monday', () {
+        final now = DateTime(2026, 5, 4, 4, 30); // Mon 04:30
+        final cachedJustAfterBoundary = DateTime(
+          2026,
+          5,
+          4,
+          4,
+          0,
+          1,
+        ); // Mon 04:00:01
+        final cachedJustBeforeBoundary = DateTime(
+          2026,
+          5,
+          4,
+          3,
+          59,
+          59,
+        ); // Mon 03:59:59
+        expect(
+          cache.isValid(now: now, cachedAt: cachedJustAfterBoundary),
+          isTrue,
+        );
+        expect(
+          cache.isValid(now: now, cachedAt: cachedJustBeforeBoundary),
+          isFalse,
+        );
+      });
 
-    test('regression: does NOT invalidate every day past 04:00', () {
-      // Pre-fix bug wiped cache daily once now > 04:00. Verify mid-week reads
-      // of a Monday-cached entry remain valid.
-      final cachedAt = DateTime(2026, 4, 27, 10, 0); // Mon 10:00
-      for (final day in [28, 29, 30]) {
-        for (final hour in [5, 12, 23]) {
-          final now = DateTime(2026, 4, day, hour, 0);
-          expect(
-            cache.isValid(now: now, cachedAt: cachedAt),
-            isTrue,
-            reason: 'Should be valid at ${now.toIso8601String()}',
-          );
+      test('regression: does NOT invalidate every day past 04:00', () {
+        // Pre-fix bug wiped cache daily once now > 04:00. Verify mid-week reads
+        // of a Monday-cached entry remain valid.
+        final cachedAt = DateTime(2026, 4, 27, 10, 0); // Mon 10:00
+        for (final day in [28, 29, 30]) {
+          for (final hour in [5, 12, 23]) {
+            final now = DateTime(2026, 4, day, hour, 0);
+            expect(
+              cache.isValid(now: now, cachedAt: cachedAt),
+              isTrue,
+              reason: 'Should be valid at ${now.toIso8601String()}',
+            );
+          }
         }
-      }
-    });
-  });
+      });
+    },
+  );
 
   group('TFirestoreCache.isValid - custom weekday/time', () {
     test('Friday 06:00 boundary', () {
@@ -214,40 +249,46 @@ void main() {
       expect(service.deletedIds, isEmpty);
     });
 
-    test('get force refresh deletes and returns null when entry exists', () async {
-      cache = TFirestoreCache(
-        firestoreCacheService: service,
-        cacheInvalidationDuration: const Duration(hours: 1),
-        forceCacheRefresh: true,
-      );
+    test(
+      'get force refresh deletes and returns null when entry exists',
+      () async {
+        cache = TFirestoreCache(
+          firestoreCacheService: service,
+          cacheInvalidationDuration: const Duration(hours: 1),
+          forceCacheRefresh: true,
+        );
 
-      await cache.saveDoc(docId: 'd1', path: 'col', doc: {'a': 1});
-      final got = await cache.get(path: 'col', id: 'd1');
+        await cache.saveDoc(docId: 'd1', path: 'col', doc: {'a': 1});
+        final got = await cache.get(path: 'col', id: 'd1');
 
-      expect(got, isNull);
-      expect(service.deletedIds, contains('d1@col'));
-      expect(service.store.containsKey('d1@col'), isFalse);
-    });
+        expect(got, isNull);
+        expect(service.deletedIds, contains('d1@col'));
+        expect(service.store.containsKey('d1@col'), isFalse);
+      },
+    );
 
-    test('list force refresh deletes and returns null when entry exists', () async {
-      cache = TFirestoreCache(
-        firestoreCacheService: service,
-        cacheInvalidationDuration: const Duration(hours: 1),
-        forceCacheRefresh: true,
-      );
+    test(
+      'list force refresh deletes and returns null when entry exists',
+      () async {
+        cache = TFirestoreCache(
+          firestoreCacheService: service,
+          cacheInvalidationDuration: const Duration(hours: 1),
+          forceCacheRefresh: true,
+        );
 
-      await cache.saveDocs(
-        query: 'q1',
-        path: 'col',
-        docs: [
-          {'a': 1},
-        ],
-      );
-      final got = await cache.list(path: 'col', query: 'q1');
+        await cache.saveDocs(
+          query: 'q1',
+          path: 'col',
+          docs: [
+            {'a': 1},
+          ],
+        );
+        final got = await cache.list(path: 'col', query: 'q1');
 
-      expect(got, isNull);
-      expect(service.deletedIds, contains('q1@col'));
-      expect(service.store.containsKey('q1@col'), isFalse);
-    });
+        expect(got, isNull);
+        expect(service.deletedIds, contains('q1@col'));
+        expect(service.store.containsKey('q1@col'), isFalse);
+      },
+    );
   });
 }

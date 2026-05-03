@@ -8,6 +8,7 @@ part of 'end_goal.dart';
 
 EndGoal _$EndGoalFromJson(Map<String, dynamic> json) => EndGoal(
   json['value'] as String,
+  name: json['name'] as String,
   acceptanceCriteria: json['acceptanceCriteria'] == null
       ? null
       : AcceptanceCriteria.fromJson(
@@ -22,6 +23,7 @@ EndGoal _$EndGoalFromJson(Map<String, dynamic> json) => EndGoal(
 );
 
 Map<String, dynamic> _$EndGoalToJson(EndGoal instance) => <String, dynamic>{
+  'name': instance.name,
   'value': ?instance.value,
   'metaData': ?instance.metaData?.toJson(),
   'acceptanceCriteria': ?instance.acceptanceCriteria?.toJson(),

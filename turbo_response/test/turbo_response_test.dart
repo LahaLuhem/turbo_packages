@@ -27,7 +27,7 @@ void main() {
         message: 'Test failed',
       );
 
-      expect(() => state.result, throwsA(isA<TurboException>()));
+      expect(state.result, isNull);
       expect(state.error, equals(error));
       expect(state.title, equals('Error'));
       expect(state.message, equals('Test failed'));
@@ -43,7 +43,7 @@ void main() {
         message: 'Test failed',
       );
       expect(response.isFail, isTrue);
-      expect(() => response.result, throwsA(isA<TurboException>()));
+      expect(response.result, isNull);
 
       // Type parameter inferred as dynamic when no context
       const dynamicResponse = TurboResponse.fail(
@@ -52,7 +52,7 @@ void main() {
         message: 'Test failed',
       );
       expect(dynamicResponse.isFail, isTrue);
-      expect(() => dynamicResponse.result, throwsA(isA<TurboException>()));
+      expect(dynamicResponse.result, isNull);
     });
 
     test('TurboException should have title and message getters', () {
@@ -785,7 +785,7 @@ void main() {
         expect(state.title, equals('Error'));
         expect(state.message, equals('Operation failed'));
         expect(state.error, isA<Object>());
-        expect(() => state.result, throwsA(isA<TurboException>()));
+        expect(state.result, isNull);
       });
     });
 

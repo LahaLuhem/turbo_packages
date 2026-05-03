@@ -61,10 +61,10 @@ mixin TurboFirestoreGetApi<DTO> on _TFirestoreApiBase<DTO> {
     bool forceCacheRefresh = false,
   }) async {
     assert(
-    _isCollectionGroup == (collectionPathOverride != null),
-    'Firestore does not support finding a document by id when communicating with a collection group, '
-        'therefore, you must specify the collectionPathOverride containing all parent collection and document ids '
-        'in order to make this method work.',
+      _isCollectionGroup == (collectionPathOverride != null),
+      'Firestore does not support finding a document by id when communicating with a collection group, '
+      'therefore, you must specify the collectionPathOverride containing all parent collection and document ids '
+      'in order to make this method work.',
     );
     try {
       _log.debug(
@@ -75,7 +75,9 @@ mixin TurboFirestoreGetApi<DTO> on _TFirestoreApiBase<DTO> {
         ),
       );
 
-      if (tryCache || forceCacheRefresh || (_firestoreCache?.forceCacheRefresh ?? false)) {
+      if (tryCache ||
+          forceCacheRefresh ||
+          (_firestoreCache?.forceCacheRefresh ?? false)) {
         final cachedResult = await _firestoreCache?.get(
           path: _pPath(collectionPathOverride),
           id: id,
@@ -188,10 +190,10 @@ mixin TurboFirestoreGetApi<DTO> on _TFirestoreApiBase<DTO> {
     bool forceCacheRefresh = false,
   }) async {
     assert(
-    _isCollectionGroup == (collectionPathOverride != null),
-    'Firestore does not support finding a document by id when communicating with a collection group, '
-        'therefore, you must specify the collectionPathOverride containing all parent collection and document ids '
-        'in order to make this method work.',
+      _isCollectionGroup == (collectionPathOverride != null),
+      'Firestore does not support finding a document by id when communicating with a collection group, '
+      'therefore, you must specify the collectionPathOverride containing all parent collection and document ids '
+      'in order to make this method work.',
     );
     try {
       _log.debug(
@@ -202,7 +204,10 @@ mixin TurboFirestoreGetApi<DTO> on _TFirestoreApiBase<DTO> {
         ),
       );
 
-      if ((tryCache || forceCacheRefresh || (_firestoreCache?.forceCacheRefresh ?? false)) && _fromJson != null) {
+      if ((tryCache ||
+              forceCacheRefresh ||
+              (_firestoreCache?.forceCacheRefresh ?? false)) &&
+          _fromJson != null) {
         final cachedResult = await _firestoreCache?.get(
           path: _pPath(collectionPathOverride),
           id: id,
@@ -312,10 +317,10 @@ mixin TurboFirestoreGetApi<DTO> on _TFirestoreApiBase<DTO> {
     String? collectionPathOverride,
   }) {
     assert(
-    _isCollectionGroup == (collectionPathOverride != null),
-    'Firestore does not support finding a document by id when communicating with a collection group, '
-        'therefore, you must specify the collectionPathOverride containing all parent collection and document ids '
-        'in order to make this method work.',
+      _isCollectionGroup == (collectionPathOverride != null),
+      'Firestore does not support finding a document by id when communicating with a collection group, '
+      'therefore, you must specify the collectionPathOverride containing all parent collection and document ids '
+      'in order to make this method work.',
     );
     _log.debug(
       message: 'Finding document..',
@@ -327,56 +332,59 @@ mixin TurboFirestoreGetApi<DTO> on _TFirestoreApiBase<DTO> {
     return _firebaseFirestore
         .doc('${_pPath(collectionPathOverride)}/$id')
         .withConverter<Map<String, dynamic>>(
-      fromFirestore: (snapshot, _) {
-        final data = snapshot.data() ?? {};
-        try {
-          return data
-              .tryAddLocalId(
-            snapshot.id,
-            idFieldName: _idFieldName,
-            tryAddLocalId: _tryAddLocalId,
-          )
-              .tryAddLocalDocumentReference(
-            snapshot.reference,
-            referenceFieldName: _documentReferenceFieldName,
-            tryAddLocalDocumentReference: _tryAddLocalDocumentReference,
-          );
-        } catch (error) {
-          _log.error(
-            message: 'Unexpected error caught while adding local id and document reference',
-            sensitiveData: TSensitiveData(
-              path: _pPath(collectionPathOverride),
-              id: snapshot.id,
-              data: data,
-            ),
-          );
-          rethrow;
-        }
-      },
-      toFirestore: (data, _) {
-        try {
-          return data
-              .tryRemoveLocalId(
-            idFieldName: _idFieldName,
-            tryRemoveLocalId: _tryAddLocalId,
-          )
-              .tryRemoveLocalDocumentReference(
-            referenceFieldName: _documentReferenceFieldName,
-            tryRemoveLocalDocumentReference: _tryAddLocalDocumentReference,
-          );
-        } catch (error) {
-          _log.error(
-            message: 'Unexpected error caught while removing local id and document reference',
-            sensitiveData: TSensitiveData(
-              path: _pPath(collectionPathOverride),
-              id: id,
-              data: data,
-            ),
-          );
-          rethrow;
-        }
-      },
-    );
+          fromFirestore: (snapshot, _) {
+            final data = snapshot.data() ?? {};
+            try {
+              return data
+                  .tryAddLocalId(
+                    snapshot.id,
+                    idFieldName: _idFieldName,
+                    tryAddLocalId: _tryAddLocalId,
+                  )
+                  .tryAddLocalDocumentReference(
+                    snapshot.reference,
+                    referenceFieldName: _documentReferenceFieldName,
+                    tryAddLocalDocumentReference: _tryAddLocalDocumentReference,
+                  );
+            } catch (error) {
+              _log.error(
+                message:
+                    'Unexpected error caught while adding local id and document reference',
+                sensitiveData: TSensitiveData(
+                  path: _pPath(collectionPathOverride),
+                  id: snapshot.id,
+                  data: data,
+                ),
+              );
+              rethrow;
+            }
+          },
+          toFirestore: (data, _) {
+            try {
+              return data
+                  .tryRemoveLocalId(
+                    idFieldName: _idFieldName,
+                    tryRemoveLocalId: _tryAddLocalId,
+                  )
+                  .tryRemoveLocalDocumentReference(
+                    referenceFieldName: _documentReferenceFieldName,
+                    tryRemoveLocalDocumentReference:
+                        _tryAddLocalDocumentReference,
+                  );
+            } catch (error) {
+              _log.error(
+                message:
+                    'Unexpected error caught while removing local id and document reference',
+                sensitiveData: TSensitiveData(
+                  path: _pPath(collectionPathOverride),
+                  id: id,
+                  data: data,
+                ),
+              );
+              rethrow;
+            }
+          },
+        );
   }
 
   /// Gets a document reference with type conversion
@@ -413,10 +421,10 @@ mixin TurboFirestoreGetApi<DTO> on _TFirestoreApiBase<DTO> {
     String? collectionPathOverride,
   }) {
     assert(
-    _isCollectionGroup == (collectionPathOverride != null),
-    'Firestore does not support finding a document by id when communicating with a collection group, '
-        'therefore, you must specify the collectionPathOverride containing all parent collection and document ids '
-        'in order to make this method work.',
+      _isCollectionGroup == (collectionPathOverride != null),
+      'Firestore does not support finding a document by id when communicating with a collection group, '
+      'therefore, you must specify the collectionPathOverride containing all parent collection and document ids '
+      'in order to make this method work.',
     );
     _log.debug(
       message: 'Finding document with converter..',
@@ -428,91 +436,97 @@ mixin TurboFirestoreGetApi<DTO> on _TFirestoreApiBase<DTO> {
     return _firebaseFirestore
         .doc('${_pPath(collectionPathOverride)}/$id')
         .withConverter<DTO>(
-      fromFirestore: (snapshot, _) {
-        final data = snapshot.data() ?? {};
-        try {
-          return _fromJson!(
-            data
-                .tryAddLocalId(
-              snapshot.id,
-              idFieldName: _idFieldName,
-              tryAddLocalId: _tryAddLocalId,
-            )
-                .tryAddLocalDocumentReference(
-              snapshot.reference,
-              referenceFieldName: _documentReferenceFieldName,
-              tryAddLocalDocumentReference: _tryAddLocalDocumentReference,
-            ),
-          );
-        } catch (error, stackTrace) {
-          _log.error(
-            message: 'Unexpected error caught while adding local id and document reference',
-            sensitiveData: TSensitiveData(
-              path: _pPath(collectionPathOverride),
-              id: snapshot.id,
-              data: data,
-            ),
-            error: InvalidJsonException(
-              id: snapshot.id,
-              path: snapshot.reference.path,
-              api: runtimeType.toString(),
-              data: data,
-            ),
-            stackTrace: stackTrace,
-          );
-          try {
-            return _fromJsonError!(
-              data
-                  .tryAddLocalId(
-                snapshot.id,
-                idFieldName: _idFieldName,
-                tryAddLocalId: _tryAddLocalId,
-              )
-                  .tryAddLocalDocumentReference(
-                snapshot.reference,
-                referenceFieldName: _documentReferenceFieldName,
-                tryAddLocalDocumentReference: _tryAddLocalDocumentReference,
-              ),
-            );
-          } catch (error, stackTrace) {
-            _log.error(
-              message: 'Unexpected error caught while adding local id and document reference',
-              sensitiveData: TSensitiveData(
-                path: _pPath(collectionPathOverride),
-                id: snapshot.id,
-                data: data,
-              ),
-              error: error,
-              stackTrace: stackTrace,
-            );
-            rethrow;
-          }
-        }
-      },
-      toFirestore: (data, _) {
-        try {
-          return _toJson!(data)
-              .tryRemoveLocalId(
-            idFieldName: _idFieldName,
-            tryRemoveLocalId: _tryAddLocalId,
-          )
-              .tryRemoveLocalDocumentReference(
-            referenceFieldName: _documentReferenceFieldName,
-            tryRemoveLocalDocumentReference: _tryAddLocalDocumentReference,
-          );
-        } catch (error) {
-          _log.error(
-            message: 'Unexpected error caught while removing local id and document reference',
-            sensitiveData: TSensitiveData(
-              path: _pPath(collectionPathOverride),
-              id: id,
-              data: data,
-            ),
-          );
-          rethrow;
-        }
-      },
-    );
+          fromFirestore: (snapshot, _) {
+            final data = snapshot.data() ?? {};
+            try {
+              return _fromJson!(
+                data
+                    .tryAddLocalId(
+                      snapshot.id,
+                      idFieldName: _idFieldName,
+                      tryAddLocalId: _tryAddLocalId,
+                    )
+                    .tryAddLocalDocumentReference(
+                      snapshot.reference,
+                      referenceFieldName: _documentReferenceFieldName,
+                      tryAddLocalDocumentReference:
+                          _tryAddLocalDocumentReference,
+                    ),
+              );
+            } catch (error, stackTrace) {
+              _log.error(
+                message:
+                    'Unexpected error caught while adding local id and document reference',
+                sensitiveData: TSensitiveData(
+                  path: _pPath(collectionPathOverride),
+                  id: snapshot.id,
+                  data: data,
+                ),
+                error: InvalidJsonException(
+                  id: snapshot.id,
+                  path: snapshot.reference.path,
+                  api: runtimeType.toString(),
+                  data: data,
+                ),
+                stackTrace: stackTrace,
+              );
+              try {
+                return _fromJsonError!(
+                  data
+                      .tryAddLocalId(
+                        snapshot.id,
+                        idFieldName: _idFieldName,
+                        tryAddLocalId: _tryAddLocalId,
+                      )
+                      .tryAddLocalDocumentReference(
+                        snapshot.reference,
+                        referenceFieldName: _documentReferenceFieldName,
+                        tryAddLocalDocumentReference:
+                            _tryAddLocalDocumentReference,
+                      ),
+                );
+              } catch (error, stackTrace) {
+                _log.error(
+                  message:
+                      'Unexpected error caught while adding local id and document reference',
+                  sensitiveData: TSensitiveData(
+                    path: _pPath(collectionPathOverride),
+                    id: snapshot.id,
+                    data: data,
+                  ),
+                  error: error,
+                  stackTrace: stackTrace,
+                );
+                rethrow;
+              }
+            }
+          },
+          toFirestore: (data, _) {
+            try {
+              return _toJson!(data)
+                  .tryRemoveLocalId(
+                    idFieldName: _idFieldName,
+                    tryRemoveLocalId: _tryAddLocalId,
+                  )
+                  .tryRemoveLocalDocumentReference(
+                    referenceFieldName: _documentReferenceFieldName,
+                    tryRemoveLocalDocumentReference:
+                        _tryAddLocalDocumentReference,
+                  );
+            } catch (error) {
+              _log.error(
+                message:
+                    'Unexpected error caught while removing local id and document reference',
+                sensitiveData: TSensitiveData(
+                  path: _pPath(collectionPathOverride),
+                  id: id,
+                  data: data,
+                ),
+              );
+              rethrow;
+            }
+          },
+        );
   }
 
   /// Gets a document snapshot for raw data access
@@ -547,10 +561,10 @@ mixin TurboFirestoreGetApi<DTO> on _TFirestoreApiBase<DTO> {
     String? collectionPathOverride,
   }) async {
     assert(
-    _isCollectionGroup == (collectionPathOverride != null),
-    'Firestore does not support finding a document by id when communicating with a collection group, '
-        'therefore, you must specify the collectionPathOverride containing all parent collection and document ids '
-        'in order to make this method work.',
+      _isCollectionGroup == (collectionPathOverride != null),
+      'Firestore does not support finding a document by id when communicating with a collection group, '
+      'therefore, you must specify the collectionPathOverride containing all parent collection and document ids '
+      'in order to make this method work.',
     );
     final docRef = getDocRefById(
       id: id,
@@ -599,10 +613,10 @@ mixin TurboFirestoreGetApi<DTO> on _TFirestoreApiBase<DTO> {
     String? collectionPathOverride,
   }) async {
     assert(
-    _isCollectionGroup == (collectionPathOverride != null),
-    'Firestore does not support finding a document by id when communicating with a collection group, '
-        'therefore, you must specify the collectionPathOverride containing all parent collection and document ids '
-        'in order to make this method work.',
+      _isCollectionGroup == (collectionPathOverride != null),
+      'Firestore does not support finding a document by id when communicating with a collection group, '
+      'therefore, you must specify the collectionPathOverride containing all parent collection and document ids '
+      'in order to make this method work.',
     );
     final docRefWithConverter = getDocRefByIdWithConverter(
       id: id,

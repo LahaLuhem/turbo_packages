@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.3
+
+### Changed
+- Made `errorTextStyle` optional in `TErrorLabel`, `TFormField`, and `StatelessTFormField`
+- Added `mainAxisSize: MainAxisSize.min` to form field column layout to prevent unnecessary vertical expansion
+
 ## 1.0.2
 
 ### Changed

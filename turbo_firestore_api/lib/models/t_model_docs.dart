@@ -35,7 +35,8 @@ class TModelDocs<DTO extends TWriteableId, MODEL extends TModel<DTO>> {
       models.add(model);
       idMap[model.id] = model;
     }
-    final pSortFilteredListsMap = sortFilteredListsMap ?? <String, TSortFilteredList<DTO, MODEL>>{};
+    final pSortFilteredListsMap =
+        sortFilteredListsMap ?? <String, TSortFilteredList<DTO, MODEL>>{};
     for (final sortFilteredList in pSortFilteredListsMap.values) {
       sortFilteredList.apply(models);
     }
@@ -61,7 +62,8 @@ class TModelDocs<DTO extends TWriteableId, MODEL extends TModel<DTO>> {
   Iterable<String> get ids => _idMap.keys;
   Iterable<MODEL> get models => _idMap.values;
   List<MODEL> getList(Object? id) => _sortFilteredListsMap[id]?.values ?? [];
-  Iterable<MODEL> findWhere(bool Function(MODEL model) test) => _idMap.values.where(test);
+  Iterable<MODEL> findWhere(bool Function(MODEL model) test) =>
+      _idMap.values.where(test);
 
   List<MODEL> listByIds(Iterable<String> ids) {
     final models = <MODEL>[];
@@ -123,7 +125,8 @@ class TModelDocs<DTO extends TWriteableId, MODEL extends TModel<DTO>> {
     return sortFilteredList.values;
   }
 
-  List<MODEL> removeList(Object id) => _sortFilteredListsMap.remove(id)?.values ?? [];
+  List<MODEL> removeList(Object id) =>
+      _sortFilteredListsMap.remove(id)?.values ?? [];
 
   int get length => _idMap.length;
 }

@@ -5,8 +5,50 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.12.0] - 2026-04-24
-- **BREAKING**: // #FEEDBACK #TODO 2026-04-24T21:58:09.878+02:00 | add everything
+## [0.12.0] - 2026-05-03
+
+### Added
+- `TModel<DTO>` base class for wrapping DTOs with identity and copy semantics
+- `TModelDocs` model for managing collections of model-wrapped documents with sorted/filtered list support
+- `TSortFilteredList` model for maintaining pre-sorted and filtered document subsets
+- `TFirestoreCollection` model encapsulating Firestore collection reference, path, and configuration
+- `TFirestorePage` pagination model for cursor-based Firestore queries
+- `TVars` (renamed from `TAuthVars`) with `defaultIdValue` and `unknownIdValue` constants
+- `TUserIdLocation` enum with `defaultValue` for configuring user ID resolution
+- `IFirestoreCacheService` abstraction and `TFirestoreCache` for time-based Firestore query caching
+- `TCachedQuery` DTO with JSON serialization for persisting cached query metadata
+- `TFirestoreApiDefaults` constants class for default configuration values
+- `TApiFactory` for constructing Firestore API instances
+- `TUserCollectionService` and `TUserDocService` for user-scoped document management
+- `listByIds` lookup methods on `TFirestoreGetApi` and `TFirestoreListApi`
+- `TCollectionValueBuilderDef` and `TDocValueBuilderDef` typedefs
+- `TModelBuilderDef`, `TModelDocsBuilderDef`, `TApiBuilderDef`, `TStreamBuilderDef` typedefs
+- `TSortFilterDefs` typedefs for sort and filter configuration
+- `TWriteableItemBuilderDef` typedef for item-level widget builders
+- `TListExtension` utilities for document list operations
+- `onMissingRemoteValue` builder on `TDocService` for handling absent remote documents
+
+### Changed
+- **BREAKING**: Renamed `TAuthVars` to `TVars`
+- **BREAKING**: Renamed `defaultId`/`unknownId` to `defaultIdValue`/`unknownIdValue` on `TVars`
+- **BREAKING**: Renamed service classes: `TDocumentService` to `TDocService`, `BeAfSyncTurboDocumentService` to `THookDocService`, `BeSyncTurboDocumentService` to `TPreDocumentService`, `AfSyncTurboDocumentService` to `TPostDocService`, and equivalent collection service renames
+- **BREAKING**: `TCollectionService` constructor now accepts `TFirestoreCollection`, `modelBuilder`, `apiBuilder`, `streamBuilder`, `modelDocsBuilder`, and optional caching/default/initial parameters
+- **BREAKING**: `TFirestoreApi` and sub-APIs now operate on `TWriteableId` DTOs with `TModel` wrappers
+- **BREAKING**: Removed `TDummyFirestoreApi` and `_TDummyProbingMap` (dummy data generation system)
+- **BREAKING**: Removed `TApiVars` model and `TValues` constants class
+- **BREAKING**: Removed `TLocatorDef` typedef
+- `TCollectionService` now manages `TModelDocs` via `docsNotifier` instead of raw DTO lists
+- `TFirestoreGetApi` and `TFirestoreListApi` accept `Iterable` for ID-based lookups
+- `createDoc`/`updateDoc` operations use updated `CreateDocDef`/`UpdateDocDef` signatures
+
+### Removed
+- `TDummyFirestoreApi` and all dummy data probing infrastructure
+- `TApiVars`, `TValues`, `TLocatorDef`
+- `lib/abstracts/t_vars.dart` (replaced by `lib/models/t_vars.dart`)
+
+### Fixed
+- Removed unused imports across typedefs, services, and example code
+- Resolved analyzer warnings (unnecessary parentheses, missing `@override` annotations)
 
 ## [0.11.0] - 2026-04-17
 

@@ -38,4 +38,5 @@ void main() {
   );
 
   print(role.toMd());
+  print(workflow.toMd());
 }

@@ -65,7 +65,7 @@ mixin TurboFirestoreStreamApi<DTO> on _TFirestoreApiBase<DTO> {
       ),
     );
     return listCollectionReference().snapshots().handleError(
-          (Object error, StackTrace stackTrace) {
+      (Object error, StackTrace stackTrace) {
         final exception = _createException(
           error: error,
           stackTrace: stackTrace,
@@ -129,28 +129,28 @@ mixin TurboFirestoreStreamApi<DTO> on _TFirestoreApiBase<DTO> {
         .snapshots()
         .map(
           (event) => event.docs.map((e) => e.data()).toList(),
-    )
+        )
         .handleError(
           (Object error, StackTrace stackTrace) {
-        final exception = _createException(
-          error: error,
-          stackTrace: stackTrace,
-          path: path,
-          operationType: TOperationType.stream,
+            final exception = _createException(
+              error: error,
+              stackTrace: stackTrace,
+              path: path,
+              operationType: TOperationType.stream,
+            );
+            _log.error(
+              message: 'Error streaming collection with converter',
+              sensitiveData: TSensitiveData(
+                path: path,
+                operationType: TOperationType.stream,
+                fullPath: path,
+              ),
+              error: error,
+              stackTrace: stackTrace,
+            );
+            throw exception;
+          },
         );
-        _log.error(
-          message: 'Error streaming collection with converter',
-          sensitiveData: TSensitiveData(
-            path: path,
-            operationType: TOperationType.stream,
-            fullPath: path,
-          ),
-          error: error,
-          stackTrace: stackTrace,
-        );
-        throw exception;
-      },
-    );
   }
 
   /// Streams documents matching a query
@@ -201,35 +201,35 @@ mixin TurboFirestoreStreamApi<DTO> on _TFirestoreApiBase<DTO> {
     );
     final query =
         collectionReferenceQuery?.call(listCollectionReference()) ??
-            listCollectionReference();
+        listCollectionReference();
     return query
         .snapshots()
         .map(
           (event) => event.docs.map((e) => e.data()).toList(),
-    )
+        )
         .handleError(
           (Object error, StackTrace stackTrace) {
-        final exception = _createException(
-          error: error,
-          stackTrace: stackTrace,
-          path: path,
-          query: whereDescription,
-          operationType: TOperationType.stream,
+            final exception = _createException(
+              error: error,
+              stackTrace: stackTrace,
+              path: path,
+              query: whereDescription,
+              operationType: TOperationType.stream,
+            );
+            _log.error(
+              message: 'Error streaming collection by query',
+              sensitiveData: TSensitiveData(
+                path: path,
+                whereDescription: whereDescription,
+                operationType: TOperationType.stream,
+                fullPath: path,
+              ),
+              error: error,
+              stackTrace: stackTrace,
+            );
+            throw exception;
+          },
         );
-        _log.error(
-          message: 'Error streaming collection by query',
-          sensitiveData: TSensitiveData(
-            path: path,
-            whereDescription: whereDescription,
-            operationType: TOperationType.stream,
-            fullPath: path,
-          ),
-          error: error,
-          stackTrace: stackTrace,
-        );
-        throw exception;
-      },
-    );
   }
 
   /// Streams and converts documents matching a query
@@ -283,35 +283,35 @@ mixin TurboFirestoreStreamApi<DTO> on _TFirestoreApiBase<DTO> {
         collectionReferenceQuery?.call(
           listCollectionReferenceWithConverter(),
         ) ??
-            listCollectionReferenceWithConverter();
+        listCollectionReferenceWithConverter();
     return query
         .snapshots()
         .map(
           (event) => event.docs.map((e) => e.data()).toList(),
-    )
+        )
         .handleError(
           (Object error, StackTrace stackTrace) {
-        final exception = _createException(
-          error: error,
-          stackTrace: stackTrace,
-          path: path,
-          query: whereDescription,
-          operationType: TOperationType.stream,
+            final exception = _createException(
+              error: error,
+              stackTrace: stackTrace,
+              path: path,
+              query: whereDescription,
+              operationType: TOperationType.stream,
+            );
+            _log.error(
+              message: 'Error streaming collection by query with converter',
+              sensitiveData: TSensitiveData(
+                path: path,
+                whereDescription: whereDescription,
+                operationType: TOperationType.stream,
+                fullPath: path,
+              ),
+              error: error,
+              stackTrace: stackTrace,
+            );
+            throw exception;
+          },
         );
-        _log.error(
-          message: 'Error streaming collection by query with converter',
-          sensitiveData: TSensitiveData(
-            path: path,
-            whereDescription: whereDescription,
-            operationType: TOperationType.stream,
-            fullPath: path,
-          ),
-          error: error,
-          stackTrace: stackTrace,
-        );
-        throw exception;
-      },
-    );
   }
 
   /// Streams a single document
@@ -365,7 +365,7 @@ mixin TurboFirestoreStreamApi<DTO> on _TFirestoreApiBase<DTO> {
     );
     final fullPath = _buildFullPath(path, id);
     return docRef.snapshots().handleError(
-          (Object error, StackTrace stackTrace) {
+      (Object error, StackTrace stackTrace) {
         final exception = _createException(
           error: error,
           stackTrace: stackTrace,
@@ -426,10 +426,10 @@ mixin TurboFirestoreStreamApi<DTO> on _TFirestoreApiBase<DTO> {
     String? collectionPathOverride,
   }) {
     assert(
-    _isCollectionGroup == (collectionPathOverride != null),
-    'Firestore does not support finding a document by id when communicating with a collection group, '
-        'therefore, you must specify the collectionPathOverride containing all parent collection and document ids '
-        'in order to make this method work.',
+      _isCollectionGroup == (collectionPathOverride != null),
+      'Firestore does not support finding a document by id when communicating with a collection group, '
+      'therefore, you must specify the collectionPathOverride containing all parent collection and document ids '
+      'in order to make this method work.',
     );
     final path = collectionPathOverride ?? _collectionPath();
     final docRefWithConverter = getDocRefByIdWithConverter(
@@ -445,7 +445,7 @@ mixin TurboFirestoreStreamApi<DTO> on _TFirestoreApiBase<DTO> {
     );
     final fullPath = _buildFullPath(path, id);
     return docRefWithConverter.snapshots().map((e) => e.data()).handleError(
-          (Object error, StackTrace stackTrace) {
+      (Object error, StackTrace stackTrace) {
         final exception = _createException(
           error: error,
           stackTrace: stackTrace,

@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-05-03
+
+### Added
+- `TCliTool.spawn()` method for constructing CLI spawn commands with configurable system prompt, allowed tools, model, yolo mode, and headless flags
+- `TCliTool` resume, system prompt, allowed tools, yolo, and model parameter builders
+- `TConfigSource` enum for distinguishing configuration origins
+- `TSpawnable` base class (under `workspace/models/meta/`) for agent-like models with `id`, `allowedTools`, `yolo`, `model`, and `headless` fields
+
+### Changed
+- **BREAKING**: Moved `TSpawnable` from `spawn/abstracts/` to `workspace/models/meta/` with a new constructor API (`name` as positional, `id` as required named, plus `allowedTools`, `yolo`, `model`, `headless` fields)
+- **BREAKING**: `Agent` now extends the new `TSpawnable` and requires `id`, `allowedTools`, `yolo`, `model`, `headless` parameters
+- `EndGoal` now requires `name` as a required named parameter
+- Regenerated all JSON serialization files to match updated model signatures
+
+### Fixed
+- Removed unused imports and unnecessary import directives flagged by the analyzer
+
 ## [0.4.0] - 2026-04-17
 
 ### Added

@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:turbo_firestore_api/abstracts/t_model.dart';
-import 'package:turbo_firestore_api/extensions/t_list_extension.dart';
 import 'package:turbo_firestore_api/models/t_model_docs.dart';
 import 'package:turbo_firestore_api/services/t_collection_service.dart';
 import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
@@ -12,7 +11,10 @@ import 'package:turbo_serializable/abstracts/t_writeable_id.dart';
 ///
 /// Type Parameters:
 /// - [DTO] - The document type, must extend [TWriteableId]
-abstract class TPreCollectionService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
+abstract class TPreCollectionService<
+  DTO extends TWriteableId,
+  MODEL extends TModel<DTO>
+>
     extends TCollectionService<DTO, MODEL> {
   /// Creates a new [TPreCollectionService] instance.
   TPreCollectionService({

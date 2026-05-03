@@ -13,9 +13,5 @@ class TModel<DTO extends TWriteableId> {
 
   MODEL copyWith<MODEL extends TModel<DTO>>({
     DTO? dto,
-  }) =>
-      (TModel(
-            dto: dto ?? this.dto,
-          )
-          as MODEL);
+  }) => TModel(dto: dto ?? this.dto) as MODEL;
 }

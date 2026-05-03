@@ -27,7 +27,8 @@ import 'package:turbolytics/turbolytics.dart';
 ///
 /// Type Parameters:
 /// - [DTO] - The document type, must extend [TWriteableId]
-class TDocService<DTO extends TWriteableId, MODEL extends TModel<DTO>> extends TAuthSyncService<DTO>
+class TDocService<DTO extends TWriteableId, MODEL extends TModel<DTO>>
+    extends TAuthSyncService<DTO>
     with Turbolytics {
   /// Creates a new [TDocService] instance.
   ///
@@ -112,7 +113,8 @@ class TDocService<DTO extends TWriteableId, MODEL extends TModel<DTO>> extends T
   @override
   Stream<DTO?> Function(User user) get stream =>
       (user) =>
-          streamBuilder?.call(user, api, this) ?? api.streamByDocIdWithConverter(id: user.uid);
+          streamBuilder?.call(user, api, this) ??
+          api.streamByDocIdWithConverter(id: user.uid);
 
   /// Handles incoming data updates from Firestore.
   ///
@@ -240,7 +242,8 @@ class TDocService<DTO extends TWriteableId, MODEL extends TModel<DTO>> extends T
   // 🏗️ HELPERS ------------------------------------------------------------------------------- \\
 
   @protected
-  DTO initialDto() => initialValue?.call(vars(), collection, this) ?? defaultDto();
+  DTO initialDto() =>
+      initialValue?.call(vars(), collection, this) ?? defaultDto();
 
   @protected
   MODEL initialDoc() => modelBuilder(this, null, initialDto());
@@ -336,7 +339,10 @@ class TDocService<DTO extends TWriteableId, MODEL extends TModel<DTO>> extends T
     if (doNotifyListeners) {
       beforeLocalNotifyUpdate?.call(pDoc);
     }
-    _doc.update(modelBuilder(this, null, pDoc), doNotifyListeners: doNotifyListeners);
+    _doc.update(
+      modelBuilder(this, null, pDoc),
+      doNotifyListeners: doNotifyListeners,
+    );
     if (doNotifyListeners) {
       afterLocalNotifyUpdate?.call(pDoc);
     }
@@ -366,7 +372,10 @@ class TDocService<DTO extends TWriteableId, MODEL extends TModel<DTO>> extends T
     if (doNotifyListeners) {
       beforeLocalNotifyUpdate?.call(pDoc);
     }
-    _doc.update(modelBuilder(this, null, pDoc), doNotifyListeners: doNotifyListeners);
+    _doc.update(
+      modelBuilder(this, null, pDoc),
+      doNotifyListeners: doNotifyListeners,
+    );
     if (doNotifyListeners) {
       afterLocalNotifyUpdate?.call(pDoc);
     }
@@ -549,7 +558,8 @@ class TDocService<DTO extends TWriteableId, MODEL extends TModel<DTO>> extends T
         doNotifyListeners: doNotifyListeners,
       );
       final future = api.createDoc(
-        writeable: remoteUpdateRequestBuilder?.call(pDoc) ?? pDoc as TWriteableId,
+        writeable:
+            remoteUpdateRequestBuilder?.call(pDoc) ?? pDoc as TWriteableId,
         id: id,
         transaction: transaction,
         merge: true,

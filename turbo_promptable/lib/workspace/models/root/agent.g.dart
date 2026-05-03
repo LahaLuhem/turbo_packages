@@ -11,6 +11,7 @@ Agent<IDENTITY> _$AgentFromJson<IDENTITY extends Role>(
   IDENTITY Function(Object? json) fromJsonIDENTITY,
 ) => Agent<IDENTITY>(
   json['name'] as String,
+  id: json['id'] as String,
   allowedTools: json['allowedTools'] as String?,
   yolo: json['yolo'] as bool? ?? true,
   model: json['model'] as String?,
@@ -26,6 +27,7 @@ Map<String, dynamic> _$AgentToJson<IDENTITY extends Role>(
   Object? Function(IDENTITY value) toJsonIDENTITY,
 ) => <String, dynamic>{
   'name': instance.name,
+  'id': instance.id,
   'allowedTools': ?instance.allowedTools,
   'yolo': instance.yolo,
   'model': ?instance.model,
