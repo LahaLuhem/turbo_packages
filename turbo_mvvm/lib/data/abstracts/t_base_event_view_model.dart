@@ -6,7 +6,8 @@ import 'package:turbo_mvvm/utils/t_completer_queue.dart';
 
 import '../../typedefs/t_event_handler.dart';
 
-abstract class TBaseEventViewModel<ARGUMENTS, EVENT> extends TBaseViewModel<ARGUMENTS> {
+abstract class TBaseEventViewModel<ARGUMENTS, EVENT extends Object>
+    extends TBaseViewModel<ARGUMENTS> {
   // 📍 LOCATOR ------------------------------------------------------------------------------- \\
   // 🧩 DEPENDENCIES -------------------------------------------------------------------------- \\
   // 🎬 INIT & DISPOSE ------------------------------------------------------------------------ \\
@@ -19,7 +20,7 @@ abstract class TBaseEventViewModel<ARGUMENTS, EVENT> extends TBaseViewModel<ARGU
     super.initialise(doSetInitialised: doSetInitialised);
   }
 
-  void _initStream() => _streamSubscription = _controller.stream.listen(
+  void _initStream() => _streamSubscription ??= _controller.stream.listen(
     (event) => _eventQueue.lockAndRun(
       run: (unlock) async => _eventQueue.lockAndRun(
         run: (unlock) async {
@@ -33,7 +34,7 @@ abstract class TBaseEventViewModel<ARGUMENTS, EVENT> extends TBaseViewModel<ARGU
         },
       ),
     ),
-    cancelOnError: cancelStreamOnError,
+    cancelOnError: cancelOnStreamError,
     onDone: onDone,
     onError: onStreamError,
   );
@@ -61,7 +62,7 @@ abstract class TBaseEventViewModel<ARGUMENTS, EVENT> extends TBaseViewModel<ARGU
   TEventHandler<EVENT> onEvent(EVENT event);
 
   VoidCallback? get onDone => null;
-  bool get cancelStreamOnError => false;
+  bool get cancelOnStreamError => false;
   void Function(Object error, StackTrace stackTrace)? get onStreamError => null;
   void Function(Object error, StackTrace stackTrace, EVENT event)? get onEventError => null;
 
@@ -78,4 +79,12 @@ abstract class TBaseEventViewModel<ARGUMENTS, EVENT> extends TBaseViewModel<ARGU
   // 🧲 FETCHERS ------------------------------------------------------------------------------ \\
   // 🏗️ HELPERS ------------------------------------------------------------------------------- \\
   // 🪄 MUTATORS ------------------------------------------------------------------------------ \\
+
+  Future<RESULT> emitAsync<RESULT>(EVENT event) async {
+    final completer = _eventQueue.registerCompleter(event);
+    _controller.add(event);
+    return await completer.future;
+  }
+
+  void emit(EVENT event) => _controller.add(event);
 }

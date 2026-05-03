@@ -1,3 +1,3 @@
 import 'dart:async';
 
-typedef TEventHandler<EVENT> = FutureOr<void> Function(EVENT event);
+typedef TEventHandler<EVENT> = FutureOr<RESULT> Function<RESULT>(EVENT event);
