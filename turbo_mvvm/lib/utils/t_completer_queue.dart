@@ -10,7 +10,9 @@ class TCompleterQueue {
     required FutureOr<T> Function(VoidCallback unlock) run,
     Object? completerId,
   }) async {
-    final myCompleter = completerId == null ? Completer() : registerCompleter(completerId);
+    final myCompleter = completerId == null
+        ? Completer()
+        : registerCompleter(completerId);
     _completerQueue.add(myCompleter);
     for (final queuedCompleter in _completerQueue) {
       if (queuedCompleter == myCompleter) break;

@@ -54,7 +54,8 @@ abstract class TEventManagement<EVENT extends Object> {
   VoidCallback? get onDone => null;
   bool get cancelOnStreamError => false;
   void Function(Object error, StackTrace stackTrace)? get onStreamError => null;
-  void Function(Object error, StackTrace stackTrace, EVENT event)? get onEventError => null;
+  void Function(Object error, StackTrace stackTrace, EVENT event)?
+  get onEventError => null;
 
   // 🎩 STATE --------------------------------------------------------------------------------- \\
 

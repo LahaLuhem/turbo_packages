@@ -7,7 +7,6 @@ import 'package:turbo_mvvm/utils/t_completer_queue.dart';
 
 abstract class TBaseEventViewModel<ARGUMENTS, EVENT extends Object>
     extends TBaseViewModel<ARGUMENTS> {
-
   // 📍 LOCATOR ------------------------------------------------------------------------------- \\
   // 🧩 DEPENDENCIES -------------------------------------------------------------------------- \\
   // 🎬 INIT & DISPOSE ------------------------------------------------------------------------ \\
@@ -62,7 +61,8 @@ abstract class TBaseEventViewModel<ARGUMENTS, EVENT extends Object>
   VoidCallback? get onDone => null;
   bool get cancelOnStreamError => false;
   void Function(Object error, StackTrace stackTrace)? get onStreamError => null;
-  void Function(Object error, StackTrace stackTrace, EVENT event)? get onEventError => null;
+  void Function(Object error, StackTrace stackTrace, EVENT event)?
+  get onEventError => null;
 
   // 🎩 STATE --------------------------------------------------------------------------------- \\
 

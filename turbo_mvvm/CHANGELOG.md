@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-05-04
+
+### Added
+- `TBaseEventViewModel<ARGUMENTS, EVENT>` abstract class for event-driven ViewModels with sequential event processing via a stream-based queue
+- `TEventManagement<EVENT>` abstract class for standalone event management outside of ViewModels
+- `TEventHandler<EVENT>` typedef for event handler functions
+- `TCompleterQueue` utility for sequential async event execution with completer-based result retrieval
+
+### Changed
+- Exported `TEventManagement` and `TEventHandler` from the public barrel file
+- Added library-level dartdoc comment to barrel file
+- Fixed unresolved dartdoc references in `TurboMvvmDefaults` and `TBusyServiceManagement`
+
 ## [1.2.0] - 2026-04-09
 
 ### Changed

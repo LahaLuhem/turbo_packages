@@ -18,8 +18,8 @@ mixin TBusyServiceManagement {
   /// [isBusy] The new busy state.
   /// [busyTitle] Optional title for the busy state.
   /// [busyMessage] Optional message for the busy state.
-  /// [minBusyDuration] Minimum duration to remain in busy state. Default is [kValuesMinBusyDuration].
-  /// [busyType] Optional busy type. Default is `null`.
+  /// [minBusyDuration] Minimum duration to remain in busy state.
+  /// [busyType] Optional busy type.
   void setBusy(
     bool isBusy, {
     String? busyTitle,
